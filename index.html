@@ -401,21 +401,43 @@ function processarAudiencia(data){
 }
 
 function montarDados(profile,insights,media,audiencia){
-  // Processar insights
-  let reach=0,impressions=0,profileViews=0,linkClicks=0,followers=profile.followers_count||DEMO.followers;
-  let reach7=DEMO.reach7,imp7=DEMO.imp7,linkClicks7=DEMO.linkClicks7;
-  try{
-    const reachData=insights.data.find(d=>d.name==='reach');
-    const impData=insights.data.find(d=>d.name==='impressions');
-    const pvData=insights.data.find(d=>d.name==='profile_views');
-    const wcData=insights.data.find(d=>d.name==='website_clicks');
-    if(reachData){reach=reachData.values.slice(-30).reduce((a,b)=>a+b.value,0);reach7=reachData.values.slice(-7).map(v=>v.value);}
-    if(impData){impressions=impData.values.slice(-30).reduce((a,b)=>a+b.value,0);imp7=impData.values.slice(-7).map(v=>v.value);}
-    if(pvData)profileViews=pvData.values.slice(-30).reduce((a,b)=>a+b.value,0);
-    if(wcData){linkClicks=wcData.values.slice(-30).reduce((a,b)=>a+b.value,0);linkClicks7=wcData.values.slice(-7).map(v=>v.value);}
-  }catch(e){console.log('Erro ao processar insights:',e);}
+  const followers=profile.followers_count||DEMO.followers;
+  let reach=0,impressions=0,profileViews=0,linkClicks=0;
+  let reach7=[...DEMO.reach7],imp7=[...DEMO.imp7],linkClicks7=[...DEMO.linkClicks7];
+  let totalLikesAPI=0,totalCommentsAPI=0,totalSavesAPI=0,totalSharesAPI=0;
 
-  // Processar posts
+  try{
+    const allData=(insights&&insights.data)||[];
+    const find=name=>allData.find(d=>d.name===name);
+    const sumVals=d=>{
+      if(!d||!d.values)return 0;
+      return d.values.reduce((a,b)=>a+(b.value||0),0);
+    };
+    const lastN=(d,n)=>{
+      if(!d||!d.values)return null;
+      return d.values.slice(-n).map(v=>v.value||0);
+    };
+    const reachData=find('reach');
+    if(reachData){
+      reach=sumVals(reachData);
+      const r7=lastN(reachData,7);
+      if(r7&&r7.length>0){reach7=r7;imp7=r7.map(v=>Math.round(v*2.5));}
+      impressions=Math.round(reach*2.5);
+    }
+    const pvData=find('profile_views');
+    if(pvData)profileViews=sumVals(pvData);
+    const wcData=find('website_clicks');
+    if(wcData){
+      linkClicks=sumVals(wcData);
+      const lc7=lastN(wcData,7);
+      if(lc7&&lc7.length>0)linkClicks7=lc7;
+    }
+    const likesD=find('likes');if(likesD)totalLikesAPI=sumVals(likesD);
+    const commD=find('comments');if(commD)totalCommentsAPI=sumVals(commD);
+    const saveD=find('saves');if(saveD)totalSavesAPI=sumVals(saveD);
+    const shareD=find('shares');if(shareD)totalSharesAPI=sumVals(shareD);
+  }catch(e){console.log('Erro insights:',e);}
+
   const posts=(media.data||[]).map(p=>({
     title:(p.caption||'').substring(0,40)||'(sem legenda)',
     type:p.media_type||'IMAGE',
@@ -423,21 +445,23 @@ function montarDados(profile,insights,media,audiencia){
     saves:p.saved||0,shares:p.shares||0,timestamp:p.timestamp
   })).slice(0,10);
 
-  // Calcular engajamento (preferir dados da API de insights)
-  const totalLikes=totalLikesAPI||posts.reduce((a,p)=>a+p.likes,0);
-  const totalComments=totalCommentsAPI||posts.reduce((a,p)=>a+p.comments,0);
-  const totalSaves=totalSavesAPI||posts.reduce((a,p)=>a+p.saves,0);
+  const totalLikes=totalLikesAPI>0?totalLikesAPI:posts.reduce((a,p)=>a+p.likes,0);
+  const totalComments=totalCommentsAPI>0?totalCommentsAPI:posts.reduce((a,p)=>a+p.comments,0);
+  const totalSaves=totalSavesAPI>0?totalSavesAPI:posts.reduce((a,p)=>a+p.saves,0);
   const totalShares=totalSharesAPI||0;
-  const engRate=followers>0&&(totalLikes+totalComments+totalSaves)>0?((totalLikes+totalComments+totalSaves)/Math.max(posts.length,1)/followers*100):DEMO.engRate;
+  const totalEng=totalLikes+totalComments+totalSaves;
+  const engRate=followers>0&&totalEng>0?parseFloat((totalEng/Math.max(posts.length,1)/followers*100).toFixed(2)):DEMO.engRate;
 
   return{
     name:'@'+(profile.username||'mktconectamais'),
-    followers,following:profile.follows_count||DEMO.following,
+    followers,
+    following:profile.follows_count||DEMO.following,
     mediaCount:parseInt(profile.media_count)||0,
-    engRate:parseFloat(engRate.toFixed(2)),reach,impressions,
+    engRate,reach,impressions,
     likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
     profileViews,linkClicks,
-    growth:DEMO.growth,reach7,imp7,reels:DEMO.reels,stories:DEMO.stories,linkClicks7,
+    growth:DEMO.growth,reach7,imp7,
+    reels:DEMO.reels,stories:DEMO.stories,linkClicks7,
     posts:posts.length>0?posts:DEMO.posts,
     gender:audiencia.gender,age:audiencia.age,cities:audiencia.cities,
     hours:DEMO.hours
