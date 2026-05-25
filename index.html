@@ -343,8 +343,8 @@ async function carregarDadosReais(){
 
     // Insights do perfil
     setLoading(true,'Buscando métricas de alcance e impressões...');
-    const insightsMetrics='impressions,reach,profile_views,website_clicks,follower_count';
-    const insights=await fetchAPI(`/${USER_ID}/insights?metric=${insightsMetrics}&period=day&since=${Math.floor(Date.now()/1000)-86400*30}&until=${Math.floor(Date.now()/1000)}`);
+    const insightsMetrics='reach,follower_count,website_clicks,profile_views,accounts_engaged,total_interactions,likes,comments,shares,saves';
+    const insights=await fetchAPI(`/${USER_ID}/insights?metric=${insightsMetrics}&period=day&metric_type=total_value&since=${Math.floor(Date.now()/1000)-86400*30}&until=${Math.floor(Date.now()/1000)}`);
 
     // Posts recentes
     setLoading(true,'Buscando publicações recentes...');
@@ -423,18 +423,19 @@ function montarDados(profile,insights,media,audiencia){
     saves:p.saved||0,shares:p.shares||0,timestamp:p.timestamp
   })).slice(0,10);
 
-  // Calcular engajamento
-  const totalLikes=posts.reduce((a,p)=>a+p.likes,0);
-  const totalComments=posts.reduce((a,p)=>a+p.comments,0);
-  const totalSaves=posts.reduce((a,p)=>a+p.saves,0);
-  const engRate=followers>0?((totalLikes+totalComments+totalSaves)/Math.max(posts.length,1)/followers*100):DEMO.engRate;
+  // Calcular engajamento (preferir dados da API de insights)
+  const totalLikes=totalLikesAPI||posts.reduce((a,p)=>a+p.likes,0);
+  const totalComments=totalCommentsAPI||posts.reduce((a,p)=>a+p.comments,0);
+  const totalSaves=totalSavesAPI||posts.reduce((a,p)=>a+p.saves,0);
+  const totalShares=totalSharesAPI||0;
+  const engRate=followers>0&&(totalLikes+totalComments+totalSaves)>0?((totalLikes+totalComments+totalSaves)/Math.max(posts.length,1)/followers*100):DEMO.engRate;
 
   return{
     name:'@'+(profile.username||'mktconectamais'),
     followers,following:profile.follows_count||DEMO.following,
-    posts:profile.media_count||DEMO.posts,
+    mediaCount:profile.media_count||0,
     engRate:parseFloat(engRate.toFixed(2)),reach,impressions,
-    likes:totalLikes,comments:totalComments,saves:totalSaves,shares:0,
+    likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
     profileViews,linkClicks,
     growth:DEMO.growth,reach7,imp7,reels:DEMO.reels,stories:DEMO.stories,linkClicks7,
     posts:posts.length>0?posts:DEMO.posts,
@@ -471,7 +472,7 @@ function renderVisao(d){
   document.getElementById('kpiMain').innerHTML=[
     {lbl:'Seguidores',icon:'ti-users',val:fmt(d.followers),d:'',up:undefined},
     {lbl:'Seguindo',icon:'ti-user-check',val:fmt(d.following),d:'',up:undefined},
-    {lbl:'Publicações',icon:'ti-photo',val:fmt(d.posts),d:'',up:undefined},
+    {lbl:'Publicações',icon:'ti-photo',val:fmt(d.mediaCount||d.posts||0),d:'',up:undefined},
     {lbl:'Taxa de eng.',icon:'ti-heart',val:d.engRate.toFixed(1)+'%',d:d.engRate>=5?'acima da média':'abaixo da média',up:d.engRate>=5},
     {lbl:'Alcance (30d)',icon:'ti-eye',val:fmt(d.reach),d:'',up:undefined},
     {lbl:'Impressões (30d)',icon:'ti-chart-bar',val:fmt(d.impressions),d:'',up:undefined},
