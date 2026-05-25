@@ -303,7 +303,7 @@ const DEMO = {
 };
 
 // ── FUNÇÕES UTILITÁRIAS ───────────────────────────────────────────────────
-function fmt(n){if(!n&&n!==0)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(1)+'k':String(Math.round(n))}
+function fmt(n){if(n===null||n===undefined||isNaN(n))return'—';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(Math.round(n))}
 function dc(k){if(charts[k]){try{charts[k].destroy()}catch(e){}charts[k]=null}}
 function getLbls(p){return p===7?['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']:p===30?['Sem 1','Sem 2','Sem 3','Sem 4']:['Mês 1','Mês 2','Mês 3']}
 function sliceSeries(arr,p){
@@ -433,7 +433,7 @@ function montarDados(profile,insights,media,audiencia){
   return{
     name:'@'+(profile.username||'mktconectamais'),
     followers,following:profile.follows_count||DEMO.following,
-    mediaCount:profile.media_count||0,
+    mediaCount:parseInt(profile.media_count)||0,
     engRate:parseFloat(engRate.toFixed(2)),reach,impressions,
     likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
     profileViews,linkClicks,
