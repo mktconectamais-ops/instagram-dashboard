@@ -3,659 +3,775 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instagram Master Dashboard</title>
+<title>Social Intelligence — Dashboard Imobiliário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#f5f4f1;--bg-card:#ffffff;--bg-sub:#f0efe9;--text:#1e1d1a;--text2:#5a5955;--text3:#999790;--border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);--blue:#185FA5;--blue-l:#E6F1FB;--blue-d:#0C447C;--green:#3B6D11;--green-l:#EAF3DE;--red:#A32D2D;--red-l:#FCEBEB;--amber:#BA7517;--amber-l:#FAEEDA;--purple:#534AB7;--purple-l:#EEEDFE;--teal:#1D9E75;--r:8px;--rl:12px;--font:'DM Sans',sans-serif}
+:root{
+  --ink:#111210;--ink2:#3D3D3A;--ink3:#7A7A75;
+  --paper:#F9F7F3;--paper2:#F1EEE8;--paper3:#E6E2DA;
+  --gold:#B8925A;--gold-l:#F5EBD9;--gold-d:#8A6530;
+  --green:#1E6B45;--green-l:#D6EDDF;
+  --red:#8B1E1E;--red-l:#F5DADA;
+  --amber:#7A4F0D;--amber-l:#F5E6CC;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --r:8px;--rl:14px;
+  --display:'Playfair Display',Georgia,serif;
+  --sans:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ── SETUP ── */
+.setup{position:fixed;inset:0;background:#0E0E0C;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.setup.off{display:none}
+.setup-box{max-width:520px;width:100%;border:1px solid rgba(184,146,90,.25);border-radius:20px;padding:40px;background:#141412}
+.setup-title{font-family:var(--display);font-size:30px;color:var(--gold);letter-spacing:.01em;margin-bottom:6px}
+.setup-sub{font-size:13px;color:#6B6B66;line-height:1.6;margin-bottom:32px}
+.setup-label{font-size:10px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.setup-input{width:100%;background:#1C1C1A;border:1px solid rgba(184,146,90,.2);border-radius:var(--r);padding:11px 14px;color:#fff;font-family:var(--sans);font-size:13px;outline:none;margin-bottom:16px}
+.setup-input:focus{border-color:var(--gold)}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.setup-select{width:100%;background:#1C1C1A;border:1px solid rgba(184,146,90,.2);border-radius:var(--r);padding:11px 14px;color:#fff;font-family:var(--sans);font-size:13px;outline:none;margin-bottom:16px;cursor:pointer}
+.setup-select option{background:#1C1C1A}
+.setup-btn{width:100%;background:var(--gold);color:#0E0E0C;border:none;border-radius:var(--r);padding:14px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;letter-spacing:.02em;transition:background .2s}
+.setup-btn:hover{background:#C9A96E}
+.setup-divider{height:.5px;background:rgba(184,146,90,.15);margin:20px 0}
+.setup-note{font-size:11px;color:#4A4A46;line-height:1.6;margin-top:16px}
+
+/* ── APP ── */
 .app{display:flex;min-height:100vh}
+.app.off{display:none}
 
-/* CONFIG BANNER */
-.config-banner{background:linear-gradient(135deg,var(--blue-d),var(--purple));color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.config-banner.hidden{display:none}
-.config-title{font-size:14px;font-weight:500}
-.config-sub{font-size:12px;opacity:.8;margin-top:2px}
-.config-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.config-input{font-size:12px;padding:7px 10px;border-radius:var(--r);border:none;background:rgba(255,255,255,0.15);color:#fff;width:200px;font-family:var(--font)}
-.config-input::placeholder{color:rgba(255,255,255,0.6)}
-.config-input:focus{outline:2px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.2)}
-.config-btn{font-size:12px;padding:7px 16px;border-radius:var(--r);border:none;background:#fff;color:var(--blue-d);font-weight:500;cursor:pointer;font-family:var(--font)}
-.config-btn:hover{background:#E6F1FB}
-.demo-badge{font-size:10px;padding:3px 8px;border-radius:6px;background:var(--amber);color:#fff;font-weight:500}
+/* ── SIDEBAR ── */
+.sidebar{width:230px;background:#111210;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:28px 22px 22px;border-bottom:.5px solid rgba(255,255,255,.06)}
+.sb-name{font-family:var(--display);font-size:20px;color:var(--gold);letter-spacing:.02em;line-height:1.2}
+.sb-client{font-size:11px;color:#555552;margin-top:5px;display:flex;align-items:center;gap:5px}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.sb-section{padding:22px 22px 5px;font-size:9px;font-weight:500;color:rgba(184,146,90,.5);text-transform:uppercase;letter-spacing:.14em}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 22px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.4);transition:all .15s;border:none;background:transparent;width:100%;text-align:left;font-family:var(--sans);border-left:2px solid transparent}
+.sb-item:hover{color:rgba(255,255,255,.75);background:rgba(184,146,90,.04)}
+.sb-item.on{color:var(--gold);border-left-color:var(--gold);background:rgba(184,146,90,.07)}
+.sb-item i{font-size:15px;opacity:.8}
+.sb-foot{margin-top:auto;padding:16px 22px;border-top:.5px solid rgba(255,255,255,.06)}
+.sb-reset{font-size:11px;color:#555552;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:none;font-family:var(--sans)}
+.sb-reset:hover{color:var(--gold)}
 
-/* SIDEBAR */
-.sidebar{width:220px;background:var(--bg-card);border-right:0.5px solid var(--border2);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sidebar-logo{padding:20px 18px 16px;border-bottom:0.5px solid var(--border)}
-.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;margin-bottom:10px}
-.logo-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
-.logo-sub{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px;margin-top:3px}
-.live-dot{width:6px;height:6px;border-radius:50%;background:#639922;animation:pulse 2s infinite}
-.live-dot.demo{background:var(--amber)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.sidebar-section{padding:12px 10px 4px;font-size:9px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border:none;background:transparent;width:calc(100% - 16px);text-align:left;font-family:var(--font)}
-.nav-item:hover{background:var(--bg-sub);color:var(--text)}
-.nav-item.active{background:var(--blue-l);color:var(--blue-d);font-weight:500}
-.nav-item i{font-size:15px;flex-shrink:0}
-.client-section{padding:12px 10px 6px;margin-top:auto;border-top:0.5px solid var(--border)}
-.client-label{font-size:9px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;padding:0 4px}
-.client-select{width:100%;font-size:12px;padding:7px 10px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg-sub);color:var(--text);cursor:pointer;font-family:var(--font)}
-.period-row{display:flex;gap:4px;margin-top:8px;margin-bottom:12px}
-.pbtn{flex:1;font-size:11px;padding:5px 0;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg-sub);color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s}
-.pbtn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* ── MAIN ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:var(--paper);border-bottom:.5px solid var(--border2);padding:18px 32px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10}
+.page-title{font-family:var(--display);font-size:24px;color:var(--ink);font-weight:500;letter-spacing:.01em;line-height:1.2}
+.page-sub{font-size:12px;color:var(--ink3);margin-top:3px}
+.period-row{display:flex;gap:3px;background:var(--paper2);border-radius:var(--r);padding:3px}
+.pbtn{font-size:11px;padding:5px 12px;border-radius:6px;border:none;background:transparent;color:var(--ink3);cursor:pointer;font-family:var(--sans);transition:all .15s;font-weight:400}
+.pbtn.on{background:#fff;color:var(--ink);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.content{padding:28px 32px;flex:1}
 
-/* MAIN */
-.main{flex:1;min-width:0;padding:24px;overflow-x:hidden}
-.page-header{margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.page-title{font-size:20px;font-weight:500}
-.page-sub{font-size:12px;color:var(--text3);margin-top:3px}
-.refresh-btn{font-size:12px;padding:6px 14px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg-card);color:var(--text2);cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px}
-.refresh-btn:hover{background:var(--bg-sub)}
+/* ── PAGES ── */
+.page{display:none}.page.on{display:block}
 
-/* LOADING */
-.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(245,244,241,.9);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
-.loading-overlay.hidden{display:none}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:14px;color:var(--text2)}
+/* ── SCOPE BAR ── */
+.scope-bar{background:var(--ink);color:#fff;border-radius:var(--rl);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:12px;font-size:12px;line-height:1.5}
+.scope-bar i{color:var(--gold);font-size:17px;flex-shrink:0}
+.scope-bar strong{color:var(--gold)}
 
-/* ERROR */
-.error-box{background:var(--red-l);border:0.5px solid var(--red);border-radius:var(--rl);padding:16px 20px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
-.error-box.hidden{display:none}
-.error-box i{color:var(--red);font-size:18px;flex-shrink:0;margin-top:1px}
-.error-title{font-size:13px;font-weight:500;color:var(--red);margin-bottom:3px}
-.error-desc{font-size:12px;color:var(--text2);line-height:1.5}
+/* ── KPI GRID ── */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:var(--rl);padding:20px 22px;border:.5px solid var(--border2);position:relative;overflow:hidden}
+.kpi-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:var(--paper3)}
+.kpi-stripe.gold{background:var(--gold)}
+.kpi-stripe.green{background:var(--green)}
+.kpi-stripe.red{background:var(--red)}
+.kpi-stripe.amber{background:#B5621A}
+.kpi-lbl{font-size:10px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.kpi-val{font-family:var(--display);font-size:30px;color:var(--ink);line-height:1;letter-spacing:-.01em}
+.kpi-sub{font-size:11px;margin-top:6px}
+.up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--ink3)}
 
-/* SCORE */
-.score-banner{background:linear-gradient(135deg,var(--blue-l),var(--purple-l));border-radius:var(--rl);padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
-.score-circle{width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500;flex-shrink:0}
-.score-label{font-size:14px;font-weight:500;color:var(--blue-d)}
-.score-desc{font-size:12px;color:var(--blue)}
-
-/* KPI */
-.section-title{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:1.25rem 0 .7rem;display:flex;align-items:center;gap:6px}
-.section-title::after{content:"";flex:1;height:.5px;background:var(--border)}
-.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:14px}
-.kpi{background:var(--bg-sub);border-radius:var(--r);padding:12px 14px}
-.kpi.hl{background:var(--blue-l)}
-.kpi.hl2{background:var(--purple-l)}
-.kpi-lbl{font-size:11px;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:4px}
-.kpi.hl .kpi-lbl{color:var(--blue)}
-.kpi.hl2 .kpi-lbl{color:var(--purple)}
-.kpi-val{font-size:20px;font-weight:500;line-height:1}
-.kpi.hl .kpi-val{color:var(--blue-d)}
-.kpi.hl2 .kpi-val{color:#3C3489}
-.kpi-d{font-size:11px;margin-top:4px}
-.up{color:var(--green)}.dn{color:var(--red)}
-
-/* LAYOUT */
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}
-.card{background:var(--bg-card);border:0.5px solid var(--border2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:12px}
+/* ── LAYOUT ── */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+.card{background:#fff;border-radius:var(--rl);padding:22px 24px;border:.5px solid var(--border2);margin-bottom:16px}
 .card:last-child{margin-bottom:0}
-.ct{font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--text2)}
-.legend-row span{display:flex;align-items:center;gap:4px}
-.lsq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.ct{font-family:var(--display);font-size:18px;color:var(--ink);margin-bottom:16px;display:flex;align-items:center;gap:9px;font-weight:500}
+.ct i{font-size:17px;color:var(--gold)}
+.ct small{font-size:11px;color:var(--ink3);font-family:var(--sans);font-weight:400;margin-left:auto}
 
-/* ROWS */
-.row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);gap:10px}
+/* ── ROW ── */
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
 .row:last-child{border-bottom:none}
-.row-lbl{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:7px;flex:1;min-width:0}
-.row-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.row-num{font-size:13px;font-weight:500;color:var(--text)}
-.mini-bar-wrap{width:72px;height:4px;background:var(--bg-sub);border-radius:2px;overflow:hidden;flex-shrink:0}
-.mini-bar{height:4px;border-radius:2px}
-.row-pct{font-size:11px;color:var(--text3);min-width:36px;text-align:right}
+.row-lbl{font-size:12px;color:var(--ink2);flex:1;min-width:0}
+.row-val{font-size:13px;font-weight:500;color:var(--ink)}
+.row-pct{font-size:11px;color:var(--ink3);min-width:36px;text-align:right}
+.mbar{width:80px;height:4px;background:var(--paper2);border-radius:2px;overflow:hidden;flex-shrink:0}
+.mbar-fill{height:4px;border-radius:2px}
 
-/* INSIGHT */
-.insight-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--r);margin-bottom:8px;border-left:3px solid}
-.insight-row:last-child{margin-bottom:0}
-.ins-text{font-size:12px;color:var(--text);line-height:1.55}
-.ins-text strong{font-weight:500}
+/* ── SCORE ── */
+.score-hero{background:var(--ink);border-radius:var(--rl);padding:26px;display:flex;align-items:center;gap:22px;margin-bottom:20px}
+.score-ring{width:76px;height:76px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.score-n{font-family:var(--display);font-size:34px;color:var(--ink);font-weight:600;line-height:1}
+.score-label{font-family:var(--display);font-size:22px;color:var(--gold);margin-bottom:4px}
+.score-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;max-width:420px}
 
-/* FOOTER */
-.footer{padding:14px 24px;border-top:.5px solid var(--border);font-size:11px;color:var(--text3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--bg-card)}
+/* ── DIAG ── */
+.diag{border-radius:var(--rl);padding:16px 18px;margin-bottom:10px;border-left:3px solid;display:flex;gap:14px;align-items:flex-start}
+.diag:last-child{margin-bottom:0}
+.diag-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.diag-title{font-size:13px;font-weight:500;margin-bottom:5px;line-height:1.4}
+.diag-desc{font-size:12px;line-height:1.65;color:var(--ink2)}
+.diag-next{margin-top:8px;font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;display:inline-block;letter-spacing:.02em}
 
-/* PAGE */
-.page{display:none}.page.active{display:block}
-.tab-content{display:none}.tab-content.active{display:block}
+/* ── FUNIL ── */
+.fstep{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r);background:var(--paper);border:.5px solid var(--border2);margin-bottom:4px;position:relative}
+.fstep-n{width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)}
+.fstep-body{flex:1;min-width:0}
+.fstep-label{font-size:12px;font-weight:500;color:var(--ink)}
+.fstep-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+.fstep-val{font-family:var(--display);font-size:20px;color:var(--ink);flex-shrink:0}
+.fstep-pct{font-size:10px;color:var(--ink3);min-width:42px;text-align:right}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;flex-shrink:0}
+.b-ok{background:var(--green-l);color:var(--green)}
+.b-warn{background:var(--amber-l);color:var(--amber)}
+.b-bad{background:var(--red-l);color:var(--red)}
 
-/* POSTS TABLE */
-.atbl{width:100%;border-collapse:collapse;font-size:12px}
-.atbl th{font-size:10px;color:var(--text3);font-weight:500;padding:6px 8px;text-align:left;border-bottom:.5px solid var(--border);text-transform:uppercase;letter-spacing:.04em}
-.atbl td{padding:9px 8px;border-bottom:.5px solid var(--border);vertical-align:middle}
-.atbl tr:last-child td{border-bottom:none}
-.chip{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:500}
+/* ── META ── */
+.meta-card{background:var(--ink);border-radius:var(--rl);padding:20px 22px;color:#fff}
+.meta-lbl{font-size:10px;color:rgba(184,146,90,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.meta-val{font-family:var(--display);font-size:34px;color:var(--gold);line-height:1}
+.meta-track{height:5px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:12px;overflow:hidden}
+.meta-fill{height:5px;border-radius:3px;background:var(--gold);transition:width .6s}
+.meta-pct{font-size:10px;color:rgba(255,255,255,.4);margin-top:5px}
 
-/* AUDIENCE */
+/* ── AUD ── */
 .aud-row{display:flex;align-items:center;gap:10px;padding:7px 0}
-.aud-lbl{font-size:12px;color:var(--text2);min-width:90px}
-.aud-bar-wrap{flex:1;height:7px;background:var(--bg-sub);border-radius:4px;overflow:hidden}
-.aud-bar{height:7px;border-radius:4px}
-.aud-val{font-size:11px;color:var(--text3);min-width:35px;text-align:right}
+.aud-lbl{font-size:12px;color:var(--ink2);min-width:100px}
+.aud-bar{flex:1;height:6px;background:var(--paper2);border-radius:3px;overflow:hidden}
+.aud-fill{height:6px;border-radius:3px}
+.aud-pct{font-size:11px;color:var(--ink3);min-width:32px;text-align:right}
 
-/* API STATUS */
-.api-status{display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 10px;border-radius:var(--r);background:var(--green-l);color:var(--green)}
-.api-status.demo{background:var(--amber-l);color:var(--amber)}
-.api-status i{font-size:13px}
+/* ── HEATMAP ── */
+.hm-row{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.hm-lbl{font-size:10px;color:var(--ink3);min-width:28px}
+.hm-cells{display:flex;gap:2px;flex:1}
+.hm-cell{flex:1;height:14px;border-radius:2px}
 
-@media(max-width:768px){.sidebar{display:none}.main{padding:16px}.kgrid{grid-template-columns:repeat(2,1fr)}}
+/* ── POSTS ── */
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl th{font-size:10px;color:var(--ink3);font-weight:500;padding:8px 10px;text-align:left;border-bottom:.5px solid var(--border);text-transform:uppercase;letter-spacing:.06em}
+.ptbl td{padding:10px 10px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.ptbl tr:last-child td{border-bottom:none}
+.ptbl tr:hover td{background:var(--paper)}
+.pill{font-size:10px;padding:3px 8px;border-radius:8px;font-weight:500}
+
+/* ── BENCH ── */
+.btbl{width:100%;border-collapse:collapse;font-size:12px}
+.btbl th{font-size:10px;color:var(--ink3);font-weight:500;padding:8px 10px;text-align:left;border-bottom:.5px solid var(--border);text-transform:uppercase;letter-spacing:.06em}
+.btbl td{padding:11px 10px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.btbl tr:last-child td{border-bottom:none}
+.btbl tr:hover td{background:var(--paper)}
+
+/* ── SCRIPT ── */
+.script-box{background:#111210;border-radius:var(--r);padding:16px 18px;border:.5px solid rgba(184,146,90,.2)}
+.script-tag{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.script-text{font-size:12px;color:rgba(255,255,255,.8);line-height:1.9;font-family:var(--mono)}
+.script-tip{margin-top:10px;padding-top:10px;border-top:.5px solid rgba(255,255,255,.06);font-size:10px;color:#555552}
+
+/* ── CHECKLIST ── */
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px}
+.check-text{font-size:12px;color:var(--ink);line-height:1.5}
+.check-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+
+/* ── PLANO ── */
+.plano-row{display:flex;gap:14px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.plano-row:last-child{border-bottom:none}
+.plano-day{font-size:9px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;min-width:42px;padding-top:2px}
+.plano-body{flex:1}
+.plano-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.plano-desc{font-size:12px;color:var(--ink2);line-height:1.6}
+.plano-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-top:6px;font-weight:500}
+
+/* ── FOOTER ── */
+.footer{padding:14px 32px;border-top:.5px solid var(--border);font-size:11px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper)}
+.footer-brand{font-family:var(--display);color:var(--gold);font-size:15px}
+
+@media(max-width:768px){.sidebar{display:none}.content,.topbar{padding:16px}.kgrid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Conectando à API do Instagram...</div>
-</div>
+<!-- SETUP -->
+<div class="setup" id="setup">
+<div class="setup-box">
+  <div class="setup-title">Social Intelligence</div>
+  <div class="setup-sub">Configure uma vez. O sistema se adapta ao perfil do seu cliente imobiliário automaticamente.</div>
 
-<!-- CONFIG BANNER -->
-<div class="config-banner" id="configBanner">
-  <div>
-    <div class="config-title">🔗 Conectar conta do Instagram <span class="demo-badge">DEMO ATIVO</span></div>
-    <div class="config-sub">Cole seu Token de Acesso para ver os dados reais da sua conta</div>
-  </div>
-  <div class="config-fields">
-    <input class="config-input" id="tokenInput" type="password" placeholder="Cole seu Token de Acesso aqui">
-    <input class="config-input" id="userIdInput" type="text" placeholder="ID da conta (ex: 17841463...)">
-    <button class="config-btn" onclick="conectarAPI()"><i class="ti ti-plug"></i> Conectar</button>
-  </div>
-</div>
+  <div class="setup-label">Nome do cliente / imobiliária</div>
+  <input class="setup-input" id="s-nome" placeholder="Ex: Grupo Ventura Imóveis">
 
-<div class="app">
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark"><i class="ti ti-brand-instagram"></i></div>
-    <div class="logo-title">Instagram Master<br>Dashboard</div>
-    <div class="logo-sub"><span class="live-dot" id="liveDot"></span><span id="liveText">modo demo</span></div>
-  </div>
-  <div class="sidebar-section">Dashboard</div>
-  <button class="nav-item active" data-page="visao"><i class="ti ti-layout-dashboard"></i>Visão geral</button>
-  <button class="nav-item" data-page="posts"><i class="ti ti-photo"></i>Posts & Reels</button>
-  <button class="nav-item" data-page="audiencia"><i class="ti ti-users"></i>Audiência</button>
-  <button class="nav-item" data-page="insights"><i class="ti ti-chart-line"></i>Insights</button>
-  <div class="sidebar-section">Estratégia</div>
-  <button class="nav-item" data-page="estrategia"><i class="ti ti-bulb"></i>Diagnóstico</button>
-  <div class="client-section">
-    <div class="client-label">Período</div>
-    <div class="period-row">
-      <button class="pbtn" data-p="7">7d</button>
-      <button class="pbtn active" data-p="30">30d</button>
-      <button class="pbtn" data-p="90">90d</button>
+  <div class="setup-divider"></div>
+
+  <div class="setup-row">
+    <div>
+      <div class="setup-label">Segmento</div>
+      <select class="setup-select" id="s-seg">
+        <option value="alto">Alto padrão</option>
+        <option value="medio" selected>Médio padrão</option>
+        <option value="lancamento">Lançamentos</option>
+      </select>
     </div>
-    <button class="refresh-btn" style="width:100%;justify-content:center" onclick="recarregarDados()"><i class="ti ti-refresh"></i> Atualizar dados</button>
+    <div>
+      <div class="setup-label">Ticket médio</div>
+      <select class="setup-select" id="s-ticket">
+        <option value="300">R$ 300k – 500k</option>
+        <option value="600" selected>R$ 500k – 1M</option>
+        <option value="1000">R$ 1M – 3M</option>
+        <option value="3000">Acima R$ 3M</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="setup-row">
+    <div>
+      <div class="setup-label">Leads/mês no WhatsApp</div>
+      <select class="setup-select" id="s-leads">
+        <option value="15">Menos de 20</option>
+        <option value="35" selected>20 a 50</option>
+        <option value="80">50 a 150</option>
+        <option value="200">Mais de 150</option>
+      </select>
+    </div>
+    <div>
+      <div class="setup-label">Resposta no WhatsApp</div>
+      <select class="setup-select" id="s-resp">
+        <option value="3">Até 5 min</option>
+        <option value="15" selected>5 a 30 min</option>
+        <option value="60">30 min a 2h</option>
+        <option value="180">Acima de 2h</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="setup-label">Meta de leads qualificados/mês</div>
+  <select class="setup-select" id="s-meta">
+    <option value="20">20 leads</option>
+    <option value="40" selected>40 leads</option>
+    <option value="80">80 leads</option>
+    <option value="150">150+ leads</option>
+  </select>
+
+  <button class="setup-btn" onclick="iniciar()">Acessar dashboard →</button>
+  <div class="setup-note">⚡ Suas respostas ficam salvas no navegador. Próxima visita abre direto no dashboard.</div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app off" id="app">
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-name">Social<br>Intelligence</div>
+    <div class="sb-client"><span class="sb-dot"></span><span id="sbClient">—</span></div>
+  </div>
+
+  <div class="sb-section">Resultado</div>
+  <button class="sb-item on" data-pg="resultado"><i class="ti ti-target-arrow"></i>Painel de Resultado</button>
+  <button class="sb-item" data-pg="funil"><i class="ti ti-route"></i>Funil de Lead</button>
+
+  <div class="sb-section">Conteúdo</div>
+  <button class="sb-item" data-pg="conteudo"><i class="ti ti-photo"></i>Criativos & Mix</button>
+  <button class="sb-item" data-pg="plano"><i class="ti ti-calendar-week"></i>Plano Semanal</button>
+
+  <div class="sb-section">Dados</div>
+  <button class="sb-item" data-pg="instagram"><i class="ti ti-brand-instagram"></i>Instagram</button>
+  <button class="sb-item" data-pg="audiencia"><i class="ti ti-users"></i>Audiência</button>
+  <button class="sb-item" data-pg="benchmark"><i class="ti ti-chart-bar"></i>Benchmarks</button>
+
+  <div class="sb-foot">
+    <button class="sb-reset" onclick="resetar()"><i class="ti ti-settings" style="font-size:13px"></i> Reconfigurar</button>
   </div>
 </aside>
 
-<div style="flex:1;display:flex;flex-direction:column;min-width:0">
-<main class="main">
+<div class="main">
+<div class="topbar">
+  <div>
+    <div class="page-title" id="pgTitle">Painel de Resultado</div>
+    <div class="page-sub" id="pgSub">O que o Instagram está entregando para o time comercial</div>
+  </div>
+  <div class="period-row">
+    <button class="pbtn" data-p="7">7d</button>
+    <button class="pbtn on" data-p="30">30d</button>
+    <button class="pbtn" data-p="90">90d</button>
+  </div>
+</div>
+<div class="content">
 
-<!-- VISÃO GERAL -->
-<div class="page active" id="page-visao">
-  <div class="page-header">
-    <div><div class="page-title">Visão geral</div><div class="page-sub" id="accountName">Carregando conta...</div></div>
-    <div id="apiStatusBadge" class="api-status demo"><i class="ti ti-wifi-off"></i> Modo demo</div>
+<!-- ═══ PAINEL DE RESULTADO ═══ -->
+<div class="page on" id="pg-resultado">
+  <div class="scope-bar">
+    <i class="ti ti-info-circle"></i>
+    <span>Seu escopo termina aqui: <strong>atrair, qualificar e entregar o lead no WhatsApp</strong>. O que acontece depois é responsabilidade do time comercial. Este painel mede exatamente o que você controla.</span>
   </div>
-  <div id="errorBox" class="error-box hidden">
-    <i class="ti ti-alert-circle"></i>
-    <div><div class="error-title" id="errorTitle">Erro ao carregar dados</div><div class="error-desc" id="errorDesc"></div></div>
+
+  <div class="score-hero">
+    <div class="score-ring"><div class="score-n" id="scoreN">—</div></div>
+    <div>
+      <div class="score-label" id="scoreLabel">Calculando...</div>
+      <div class="score-desc" id="scoreDesc">—</div>
+    </div>
   </div>
-  <div class="score-banner">
-    <div class="score-circle" id="scoreVal">—</div>
-    <div><div class="score-label" id="scoreLabel">Calculando score...</div><div class="score-desc" id="scoreDesc">Conecte sua conta para ver o diagnóstico</div></div>
-  </div>
-  <div class="section-title">métricas principais</div>
-  <div class="kgrid" id="kpiMain"></div>
-  <div class="section-title">engajamento e conversão</div>
-  <div class="kgrid" id="kpiConv"></div>
-  <div class="grid2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-trending-up" style="color:var(--blue)"></i>Crescimento de seguidores</div><div style="position:relative;height:190px"><canvas id="cFollowers"></canvas></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-heart" style="color:#D4537E"></i>Engajamento por tipo</div><div class="legend-row" id="engLegend"></div><div style="position:relative;height:165px"><canvas id="cEng"></canvas></div></div>
-  </div>
-  <div class="grid2" style="margin-top:12px">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-eye" style="color:var(--teal)"></i>Alcance e impressões</div><div style="position:relative;height:190px"><canvas id="cReach"></canvas></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-player-play" style="color:var(--amber)"></i>Reels vs Stories — views</div><div style="position:relative;height:190px"><canvas id="cReels"></canvas></div></div>
+
+  <div class="g3" id="metasGrid"></div>
+
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-stethoscope"></i>Diagnóstico <small>o que está impedindo mais leads</small></div>
+      <div id="diagEl"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct"><i class="ti ti-flag-3"></i>As 4 métricas que você controla</div>
+        <div id="quatroKpis"></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct"><i class="ti ti-bolt"></i>Ação desta semana</div>
+        <div id="acaoSemana"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- POSTS -->
-<div class="page" id="page-posts">
-  <div class="page-header"><div><div class="page-title">Posts & Reels</div><div class="page-sub">Últimas publicações e desempenho</div></div></div>
+<!-- ═══ FUNIL DE LEAD ═══ -->
+<div class="page" id="pg-funil">
+  <div class="scope-bar">
+    <i class="ti ti-info-circle"></i>
+    <span>O funil termina na <strong>entrega do lead qualificado no WhatsApp</strong>. Visita, proposta e fechamento são métricas do CRM do corretor — fora do seu escopo.</span>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-filter"></i>Do conteúdo ao lead qualificado</div>
+      <div id="funnelEl"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct"><i class="ti ti-alert-triangle"></i>Maior gargalo do funil</div>
+        <div id="gargaloEl"></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct"><i class="ti ti-clock"></i>Velocidade de entrega ao time</div>
+        <div id="velocEl"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CRIATIVOS & MIX ═══ -->
+<div class="page" id="pg-conteudo">
+  <div class="scope-bar">
+    <i class="ti ti-bulb"></i>
+    <span>No imobiliário de <strong>médio/alto padrão</strong>: tour em vídeo converte 3× mais que foto estática. Lifestyle e prova social convertem mais que especificações técnicas.</span>
+  </div>
   <div class="card">
-    <div class="ct"><i class="ti ti-star" style="color:var(--amber)"></i>Top publicações por engajamento</div>
-    <div style="overflow-x:auto" id="postsTable"></div>
+    <div class="ct"><i class="ti ti-photo"></i>Performance por tipo de criativo</div>
+    <div style="overflow-x:auto" id="criTbl"></div>
   </div>
-  <div class="grid2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-pie" style="color:var(--purple)"></i>Performance por formato</div><div id="formatList"></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock" style="color:var(--amber)"></i>Melhores horários para postar</div><div style="position:relative;height:200px"><canvas id="cHours"></canvas></div></div>
-  </div>
-</div>
-
-<!-- AUDIÊNCIA -->
-<div class="page" id="page-audiencia">
-  <div class="page-header"><div><div class="page-title">Audiência</div><div class="page-sub">Quem são seus seguidores</div></div></div>
-  <div class="grid2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-gender-bigender" style="color:#D4537E"></i>Gênero</div><div id="genderList"></div><div style="position:relative;height:130px;margin-top:10px"><canvas id="cGender"></canvas></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-calendar" style="color:var(--blue)"></i>Faixa etária</div><div id="ageList"></div></div>
-  </div>
-  <div class="grid2" style="margin-top:12px">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-map" style="color:var(--teal)"></i>Top países/cidades</div><div id="locList"></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-eye" style="color:var(--blue)"></i>Alcance por tipo de conteúdo</div><div style="position:relative;height:200px"><canvas id="cContentType"></canvas></div></div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-chart-donut"></i>Mix atual vs. recomendado</div>
+      <div id="mixEl"></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-clock"></i>Melhores horários</div>
+      <div id="horariosEl"></div>
+    </div>
   </div>
 </div>
 
-<!-- INSIGHTS -->
-<div class="page" id="page-insights">
-  <div class="page-header"><div><div class="page-title">Insights detalhados</div><div class="page-sub">Dados da API do Instagram</div></div></div>
-  <div class="card"><div class="ct"><i class="ti ti-chart-bar" style="color:var(--blue)"></i>Métricas do perfil — últimos 30 dias</div><div id="insightsList"></div></div>
-  <div class="card"><div class="ct"><i class="ti ti-link" style="color:var(--blue)"></i>Cliques no link da bio</div><div style="position:relative;height:200px"><canvas id="cLinkClicks"></canvas></div></div>
+<!-- ═══ PLANO SEMANAL ═══ -->
+<div class="page" id="pg-plano">
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-calendar-week"></i>Plano de conteúdo <small>adaptado ao seu segmento</small></div>
+      <div id="planoEl"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct"><i class="ti ti-message-2"></i>Script de primeiro contato WhatsApp</div>
+        <div id="scriptEl"></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct"><i class="ti ti-checklist"></i>Checklist de entrega de lead</div>
+        <div id="checkEl"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- DIAGNÓSTICO -->
-<div class="page" id="page-estrategia">
-  <div class="page-header"><div><div class="page-title">Diagnóstico automático</div><div class="page-sub">O que os dados estão te dizendo</div></div></div>
-  <div id="diagList"></div>
+<!-- ═══ INSTAGRAM ═══ -->
+<div class="page" id="pg-instagram">
+  <div class="kgrid" id="igKpis"></div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-trending-up"></i>Crescimento de seguidores</div>
+      <div style="position:relative;height:200px"><canvas id="cGrow"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-heart"></i>Engajamento por tipo</div>
+      <div id="engLeg" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--ink3)"></div>
+      <div style="position:relative;height:175px"><canvas id="cEng"></canvas></div>
+    </div>
+  </div>
+  <div class="g2" style="margin-top:16px">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-eye"></i>Alcance e impressões</div>
+      <div style="position:relative;height:200px"><canvas id="cReach"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-link"></i>Cliques no link <small>caminho para o lead</small></div>
+      <div style="position:relative;height:200px"><canvas id="cLink"></canvas></div>
+    </div>
+  </div>
 </div>
 
-</main>
+<!-- ═══ AUDIÊNCIA ═══ -->
+<div class="page" id="pg-audiencia">
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-gender-bigender"></i>Gênero</div>
+      <div id="genEl"></div>
+      <div style="position:relative;height:140px;margin-top:12px"><canvas id="cGen"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-calendar"></i>Faixa etária <small>e fit com comprador imobiliário</small></div>
+      <div id="ageEl"></div>
+      <div id="ageDiag" style="margin-top:12px;padding:10px;background:var(--paper);border-radius:var(--r);font-size:11px"></div>
+    </div>
+  </div>
+  <div class="g2" style="margin-top:16px">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-map-pin"></i>Localização</div>
+      <div id="locEl"></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-user-check"></i>Fit com público comprador</div>
+      <div id="fitEl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BENCHMARKS ═══ -->
+<div class="page" id="pg-benchmark">
+  <div class="scope-bar">
+    <i class="ti ti-chart-bar"></i>
+    <span>Benchmarks do mercado imobiliário <strong>médio/alto padrão no Brasil</strong>. Fonte: dados setoriais 2025–2026.</span>
+  </div>
+  <div class="card">
+    <div class="ct"><i class="ti ti-scale"></i>Sua performance vs. o mercado</div>
+    <table class="btbl" id="benchTbl"></table>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-trophy"></i>O que os melhores fazem</div>
+      <div id="bestEl"></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-arrow-up-right"></i>Próximos marcos</div>
+      <div id="marcosEl"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- content -->
 <footer class="footer">
-  <span id="footerStatus"><i class="ti ti-api"></i> Instagram Graph API · modo demo</span>
-  <span>Instagram Master Dashboard · mktconectamais</span>
+  <span><span class="footer-brand">Social Intelligence</span> · Dashboard Imobiliário</span>
+  <span id="footerTxt">—</span>
 </footer>
 </div>
-</div>
+</div><!-- app -->
 
 <script>
-// ── CONFIGURAÇÃO ──────────────────────────────────────────────────────────
-let ACCESS_TOKEN = '';
-let USER_ID = '';
-let isConnected = false;
-let period = 30;
-const charts = {};
-
-// ── DADOS DEMO (fallback quando não conectado) ────────────────────────────
-const DEMO = {
-  name:'@mktconectamais',followers:18400,following:842,posts:312,
-  engRate:5.8,reach:52000,impressions:134000,
-  likes:3100,comments:420,saves:680,shares:240,
-  profileViews:8700,linkClicks:1240,
-  growth:[16800,17100,17400,17600,17900,18100,18400],
-  reach7:[6200,7100,8000,6800,7900,8200,7800],
-  imp7:[15000,17200,19400,16500,19200,20100,19000],
-  reels:[42000,38000,51000,47000,55000,49000,61000],
-  stories:[12000,14000,11000,16000,13000,15000,17000],
-  linkClicks7:[140,170,190,160,200,195,185],
+// ── DADOS DE EXEMPLO ──────────────────────────────────────────────────────
+const IG={
+  followers:4800,following:312,engRate:5.8,
+  reach:28000,impressions:72000,profileViews:3400,linkClicks:890,
+  likes:2100,comments:180,saves:420,shares:90,
+  growth:[4100,4250,4380,4450,4560,4690,4800],
+  reach7:[3800,4200,3600,4800,4100,5200,4300],
+  imp7:[9500,10500,9000,12000,10200,13000,10800],
+  link7:[110,130,95,160,120,180,95],
+  horas:[1,1,1,1,2,3,4,6,9,14,18,22,20,18,16,14,12,18,26,30,24,16,8,3],
   posts:[
-    {title:'Look verão 2026',type:'REEL',reach:14200,likes:980,comments:142,saves:118,timestamp:'2026-05-20'},
-    {title:'Nova coleção — carrossel',type:'CAROUSEL_ALBUM',reach:9800,likes:720,comments:98,saves:162,timestamp:'2026-05-18'},
-    {title:'Bastidores da loja',type:'REEL',reach:8100,likes:540,comments:76,saves:64,timestamp:'2026-05-15'},
-    {title:'5 looks para o verão',type:'CAROUSEL_ALBUM',reach:7400,likes:480,comments:54,saves:214,timestamp:'2026-05-12'},
-    {title:'Promoção relâmpago',type:'IMAGE',reach:5200,likes:320,comments:38,saves:28,timestamp:'2026-05-10'},
+    {t:'Tour Reel — Cobertura 180m²',tipo:'REEL',reach:12400,likes:940,saves:264,ctr:5.2},
+    {t:'Lifestyle — manhã no terraço',tipo:'REEL',reach:9800,likes:720,saves:198,ctr:4.8},
+    {t:'Depoimento comprador',tipo:'VIDEO',reach:6100,likes:410,saves:88,ctr:4.1},
+    {t:'Tour vídeo — sala integrada',tipo:'VIDEO',reach:8200,likes:620,saves:182,ctr:3.8},
+    {t:'Carrossel — localização',tipo:'CAROUSEL',reach:5800,likes:380,saves:96,ctr:2.1},
+    {t:'Planta decorada',tipo:'CAROUSEL',reach:4600,likes:290,saves:74,ctr:2.3},
+    {t:'Foto estática fachada',tipo:'IMAGE',reach:3200,likes:180,saves:42,ctr:0.9},
   ],
-  gender:[{label:'Feminino',pct:78,cor:'#D4537E'},{label:'Masculino',pct:21,cor:'#185FA5'},{label:'Outro',pct:1,cor:'#534AB7'}],
-  age:[{label:'18-24',pct:32},{label:'25-34',pct:41},{label:'35-44',pct:18},{label:'45-54',pct:7},{label:'55+',pct:2}],
-  cities:[{label:'São Paulo, BR',pct:28},{label:'Rio de Janeiro, BR',pct:18},{label:'Belo Horizonte, BR',pct:9},{label:'Recife, BR',pct:7},{label:'Outros',pct:38}],
-  hours:[2,1,1,1,2,3,5,8,12,18,22,28,35,42,38,32,28,35,48,52,45,28,15,8]
+  gender:[{l:'Masculino',p:54,c:'#1B4F8A'},{l:'Feminino',p:44,c:'#8B1E1E'},{l:'Outro',p:2,c:'#B8925A'}],
+  age:[{l:'18–24',p:8},{l:'25–34',p:28},{l:'35–44',p:38},{l:'45–54',p:20},{l:'55+',p:6}],
+  cities:[{l:'São Paulo, SP',p:42},{l:'Campinas, SP',p:12},{l:'Santos, SP',p:8},{l:'Rio de Janeiro',p:7},{l:'Outros',p:31}],
 };
 
-// ── FUNÇÕES UTILITÁRIAS ───────────────────────────────────────────────────
-function fmt(n){if(n===null||n===undefined||isNaN(n))return'—';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(Math.round(n))}
+// ── BENCHMARKS ────────────────────────────────────────────────────────────
+const B={
+  alto:{eng:{min:3,ref:5},ctr:{min:8,ref:18},leads:{min:30,ref:80},cpl:{min:80,ref:40},resp:{ok:5,ref:'≤ 5 min'}},
+  medio:{eng:{min:4,ref:7},ctr:{min:10,ref:22},leads:{min:50,ref:150},cpl:{min:60,ref:30},resp:{ok:10,ref:'≤ 10 min'}},
+  lancamento:{eng:{min:5,ref:9},ctr:{min:12,ref:25},leads:{min:80,ref:200},cpl:{min:50,ref:25},resp:{ok:3,ref:'≤ 3 min'}},
+};
+
+let P={},period=30;
+const charts={};
+function fmt(n){if(n===null||n===undefined||isNaN(n))return'—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(Math.round(n))}
 function dc(k){if(charts[k]){try{charts[k].destroy()}catch(e){}charts[k]=null}}
-function getLbls(p){return p===7?['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']:p===30?['Sem 1','Sem 2','Sem 3','Sem 4']:['Mês 1','Mês 2','Mês 3']}
-function sliceSeries(arr,p){
-  if(p===7)return arr.slice(-7);
-  const n=p===30?4:3;
-  const r=[];for(let i=0;i<n;i++){const s=arr.slice(Math.floor(i*arr.length/n),Math.floor((i+1)*arr.length/n));r.push(Math.round(s.reduce((a,b)=>a+b,0)/Math.max(s.length,1)));}return r;
-}
-function showError(title,desc){
-  document.getElementById('errorBox').classList.remove('hidden');
-  document.getElementById('errorTitle').textContent=title;
-  document.getElementById('errorDesc').textContent=desc;
-}
-function hideError(){document.getElementById('errorBox').classList.add('hidden')}
-function setLoading(show,text='Carregando dados...'){
-  const el=document.getElementById('loadingOverlay');
-  document.getElementById('loadingText').textContent=text;
-  el.classList.toggle('hidden',!show);
-}
 
-// ── API DO INSTAGRAM ──────────────────────────────────────────────────────
-async function fetchAPI(endpoint){
-  const base='https://graph.instagram.com/v21.0';
-  const url=`${base}${endpoint}${endpoint.includes('?')?'&':'?'}access_token=${ACCESS_TOKEN}`;
-  const resp=await fetch(url);
-  const data=await resp.json();
-  if(data.error)throw new Error(data.error.message);
-  return data;
+// ── SETUP ─────────────────────────────────────────────────────────────────
+function iniciar(){
+  const nome=document.getElementById('s-nome').value.trim()||'Meu Cliente';
+  P={nome,seg:document.getElementById('s-seg').value,ticket:parseInt(document.getElementById('s-ticket').value),leads:parseInt(document.getElementById('s-leads').value),resp:parseInt(document.getElementById('s-resp').value),meta:parseInt(document.getElementById('s-meta').value)};
+  localStorage.setItem('si_p',JSON.stringify(P));
+  ativar();
+}
+function resetar(){localStorage.removeItem('si_p');document.getElementById('setup').classList.remove('off');document.getElementById('app').classList.add('off')}
+function ativar(){
+  document.getElementById('setup').classList.add('off');
+  document.getElementById('app').classList.remove('off');
+  document.getElementById('sbClient').textContent=P.nome;
+  document.getElementById('footerTxt').textContent='Dashboard de '+P.nome;
+  render();
 }
 
-async function carregarDadosReais(){
-  setLoading(true,'Conectando à API do Instagram...');
-  hideError();
-  try{
-    // Perfil básico
-    setLoading(true,'Buscando dados do perfil...');
-    const profile=await fetchAPI(`/${USER_ID}?fields=name,username,followers_count,follows_count,media_count,profile_picture_url,biography,website`);
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function render(){rResultado();rFunil();rConteudo();rPlano();rInstagram();rAudiencia();rBenchmark();}
 
-    // Insights do perfil
-    setLoading(true,'Buscando métricas de alcance e impressões...');
-    const insightsMetrics='reach,follower_count,website_clicks,profile_views,accounts_engaged,total_interactions,likes,comments,shares,saves';
-    const insights=await fetchAPI(`/${USER_ID}/insights?metric=${insightsMetrics}&period=day&metric_type=total_value&since=${Math.floor(Date.now()/1000)-86400*30}&until=${Math.floor(Date.now()/1000)}`);
+// ── PAINEL DE RESULTADO ───────────────────────────────────────────────────
+function rResultado(){
+  const b=B[P.seg]||B.medio;
+  const ctr=(IG.linkClicks/IG.profileViews*100);
+  const leadsOk=P.leads>=b.leads.min;
+  const engOk=IG.engRate>=b.eng.min;
+  const ctrOk=ctr>=b.ctr.min;
+  const respOk=P.resp<=b.resp.ok*2;
 
-    // Posts recentes
-    setLoading(true,'Buscando publicações recentes...');
-    const media=await fetchAPI(`/${USER_ID}/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,impressions,saved,shares&limit=20`);
+  let score=45;
+  if(engOk)score+=18;if(ctrOk)score+=15;if(leadsOk)score+=12;if(respOk)score+=10;
+  score=Math.min(score,100);
 
-    // Audiência
-    setLoading(true,'Buscando dados de audiência...');
-    let audienceData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
-    try{
-      const audience=await fetchAPI(`/${USER_ID}/insights?metric=audience_gender_age,audience_city&period=lifetime`);
-      audienceData=processarAudiencia(audience.data);
-    }catch(e){console.log('Audiência detalhada não disponível, usando estimativa');}
+  const sLabel=score>=85?'Entrega excelente':score>=70?'Entrega consistente':score>=55?'Entrega com gargalos':'Entrega crítica';
+  const sDesc=score>=85?'O Instagram está gerando leads qualificados acima da média do mercado imobiliário.':score>=70?'Boa geração de leads, mas existem 1-2 pontos de melhoria que ampliam o volume.':score>=55?'O funil está vazando em pontos claros. Veja o diagnóstico abaixo.':'Volume e qualidade de leads abaixo do necessário para a meta.';
 
-    // Montar objeto de dados reais
-    const dadosReais=montarDados(profile,insights,media,audienceData);
-    renderizarTudo(dadosReais);
-    setConnectedState(profile.username||profile.name);
-    setLoading(false);
-  }catch(err){
-    setLoading(false);
-    console.error('Erro API:',err);
-    showError('Erro ao carregar dados da API',err.message+'. Verifique se o token está correto e não expirou.');
-    renderizarTudo(DEMO);
-  }
-}
+  document.getElementById('scoreN').textContent=score;
+  document.getElementById('scoreLabel').textContent=sLabel;
+  document.getElementById('scoreDesc').textContent=sDesc;
 
-function processarAudiencia(data){
-  let gender=DEMO.gender,age=DEMO.age,cities=DEMO.cities;
-  try{
-    const genderAge=data.find(d=>d.name==='audience_gender_age');
-    if(genderAge){
-      let f=0,m=0,u=0,total=0;
-      const ageMap={};
-      Object.entries(genderAge.values[0].value).forEach(([k,v])=>{
-        const[g,a]=k.split('.');
-        total+=v;
-        if(g==='F')f+=v;else if(g==='M')m+=v;else u+=v;
-        if(!ageMap[a])ageMap[a]=0;
-        ageMap[a]+=v;
-      });
-      if(total>0){
-        gender=[{label:'Feminino',pct:Math.round(f/total*100),cor:'#D4537E'},{label:'Masculino',pct:Math.round(m/total*100),cor:'#185FA5'},{label:'Outro',pct:Math.round(u/total*100),cor:'#534AB7'}];
-        age=Object.entries(ageMap).map(([k,v])=>({label:k,pct:Math.round(v/total*100)})).sort((a,b)=>a.label.localeCompare(b.label));
-      }
-    }
-    const cityData=data.find(d=>d.name==='audience_city');
-    if(cityData){
-      const vals=cityData.values[0].value;
-      const total=Object.values(vals).reduce((a,b)=>a+b,0);
-      cities=Object.entries(vals).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>({label:k,pct:Math.round(v/total*100)}));
-    }
-  }catch(e){console.log('Erro ao processar audiência:',e);}
-  return{gender,age,cities};
-}
+  // Metas
+  const pctLeads=Math.min(Math.round(P.leads/P.meta*100),100);
+  const pctEng=Math.min(Math.round(IG.engRate/b.eng.ref*100),100);
+  const pctCtr=Math.min(Math.round(ctr/b.ctr.ref*100),100);
+  document.getElementById('metasGrid').innerHTML=[
+    {l:'Leads entregues/mês',v:fmt(P.leads),meta:P.meta+'meta',pct:pctLeads},
+    {l:'Taxa de engajamento',v:IG.engRate.toFixed(1)+'%',meta:'meta '+b.eng.ref+'%',pct:pctEng},
+    {l:'CTR do perfil',v:ctr.toFixed(1)+'%',meta:'meta '+b.ctr.ref+'%',pct:pctCtr},
+  ].map(m=>`<div class="meta-card"><div class="meta-lbl">${m.l}</div><div class="meta-val">${m.v}</div><div class="meta-track"><div class="meta-fill" style="width:${m.pct}%"></div></div><div class="meta-pct">${m.pct}% · ref. mercado</div></div>`).join('');
 
-function montarDados(profile,insights,media,audiencia){
-  const followers=profile.followers_count||DEMO.followers;
-  let reach=0,impressions=0,profileViews=0,linkClicks=0;
-  let reach7=[...DEMO.reach7],imp7=[...DEMO.imp7],linkClicks7=[...DEMO.linkClicks7];
-  let totalLikesAPI=0,totalCommentsAPI=0,totalSavesAPI=0,totalSharesAPI=0;
-
-  try{
-    const allData=(insights&&insights.data)||[];
-    const find=name=>allData.find(d=>d.name===name);
-    const sumVals=d=>{
-      if(!d||!d.values)return 0;
-      return d.values.reduce((a,b)=>a+(b.value||0),0);
-    };
-    const lastN=(d,n)=>{
-      if(!d||!d.values)return null;
-      return d.values.slice(-n).map(v=>v.value||0);
-    };
-    const reachData=find('reach');
-    if(reachData){
-      reach=sumVals(reachData);
-      const r7=lastN(reachData,7);
-      if(r7&&r7.length>0){reach7=r7;imp7=r7.map(v=>Math.round(v*2.5));}
-      impressions=Math.round(reach*2.5);
-    }
-    const pvData=find('profile_views');
-    if(pvData)profileViews=sumVals(pvData);
-    const wcData=find('website_clicks');
-    if(wcData){
-      linkClicks=sumVals(wcData);
-      const lc7=lastN(wcData,7);
-      if(lc7&&lc7.length>0)linkClicks7=lc7;
-    }
-    const likesD=find('likes');if(likesD)totalLikesAPI=sumVals(likesD);
-    const commD=find('comments');if(commD)totalCommentsAPI=sumVals(commD);
-    const saveD=find('saves');if(saveD)totalSavesAPI=sumVals(saveD);
-    const shareD=find('shares');if(shareD)totalSharesAPI=sumVals(shareD);
-  }catch(e){console.log('Erro insights:',e);}
-
-  const posts=(media.data||[]).map(p=>({
-    title:(p.caption||'').substring(0,40)||'(sem legenda)',
-    type:p.media_type||'IMAGE',
-    reach:p.reach||0,likes:p.like_count||0,comments:p.comments_count||0,
-    saves:p.saved||0,shares:p.shares||0,timestamp:p.timestamp
-  })).slice(0,10);
-
-  const totalLikes=totalLikesAPI>0?totalLikesAPI:posts.reduce((a,p)=>a+p.likes,0);
-  const totalComments=totalCommentsAPI>0?totalCommentsAPI:posts.reduce((a,p)=>a+p.comments,0);
-  const totalSaves=totalSavesAPI>0?totalSavesAPI:posts.reduce((a,p)=>a+p.saves,0);
-  const totalShares=totalSharesAPI||0;
-  const totalEng=totalLikes+totalComments+totalSaves;
-  const engRate=followers>0&&totalEng>0?parseFloat((totalEng/Math.max(posts.length,1)/followers*100).toFixed(2)):DEMO.engRate;
-
-  return{
-    name:'@'+(profile.username||'mktconectamais'),
-    followers,
-    following:profile.follows_count||DEMO.following,
-    mediaCount:parseInt(profile.media_count)||0,
-    engRate,reach,impressions,
-    likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
-    profileViews,linkClicks,
-    growth:DEMO.growth,reach7,imp7,
-    reels:DEMO.reels,stories:DEMO.stories,linkClicks7,
-    posts:posts.length>0?posts:DEMO.posts,
-    gender:audiencia.gender,age:audiencia.age,cities:audiencia.cities,
-    hours:DEMO.hours
-  };
-}
-
-function setConnectedState(username){
-  isConnected=true;
-  document.getElementById('liveDot').classList.remove('demo');
-  document.getElementById('liveText').textContent='conectado · ao vivo';
-  document.getElementById('apiStatusBadge').className='api-status';
-  document.getElementById('apiStatusBadge').innerHTML='<i class="ti ti-wifi"></i> API conectada';
-  document.getElementById('footerStatus').innerHTML='<i class="ti ti-api"></i> Instagram Graph API · @'+username;
-  document.getElementById('configBanner').classList.add('hidden');
-}
-
-// ── RENDERIZAÇÃO ──────────────────────────────────────────────────────────
-function kpiHTML(k){
-  const cls=k.hl?' hl':k.hl2?' hl2':'';
-  const trend=k.up!==undefined?(k.up?`<span class="up">▲ ${k.d}</span>`:`<span class="dn">▼ ${k.d}</span>`):'';
-  return `<div class="kpi${cls}"><div class="kpi-lbl"><i class="ti ${k.icon}" style="font-size:13px"></i>${k.lbl}</div><div class="kpi-val">${k.val}</div><div class="kpi-d">${trend}</div></div>`;
-}
-
-function renderVisao(d){
-  // Score
-  const score=calcScore(d);
-  document.getElementById('scoreVal').textContent=score.val;
-  document.getElementById('scoreLabel').textContent='Score: '+score.label;
-  document.getElementById('scoreDesc').textContent=score.desc;
-  document.getElementById('accountName').textContent=d.name+' · '+fmt(d.followers)+' seguidores';
-
-  document.getElementById('kpiMain').innerHTML=[
-    {lbl:'Seguidores',icon:'ti-users',val:fmt(d.followers),d:'',up:undefined},
-    {lbl:'Seguindo',icon:'ti-user-check',val:fmt(d.following),d:'',up:undefined},
-    {lbl:'Publicações',icon:'ti-photo',val:fmt(d.mediaCount||d.posts||0),d:'',up:undefined},
-    {lbl:'Taxa de eng.',icon:'ti-heart',val:d.engRate.toFixed(1)+'%',d:d.engRate>=5?'acima da média':'abaixo da média',up:d.engRate>=5},
-    {lbl:'Alcance (30d)',icon:'ti-eye',val:fmt(d.reach),d:'',up:undefined},
-    {lbl:'Impressões (30d)',icon:'ti-chart-bar',val:fmt(d.impressions),d:'',up:undefined},
-  ].map(k=>kpiHTML(k)).join('');
-
-  document.getElementById('kpiConv').innerHTML=[
-    {lbl:'Cliques no link',icon:'ti-link',val:fmt(d.linkClicks),d:'',up:undefined,hl:true},
-    {lbl:'Visitas ao perfil',icon:'ti-user-circle',val:fmt(d.profileViews),d:'',up:undefined,hl:true},
-    {lbl:'Curtidas (total)',icon:'ti-thumb-up',val:fmt(d.likes),d:'',up:undefined,hl2:true},
-    {lbl:'Comentários',icon:'ti-message',val:fmt(d.comments),d:'',up:undefined},
-    {lbl:'Saves',icon:'ti-bookmark',val:fmt(d.saves),d:'',up:undefined},
-    {lbl:'CTR do perfil',icon:'ti-cursor-text',val:d.profileViews>0?Math.round(d.linkClicks/d.profileViews*100)+'%':'—',d:'',up:undefined},
-  ].map(k=>kpiHTML(k)).join('');
-
-  // Gráficos
-  dc('followers');
-  charts.followers=new Chart(document.getElementById('cFollowers'),{type:'line',data:{labels:d.growth.map((_,i)=>'S'+(i+1)),datasets:[{data:d.growth,borderColor:'#185FA5',backgroundColor:'#185FA522',fill:true,tension:.4,pointRadius:3,borderWidth:2,pointBackgroundColor:'#fff',pointBorderColor:'#185FA5',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-
-  const ec=[d.likes,d.comments,d.saves,d.shares];
-  const ecl=['#185FA5','#D4537E','#3B6D11','#BA7517'],ell=['Curtidas','Coment.','Saves','Compart.'];
-  document.getElementById('engLegend').innerHTML=ell.map((l,i)=>`<span><span class="lsq" style="background:${ecl[i]}"></span>${l} ${fmt(ec[i])}</span>`).join('');
-  dc('eng');
-  charts.eng=new Chart(document.getElementById('cEng'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-
-  dc('reach');
-  charts.reach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:getLbls(period),datasets:[{label:'Alcance',data:sliceSeries(d.reach7,period),backgroundColor:'#1D9E7566',borderColor:'#1D9E75',borderWidth:1.5,borderRadius:4},{label:'Impressões',data:sliceSeries(d.imp7,period),backgroundColor:'#185FA533',borderColor:'#185FA5',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-
-  dc('reels');
-  charts.reels=new Chart(document.getElementById('cReels'),{type:'line',data:{labels:getLbls(period),datasets:[{label:'Reels',data:sliceSeries(d.reels,period),borderColor:'#BA7517',backgroundColor:'#BA751722',fill:true,tension:.4,borderWidth:2,pointRadius:3},{label:'Stories',data:sliceSeries(d.stories,period),borderColor:'#534AB7',backgroundColor:'#534AB722',fill:true,tension:.4,borderWidth:2,pointRadius:3,borderDash:[5,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-}
-
-function renderPosts(d){
-  const tipos={IMAGE:'Foto',VIDEO:'Vídeo',REEL:'Reel',CAROUSEL_ALBUM:'Carrossel'};
-  const cores={IMAGE:['#EAF3DE','#27500A'],VIDEO:['#FAEEDA','#633806'],REEL:['#FAEEDA','#633806'],CAROUSEL_ALBUM:['#E6F1FB','#0C447C']};
-  const posts=d.posts||DEMO.posts;
-  document.getElementById('postsTable').innerHTML=`<table class="atbl"><thead><tr><th>#</th><th>Publicação</th><th>Tipo</th><th>Alcance</th><th>Curtidas</th><th>Coment.</th><th>Saves</th><th>Eng.%</th></tr></thead><tbody>${posts.map((p,i)=>{
-    const eng=p.reach>0?((p.likes+p.comments+p.saves)/p.reach*100).toFixed(1):'—';
-    const c=cores[p.type]||cores.IMAGE;
-    return`<tr><td style="color:var(--text3)">${i+1}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</td><td><span class="chip" style="background:${c[0]};color:${c[1]}">${tipos[p.type]||p.type}</span></td><td>${fmt(p.reach)}</td><td style="font-weight:500">${fmt(p.likes)}</td><td>${fmt(p.comments)}</td><td>${fmt(p.saves)}</td><td style="font-weight:500;color:${parseFloat(eng)>3?'var(--green)':'var(--amber)'}">${eng}%</td></tr>`;
-  }).join('')}</tbody></table>`;
-
-  // Formatos
-  const fmtMap={};
-  posts.forEach(p=>{const t=tipos[p.type]||p.type;if(!fmtMap[t])fmtMap[t]={n:0,likes:0,reach:0};fmtMap[t].n++;fmtMap[t].likes+=p.likes;fmtMap[t].reach+=p.reach;});
-  const fmtColors={'Reel':'#BA7517','Foto':'#3B6D11','Carrossel':'#185FA5','Vídeo':'#534AB7'};
-  document.getElementById('formatList').innerHTML=Object.entries(fmtMap).map(([t,v])=>`<div class="row"><div class="row-icon" style="background:${fmtColors[t]||'#888'}18;color:${fmtColors[t]||'#888'}"><i class="ti ti-${t==='Reel'?'player-play':t==='Carrossel'?'layout-grid':'photo'}"></i></div><div style="flex:1"><div style="font-size:12px;font-weight:500">${t} · ${v.n} posts</div><div style="font-size:11px;color:var(--text3)">${fmt(v.reach)} alcance total</div></div><span style="font-size:13px;font-weight:500;color:${fmtColors[t]||'#888'}">${fmt(v.likes)} ❤</span></div>`).join('');
-
-  dc('hours');
-  charts.hours=new Chart(document.getElementById('cHours'),{type:'bar',data:{labels:Array.from({length:24},(_,i)=>i+'h'),datasets:[{data:d.hours||DEMO.hours,backgroundColor:(d.hours||DEMO.hours).map(h=>h>30?'#BA7517':h>15?'#FAC775':'#FAEEDA'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:0,callback:function(v,i){return i%4===0?this.getLabelForValue(v):''}}},y:{ticks:{font:{size:10}}}}}});
-}
-
-function renderAudiencia(d){
-  const gender=d.gender||DEMO.gender;
-  const age=d.age||DEMO.age;
-  const cities=d.cities||DEMO.cities;
-  document.getElementById('genderList').innerHTML=gender.map(g=>`<div class="aud-row"><span class="aud-lbl">${g.label}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${g.pct}%;background:${g.cor}"></div></div><span class="aud-val">${g.pct}%</span></div>`).join('');
-  dc('gender');
-  charts.gender=new Chart(document.getElementById('cGender'),{type:'doughnut',data:{labels:gender.map(g=>g.label),datasets:[{data:gender.map(g=>g.pct),backgroundColor:gender.map(g=>g.cor),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-
-  const ac=['#185FA5','#534AB7','#1D9E75','#BA7517','#888780'];
-  document.getElementById('ageList').innerHTML=age.map((g,i)=>`<div class="aud-row"><span class="aud-lbl">${g.label}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${g.pct*2}%;background:${ac[i]||'#888'}"></div></div><span class="aud-val">${g.pct}%</span></div>`).join('');
-
-  document.getElementById('locList').innerHTML=cities.map(g=>`<div class="aud-row"><span class="aud-lbl" style="min-width:140px">${g.label}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${g.pct*2}%;background:#1D9E75"></div></div><span class="aud-val">${g.pct}%</span></div>`).join('');
-
-  dc('contentType');
-  charts.contentType=new Chart(document.getElementById('cContentType'),{type:'bar',data:{labels:['Reels','Stories','Feed','Carrossel'],datasets:[{data:[sliceSeries(d.reels||DEMO.reels,period).reduce((a,b)=>a+b,0),sliceSeries(d.stories||DEMO.stories,period).reduce((a,b)=>a+b,0),d.reach||DEMO.reach,d.impressions||DEMO.impressions],backgroundColor:['#BA7517','#534AB7','#185FA5','#1D9E75'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-}
-
-function renderInsights(d){
-  const items=[
-    {label:'Alcance total (30d)',val:fmt(d.reach),icon:'ti-eye',cor:'#185FA5'},
-    {label:'Impressões (30d)',val:fmt(d.impressions),icon:'ti-chart-bar',cor:'#534AB7'},
-    {label:'Visitas ao perfil (30d)',val:fmt(d.profileViews),icon:'ti-user-circle',cor:'#1D9E75'},
-    {label:'Cliques no link (30d)',val:fmt(d.linkClicks),icon:'ti-link',cor:'#BA7517'},
-    {label:'Taxa de engajamento',val:d.engRate.toFixed(2)+'%',icon:'ti-heart',cor:'#D4537E'},
-    {label:'Total de seguidores',val:fmt(d.followers),icon:'ti-users',cor:'#3B6D11'},
-  ];
-  document.getElementById('insightsList').innerHTML=items.map(x=>`<div class="row"><span class="row-lbl"><span class="row-icon" style="background:${x.cor}18;color:${x.cor}"><i class="ti ${x.icon}"></i></span>${x.label}</span><span style="font-size:15px;font-weight:500;color:${x.cor}">${x.val}</span></div>`).join('');
-
-  dc('linkClicks');
-  charts.linkClicks=new Chart(document.getElementById('cLinkClicks'),{type:'line',data:{labels:getLbls(period),datasets:[{label:'Cliques no link',data:sliceSeries(d.linkClicks7||DEMO.linkClicks7,period),borderColor:'#185FA5',backgroundColor:'#185FA522',fill:true,tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:'#185FA5',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-}
-
-function renderDiag(d){
-  const diags=gerarDiagnosticos(d);
-  document.getElementById('diagList').innerHTML=diags.map(dg=>`<div class="insight-row" style="background:${dg.bg};border-left-color:${dg.cor};margin-bottom:10px"><i class="ti ${dg.icon}" style="color:${dg.cor};font-size:17px;flex-shrink:0;margin-top:1px"></i><div class="ins-text"><strong style="color:${dg.cor}">${dg.prob}</strong><br>${dg.acao}</div></div>`).join('');
-}
-
-function calcScore(d){
-  let s=50;
-  if(d.engRate>=7)s+=20;else if(d.engRate>=5)s+=15;else if(d.engRate>=3)s+=8;
-  if(d.reach>=50000)s+=15;else if(d.reach>=20000)s+=10;else if(d.reach>=5000)s+=5;
-  if(d.linkClicks>=1000)s+=10;else if(d.linkClicks>=300)s+=5;
-  if(d.followers>=10000)s+=5;
-  s=Math.min(s,100);
-  const label=s>=90?'excepcional':s>=75?'muito bom':s>=60?'bom':s>=45?'precisa atenção':'urgente';
-  const desc=s>=75?'Crescimento saudável e engajamento acima da média':s>=60?'Resultados consistentes, há espaço para melhorar':s>=45?'Algumas métricas precisam de atenção':'Ação imediata necessária';
-  return{val:s,label,desc};
-}
-
-function gerarDiagnosticos(d){
+  // Diagnóstico
   const diags=[];
-  if(d.engRate<3)diags.push({prob:'Taxa de engajamento abaixo de 3%',icon:'ti-alert-triangle',cor:'#A32D2D',bg:'#FCEBEB',acao:'<strong>Causa:</strong> Posts sem CTA ou base inflada. <strong>Ação:</strong> Criar conteúdo que peça interação direta — enquetes nos Stories, perguntas nas legendas, carrosséis com deslize incentivado.'});
-  else if(d.engRate>=6)diags.push({prob:'Engajamento acima de 6% — acima da média!',icon:'ti-star',cor:'#3B6D11',bg:'#EAF3DE',acao:'<strong>Parabéns!</strong> Sua audiência está altamente engajada. Aproveite para lançar ofertas — público engajado converte mais.'});
-  if(d.linkClicks<500&&d.profileViews>2000)diags.push({prob:'Muitas visitas ao perfil mas poucos cliques no link',icon:'ti-link',cor:'#BA7517',bg:'#FAEEDA',acao:'<strong>Causa:</strong> A bio não está convertendo. <strong>Ação:</strong> Reescrever a bio com uma promessa clara e CTA direto. Usar Stories com link sticker todo dia.'});
-  if(d.reach>0&&d.followers>0&&d.reach/d.followers<0.3)diags.push({prob:'Alcance abaixo de 30% da base de seguidores',icon:'ti-trending-down',cor:'#A32D2D',bg:'#FCEBEB',acao:'<strong>Causa:</strong> Algoritmo limitando distribuição. <strong>Ação:</strong> Publicar com mais consistência (mínimo 4x/semana), usar Reels que é o formato com maior alcance orgânico.'});
-  if(d.profileViews>0&&d.linkClicks/d.profileViews<0.1)diags.push({prob:'CTR do perfil abaixo de 10%',icon:'ti-cursor-text',cor:'#BA7517',bg:'#FAEEDA',acao:'<strong>Causa:</strong> O perfil não está convencendo. <strong>Ação:</strong> Revisar foto de perfil, bio e os 3 primeiros posts fixados — eles são vistos por quase todos os visitantes.'});
-  if(diags.length===0)diags.push({prob:'Perfil com bom desempenho geral',icon:'ti-circle-check',cor:'#3B6D11',bg:'#EAF3DE',acao:'Suas métricas estão saudáveis. Continue monitorando semanalmente e foque em converter o engajamento em vendas usando links estratégicos nos Stories e na bio.'});
-  return diags;
+  if(!ctrOk)diags.push({icon:'ti-link-off',c:'#8B1E1E',bg:'#F5DADA',title:'Bio não converte visitantes em leads',desc:`CTR atual: ${ctr.toFixed(1)}%. O benchmark para ${P.seg} padrão é ${b.ctr.min}–${b.ctr.ref}%. O visitante chega, vê o conteúdo e sai sem agir.`,next:'Reescrever a bio com promessa específica + link com CTA claro. Ex: "Ver imóveis disponíveis acima de R$'+P.ticket+'k →"'});
+  if(!engOk)diags.push({icon:'ti-heart-off',c:'#7A4F0D',bg:'#F5E6CC',title:'Engajamento abaixo do esperado',desc:`Taxa atual: ${IG.engRate}%. O conteúdo não está gerando identificação com o público comprador. Especificações técnicas engajam menos que lifestyle e prova social.`,next:'Substituir 2 posts técnicos por semana por conteúdo de lifestyle: "Como é a rotina neste bairro?" converte mais.'});
+  if(!leadsOk)diags.push({icon:'ti-user-x',c:'#7A4F0D',bg:'#F5E6CC',title:'Volume de leads abaixo da meta',desc:`${P.leads} leads/mês. Para atingir a meta de ${P.meta} leads, falta ${P.meta-P.leads} leads. A taxa de conversão do setor é 2,8%.`,next:'Aumentar verba em tráfego pago ou ativar remarketing para quem visitou o perfil mas não clicou no link.'});
+  if(P.resp>b.resp.ok*2)diags.push({icon:'ti-clock-off',c:'#8B1E1E',bg:'#F5DADA',title:'Velocidade de resposta prejudica conversão',desc:`Resposta em ${P.resp} min. O comprador de alto padrão avalia múltiplos imóveis simultaneamente. Cada 10 min a mais reduz a conversão em até 7%.`,next:'Implementar resposta automática no WhatsApp Business com qualificação inicial antes de passar ao corretor.'});
+  if(diags.length===0)diags.push({icon:'ti-circle-check',c:'#1E6B45',bg:'#D6EDDF',title:'Métricas saudáveis — foco em escalar',desc:'O funil está funcionando bem. Momento ideal para aumentar o volume com tráfego pago.',next:'Transformar os posts com maior CTR em anúncios. Conteúdo orgânico que já performa tem CPL 40% menor quando impulsionado.'});
+
+  document.getElementById('diagEl').innerHTML=diags.map(d=>`<div class="diag" style="background:${d.bg};border-left-color:${d.c}"><i class="ti ${d.icon} diag-icon" style="color:${d.c}"></i><div><div class="diag-title" style="color:${d.c}">${d.title}</div><div class="diag-desc">${d.desc}</div><span class="diag-next" style="background:${d.c}18;color:${d.c}">→ ${d.next}</span></div></div>`).join('');
+
+  // 4 métricas
+  document.getElementById('quatroKpis').innerHTML=[
+    {l:'Volume de leads/mês',v:fmt(P.leads),s:leadsOk?'ok':'bad'},
+    {l:'Qualidade (eng. rate)',v:IG.engRate.toFixed(1)+'%',s:engOk?'ok':'warn'},
+    {l:'CTR (conversão perfil→lead)',v:ctr.toFixed(1)+'%',s:ctrOk?'ok':'bad'},
+    {l:'Velocidade entrega (WPP)',v:P.resp+'min',s:respOk?'ok':'warn'},
+  ].map(x=>{const c={ok:'#1E6B45',warn:'#7A4F0D',bad:'#8B1E1E'}[x.s];return`<div class="row"><span class="row-lbl">${x.l}</span><span style="font-weight:500;color:${c}">${x.v}</span></div>`;}).join('');
+
+  // Ação
+  const prio=diags[0];
+  document.getElementById('acaoSemana').innerHTML=`<div class="diag" style="background:${prio.bg};border-left-color:${prio.c}"><i class="ti ${prio.icon} diag-icon" style="color:${prio.c}"></i><div><div class="diag-title" style="color:${prio.c}">${prio.title}</div><div class="diag-desc" style="margin-top:6px"><strong style="color:${prio.c}">Próximo passo:</strong> ${prio.next}</div></div></div>`;
 }
 
-function renderizarTudo(d){
-  renderVisao(d);renderPosts(d);renderAudiencia(d);renderInsights(d);renderDiag(d);
+// ── FUNIL ─────────────────────────────────────────────────────────────────
+function rFunil(){
+  const steps=[
+    {n:1,l:'Alcance no Instagram',sub:'pessoas que viram o conteúdo',v:IG.reach,pct:100},
+    {n:2,l:'Visitaram o perfil',sub:'clicaram para saber mais',v:IG.profileViews,pct:Math.round(IG.profileViews/IG.reach*100)},
+    {n:3,l:'Clicaram no link da bio',sub:'demonstraram intenção',v:IG.linkClicks,pct:Math.round(IG.linkClicks/IG.profileViews*100)},
+    {n:4,l:'Lead no WhatsApp ✓',sub:'entrou em contato — sua entrega',v:P.leads,pct:Math.round(P.leads/IG.linkClicks*100)},
+  ];
+  document.getElementById('funnelEl').innerHTML=steps.map((s,i)=>{
+    const prev=i>0?steps[i-1].v:null;
+    const loss=prev?100-Math.round(s.v/prev*100):0;
+    const bs=s.pct>=15?'b-ok':s.pct>=6?'b-warn':'b-bad';
+    return`<div class="fstep" style="${i===3?'border-color:#B8925A;background:#F5EBD9':''}"><div class="fstep-n">${s.n}</div><div class="fstep-body"><div class="fstep-label">${s.l}</div><div class="fstep-sub">${s.sub}${prev?` · ${loss}% não avançou`:''}</div></div><div class="fstep-val">${fmt(s.v)}</div><div class="fstep-pct">${s.pct}%</div><span class="badge ${bs}">${s.pct>=15?'✓':s.pct>=6?'⚠':'↓'}</span></div>`;
+  }).join('');
+
+  // Gargalo
+  const taxas=[
+    {l:'Alcance → Perfil',v:Math.round(IG.profileViews/IG.reach*100),ref:10},
+    {l:'Perfil → Link',v:Math.round(IG.linkClicks/IG.profileViews*100),ref:12},
+    {l:'Link → WhatsApp',v:Math.round(P.leads/IG.linkClicks*100),ref:50},
+  ];
+  const pior=taxas.reduce((a,b2)=>b2.v<a.ref?b2:a,taxas[0]);
+  document.getElementById('gargaloEl').innerHTML=`<div class="diag" style="background:#F5E6CC;border-left-color:#7A4F0D;margin-bottom:10px"><i class="ti ti-alert-triangle diag-icon" style="color:#7A4F0D"></i><div><div class="diag-title" style="color:#7A4F0D">Maior perda: "${pior.l}"</div><div class="diag-desc">Taxa atual: ${pior.v}% (referência: ${pior.ref}%). Melhorar esta etapa tem o maior impacto no volume de leads entregues.</div></div></div>`+taxas.map(t=>`<div class="row"><span class="row-lbl">${t.l}</span><span style="font-weight:500;color:${t.v>=t.ref?'#1E6B45':'#8B1E1E'}">${t.v}%</span><span class="badge ${t.v>=t.ref?'b-ok':'b-bad'}" style="font-size:10px;padding:2px 7px;border-radius:8px">${t.v>=t.ref?'ok':'melhorar'}</span></div>`).join('');
+
+  // Velocidade
+  const rs=P.resp<=5?'ok':P.resp<=30?'warn':'bad';
+  const rc={ok:'#1E6B45',warn:'#7A4F0D',bad:'#8B1E1E'}[rs];
+  document.getElementById('velocEl').innerHTML=`<div class="row"><span class="row-lbl"><i class="ti ti-clock" style="color:var(--gold)"></i> Resposta WhatsApp</span><span style="font-weight:500;color:${rc}">${P.resp} min</span></div><div class="row"><span class="row-lbl"><i class="ti ti-phone" style="color:var(--gold)"></i> Lead qualificado entregue</span><span style="font-weight:500">até 24h após contato</span></div><div style="margin-top:12px;padding:10px;background:${rs==='ok'?'#D6EDDF':rs==='warn'?'#F5E6CC':'#F5DADA'};border-radius:var(--r);font-size:11px;color:${rc}">${rs==='ok'?'✓ Velocidade excelente. Mantenha essa disciplina.':rs==='warn'?'⚠ Considere WhatsApp Business automático para garantir resposta instantânea fora do horário.':'⚠ Crítico. Cada hora de atraso perde o lead para o concorrente. Implante resposta automática hoje.'}</div>`;
 }
 
-// ── CONECTAR API ──────────────────────────────────────────────────────────
-async function conectarAPI(){
-  const token=document.getElementById('tokenInput').value.trim();
-  const userId=document.getElementById('userIdInput').value.trim();
-  if(!token||!userId){alert('Preencha o Token de Acesso e o ID da conta!');return;}
-  ACCESS_TOKEN=token;USER_ID=userId;
-  localStorage.setItem('ig_token',token);
-  localStorage.setItem('ig_user_id',userId);
-  await carregarDadosReais();
+// ── CRIATIVOS ─────────────────────────────────────────────────────────────
+function rConteudo(){
+  const tipos={REEL:'Reel',VIDEO:'Vídeo',CAROUSEL:'Carrossel',IMAGE:'Foto'};
+  const tc={REEL:['#F5EBD9','#8A6530'],VIDEO:['#F5E6CC','#7A4F0D'],CAROUSEL:['#E0ECFA','#1B4F8A'],IMAGE:['#D6EDDF','#1E6B45']};
+  document.getElementById('criTbl').innerHTML=`<table class="ptbl"><thead><tr><th>Criativo</th><th>Tipo</th><th>Alcance</th><th>Saves</th><th>CTR</th><th>Resultado</th></tr></thead><tbody>${IG.posts.map(p=>{const c=tc[p.tipo]||['#F1EEE8','#3D3D3A'];const res=p.ctr>=4?'Gera lead':p.ctr>=2?'Gera interesse':'Não converte';const rc=p.ctr>=4?['#D6EDDF','#1E6B45']:p.ctr>=2?['#F5E6CC','#7A4F0D']:['#F5DADA','#8B1E1E'];return`<tr><td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.t}</td><td><span class="pill" style="background:${c[0]};color:${c[1]}">${tipos[p.tipo]||p.tipo}</span></td><td>${fmt(p.reach)}</td><td style="color:#1E6B45;font-weight:500">${fmt(p.saves)}</td><td>${p.ctr.toFixed(1)}%</td><td><span class="pill" style="background:${rc[0]};color:${rc[1]}">${res}</span></td></tr>`;}).join('')}</tbody></table>`;
+
+  // Mix
+  const mix=[
+    {l:'Lifestyle & experiência',atual:32,rec:40,c:'#B8925A'},
+    {l:'Tour em vídeo/Reel',atual:28,rec:30,c:'#1B4F8A'},
+    {l:'Prova social',atual:12,rec:20,c:'#1E6B45'},
+    {l:'Bastidores',atual:18,rec:10,c:'#7A4F0D'},
+    {l:'Especificações técnicas',atual:10,rec:0,c:'#8B1E1E'},
+  ];
+  document.getElementById('mixEl').innerHTML='<div style="font-size:10px;color:var(--ink3);margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;text-transform:uppercase;letter-spacing:.06em"><span>Tipo</span><span style="text-align:right">Atual → Ideal</span></div>'+mix.map(m=>`<div class="row"><span class="row-lbl">${m.l}</span><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--mono);font-size:11px;color:var(--ink3)">${m.atual}%→${m.rec}%</span><div class="mbar"><div class="mbar-fill" style="width:${m.atual}%;background:${m.c}"></div></div></div></div>`).join('');
+
+  // Horários
+  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  document.getElementById('horariosEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Intensidade de audiência por hora</div>'+days.map((d,i)=>`<div class="hm-row"><span class="hm-lbl">${d}</span><div class="hm-cells">${IG.horas.map(v=>{const o=Math.min(v/32,1);return`<div class="hm-cell" style="background:${v>22?`rgba(184,146,90,${Math.max(o,.7)})`:v>12?`rgba(184,146,90,${Math.max(o*.6,.3)})`:v>5?'rgba(184,146,90,.15)':'rgba(184,146,90,.05)'}"></div>`;}).join('')}</div></div>`).join('')+'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ink3);margin-top:4px;padding-left:33px"><span>0h</span><span>8h</span><span>16h</span><span>23h</span></div>';
 }
 
-async function recarregarDados(){
-  if(isConnected)await carregarDadosReais();
-  else{renderizarTudo(DEMO);alert('Conecte sua conta primeiro para atualizar dados reais.');}
+// ── PLANO SEMANAL ─────────────────────────────────────────────────────────
+function rPlano(){
+  const isAlto=P.seg==='alto'||P.seg==='lancamento';
+  document.getElementById('planoEl').innerHTML=[
+    {day:'SEG',title:'Reel de tour',desc:`Explorar 1 ambiente do imóvel com narração. ${isAlto?'Foco em acabamento, pé-direito e vista.':'Foco em funcionalidade e custo-benefício.'} Legenda com pergunta: "Como seria sua manhã aqui?"`,tag:'Lifestyle',c:'#B8925A'},
+    {day:'TER',title:'Stories com link sticker',desc:'Sequência de 4 Stories: localização → área de lazer → detalhe do imóvel → CTA com link sticker para WhatsApp. Medir quantos clicam.',tag:'Conversão',c:'#8B1E1E'},
+    {day:'QUA',title:'Carrossel educativo',desc:`"${isAlto?'3 erros ao comprar imóvel de alto padrão':'O que ninguém te conta sobre financiamento'}". Gera saves e compartilhamentos — aumenta alcance orgânico.`,tag:'Educativo',c:'#1B4F8A'},
+    {day:'QUI',title:'Prova social',desc:'Depoimento em vídeo (60s) ou print de conversa de WhatsApp com permissão. O comprador de alto padrão compra confiança antes de comprar o imóvel.',tag:'Prova social',c:'#1E6B45'},
+    {day:'SEX',title:'Lifestyle do bairro',desc:'Vídeo ou foto mostrando o entorno: comércio, restaurantes, parques, trânsito. "Não é só o imóvel — é onde você vai viver." Ótimo para remarketing.',tag:'Lifestyle',c:'#B8925A'},
+    {day:'SAB',title:'Bastidores',desc:'30s mostrando você ou o time visitando um imóvel, o que observa, dicas de avaliação. Humaniza a marca — diferencial no mercado imobiliário.',tag:'Bastidores',c:'#7A4F0D'},
+    {day:'DOM',title:'Story de relacionamento',desc:'Enquete simples ("Qual sua prioridade: localização ou tamanho?") ou caixinha de perguntas. Ativa o algoritmo e gera dados do público.',tag:'Engajamento',c:'#534AB7'},
+  ].map(p=>`<div class="plano-row"><div class="plano-day">${p.day}</div><div class="plano-body"><div class="plano-title">${p.title}</div><div class="plano-desc">${p.desc}</div><span class="plano-tag" style="background:${p.c}15;color:${p.c}">${p.tag}</span></div></div>`).join('');
+
+  // Script WPP
+  document.getElementById('scriptEl').innerHTML=`<div class="script-box"><div class="script-tag">Primeiro contato — responder em até ${P.resp} min</div><div class="script-text">Olá, [Nome]! 👋<br><br>Vi que você veio pelo Instagram.<br>Para te indicar o melhor imóvel, me ajuda:<br><br>1️⃣ Está buscando para morar ou investir?<br>2️⃣ Qual é o prazo ideal de mudança?<br><br>Assim consigo te mostrar algo realmente alinhado ao que você procura. 🏡</div><div class="script-tip">⚡ Responder em até 5 min aumenta em 78% a chance de agendar visita.</div></div>`;
+
+  // Checklist
+  document.getElementById('checkEl').innerHTML=[
+    {t:'Lead identificado por origem (qual post/anúncio)',s:'Saber o que gerou o lead melhora o conteúdo'},
+    {t:'Perfil qualificado (morar ou investir + prazo)',s:'Lead qualificado converte 3× mais'},
+    {t:'Lead entregue ao corretor com contexto',s:'Passar o que o lead disse na primeira mensagem'},
+    {t:'Confirmação de recebimento pelo corretor',s:'Garantir que nenhum lead se perde na passagem'},
+  ].map(x=>`<div class="check-item"><div class="check-box"></div><div><div class="check-text">${x.t}</div><div class="check-sub">${x.s}</div></div></div>`).join('');
 }
 
-// ── INICIALIZAÇÃO ─────────────────────────────────────────────────────────
-document.querySelectorAll('.nav-item').forEach(btn=>{
+// ── INSTAGRAM ─────────────────────────────────────────────────────────────
+function rInstagram(){
+  document.getElementById('igKpis').innerHTML=[
+    {l:'Seguidores',icon:'ti-users',v:fmt(IG.followers),cls:'gold'},
+    {l:'Engajamento',icon:'ti-heart',v:IG.engRate.toFixed(1)+'%',cls:'green'},
+    {l:'Alcance (30d)',icon:'ti-eye',v:fmt(IG.reach),cls:''},
+    {l:'Impressões',icon:'ti-chart-bar',v:fmt(IG.impressions),cls:''},
+    {l:'Visitas ao perfil',icon:'ti-user-circle',v:fmt(IG.profileViews),cls:''},
+    {l:'Cliques no link',icon:'ti-link',v:fmt(IG.linkClicks),cls:'gold'},
+  ].map(k=>`<div class="kpi"><div class="kpi-stripe ${k.cls}"></div><div class="kpi-lbl"><i class="ti ${k.icon}"></i> ${k.l}</div><div class="kpi-val">${k.v}</div></div>`).join('');
+
+  dc('cGrow');charts.cGrow=new Chart(document.getElementById('cGrow'),{type:'line',data:{labels:['S1','S2','S3','S4','S5','S6','S7'],datasets:[{data:IG.growth,borderColor:'#B8925A',backgroundColor:'#B8925A14',fill:true,tension:.4,pointRadius:4,borderWidth:2,pointBackgroundColor:'#fff',pointBorderColor:'#B8925A',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
+
+  const ec=[IG.likes,IG.comments,IG.saves,IG.shares],ecl=['#B8925A','#1B4F8A','#1E6B45','#8B1E1E'],ell=['Curtidas','Comentários','Saves','Compart.'];
+  document.getElementById('engLeg').innerHTML=ell.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${ecl[i]}"></span>${l} ${fmt(ec[i])}</span>`).join('');
+  dc('cEng');charts.cEng=new Chart(document.getElementById('cEng'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#F9F7F3'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
+
+  dc('cReach');charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{label:'Alcance',data:IG.reach7,backgroundColor:'#1B4F8A55',borderColor:'#1B4F8A',borderWidth:1.5,borderRadius:4},{label:'Impressões',data:IG.imp7,backgroundColor:'#B8925A33',borderColor:'#B8925A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
+
+  dc('cLink');charts.cLink=new Chart(document.getElementById('cLink'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{data:IG.link7,borderColor:'#B8925A',backgroundColor:'#B8925A14',fill:true,tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:'#B8925A',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
+}
+
+// ── AUDIÊNCIA ─────────────────────────────────────────────────────────────
+function rAudiencia(){
+  const ac=['#1B4F8A','#8B1E1E','#B8925A','#1E6B45','#7A4F0D'];
+  document.getElementById('genEl').innerHTML=IG.gender.map(g=>`<div class="aud-row"><span class="aud-lbl">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p}%;background:${g.c}"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
+  dc('cGen');charts.cGen=new Chart(document.getElementById('cGen'),{type:'doughnut',data:{labels:IG.gender.map(g=>g.l),datasets:[{data:IG.gender.map(g=>g.p),backgroundColor:IG.gender.map(g=>g.c),borderWidth:2,borderColor:'#F9F7F3'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
+
+  document.getElementById('ageEl').innerHTML=IG.age.map((g,i)=>`<div class="aud-row"><span class="aud-lbl">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p*2}%;background:${ac[i]}"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
+
+  const fit35=IG.age.filter(a=>a.l==='35–44'||a.l==='45–54').reduce((s,a)=>s+a.p,0);
+  const fitOk=fit35>=45;
+  document.getElementById('ageDiag').innerHTML=`<span style="font-size:11px;color:${fitOk?'#1E6B45':'#7A4F0D'}">${fitOk?'✓':'⚠'} ${fit35}% da audiência está na faixa 35–54 anos — ${fitOk?'ótimo fit com o perfil de comprador de médio/alto padrão.':'abaixo do ideal. Comprador de alto padrão tende a ter 35–55 anos. Revisar o conteúdo para atrair esse perfil.'}</span>`;
+
+  document.getElementById('locEl').innerHTML=IG.cities.map(g=>`<div class="aud-row"><span class="aud-lbl" style="min-width:140px">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p*2}%;background:#B8925A"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
+
+  document.getElementById('fitEl').innerHTML=`<div class="row"><span class="row-lbl">Faixa 35–54 anos</span><span style="font-weight:500;color:${fitOk?'#1E6B45':'#7A4F0D'}">${fit35}%</span></div><div class="row"><span class="row-lbl">Audiência local</span><span style="font-weight:500">${IG.cities[0].p+IG.cities[1].p}%</span></div><div class="row"><span class="row-lbl">Engajamento/seguidor</span><span style="font-weight:500">${IG.engRate.toFixed(1)}%</span></div><div style="margin-top:12px;padding:10px;background:${fitOk?'#D6EDDF':'#F5E6CC'};border-radius:var(--r);font-size:11px;color:${fitOk?'#1E6B45':'#7A4F0D'}">${fitOk?'✓ Audiência com bom fit para o segmento. A base está atraindo o perfil correto de comprador.':'⚠ Audiência com fit parcial. Ajustar conteúdo para atrair faixa etária com maior poder de compra.'}</div>`;
+}
+
+// ── BENCHMARK ─────────────────────────────────────────────────────────────
+function rBenchmark(){
+  const b=B[P.seg]||B.medio;
+  const ctr=(IG.linkClicks/IG.profileViews*100);
+  const rows=[
+    {m:'Leads qualificados/mês',sua:P.leads+'',bench:b.leads.min+'–'+b.leads.ref,ok:P.leads>=b.leads.min},
+    {m:'Taxa de engajamento',sua:IG.engRate.toFixed(1)+'%',bench:b.eng.min+'–'+b.eng.ref+'%',ok:IG.engRate>=b.eng.min},
+    {m:'CTR do perfil',sua:ctr.toFixed(1)+'%',bench:b.ctr.min+'–'+b.ctr.ref+'%',ok:ctr>=b.ctr.min},
+    {m:'Tempo resposta WPP',sua:P.resp+'min',bench:b.resp.ref,ok:P.resp<=b.resp.ok*2},
+    {m:'Seguidores',sua:fmt(IG.followers),bench:'3k–10k',ok:IG.followers>=3000},
+  ];
+  document.getElementById('benchTbl').innerHTML=`<thead><tr><th>Métrica</th><th>Sua performance</th><th>Referência do mercado</th><th>Status</th></tr></thead><tbody>`+rows.map(r=>`<tr><td style="font-weight:500">${r.m}</td><td style="font-family:var(--mono)">${r.sua}</td><td style="color:var(--ink3)">${r.bench}</td><td><span class="pill" style="background:${r.ok?'#D6EDDF':'#F5DADA'};color:${r.ok?'#1E6B45':'#8B1E1E'}">${r.ok?'Acima da média':'Abaixo da média'}</span></td></tr>`).join('')+'</tbody>';
+
+  document.getElementById('bestEl').innerHTML=[
+    {i:'🎬',t:'Publicam mínimo 4 Reels/semana com narração — não só imagens'},
+    {i:'⚡',t:'Respondem WhatsApp em menos de 3 min com qualificação automática'},
+    {i:'⭐',t:'Têm mínimo 6 depoimentos em destaque no perfil'},
+    {i:'🏙️',t:'70% do conteúdo é lifestyle e prova social — não especificações'},
+    {i:'🎯',t:'Usam remarketing para quem visitou o perfil mas não clicou'},
+    {i:'📊',t:'Revisam métricas toda segunda e ajustam o plano da semana'},
+  ].map(x=>`<div class="row"><span class="row-lbl">${x.i} ${x.t}</span></div>`).join('');
+
+  document.getElementById('marcosEl').innerHTML=[
+    {m:`${b.leads.min} leads/mês`,a:P.leads+'',acao:'Volume consistente de conteúdo + tráfego pago'},
+    {m:`CTR ${b.ctr.min}%`,a:ctr.toFixed(1)+'%',acao:'Bio com CTA específico + link otimizado'},
+    {m:`${b.eng.min}% engajamento`,a:IG.engRate.toFixed(1)+'%',acao:'Mix lifestyle + prova social'},
+    {m:'Resposta ≤ 5 min',a:P.resp+'min',acao:'WhatsApp Business automático'},
+  ].map(x=>`<div class="row"><div style="flex:1"><div style="font-size:12px;font-weight:500">${x.m}</div><div style="font-size:11px;color:var(--ink3)">Atual: ${x.a} · ${x.acao}</div></div></div>`).join('');
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────
+const titles={resultado:['Painel de Resultado','O que o Instagram está entregando para o time comercial'],funil:['Funil de Lead','Do conteúdo ao WhatsApp — onde o lead está escapando'],conteudo:['Criativos & Mix','O que converte em lead no imobiliário'],plano:['Plano Semanal','Conteúdo, script e checklist de entrega'],instagram:['Performance Instagram','Métricas do perfil'],audiencia:['Audiência','Quem são seus seguidores e qual o fit com o comprador'],benchmark:['Benchmarks','Sua performance vs. o mercado imobiliário']};
+
+document.querySelectorAll('.sb-item').forEach(btn=>{
   btn.addEventListener('click',function(){
-    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('page-'+this.dataset.page).classList.add('active');
+    document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    this.classList.add('on');
+    const pg=this.dataset.pg;
+    document.getElementById('pg-'+pg).classList.add('on');
+    const t=titles[pg]||['',''];
+    document.getElementById('pgTitle').textContent=t[0];
+    document.getElementById('pgSub').textContent=t[1];
   });
 });
 document.querySelectorAll('.pbtn').forEach(b=>b.addEventListener('click',function(){
-  document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('active'));
-  this.classList.add('active');period=parseInt(this.dataset.p);
-  if(isConnected)carregarDadosReais();else renderizarTudo(DEMO);
+  document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');period=parseInt(this.dataset.p);
 }));
 
-// Verificar token salvo no navegador
-window.addEventListener('load',async()=>{
-  const savedToken=localStorage.getItem('ig_token');
-  const savedUserId=localStorage.getItem('ig_user_id');
-  if(savedToken&&savedUserId){
-    ACCESS_TOKEN=savedToken;USER_ID=savedUserId;
-    document.getElementById('tokenInput').value=savedToken;
-    document.getElementById('userIdInput').value=savedUserId;
-    await carregarDadosReais();
-  }else{
-    setLoading(false);
-    renderizarTudo(DEMO);
-  }
+// ── BOOT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  const saved=localStorage.getItem('si_p');
+  if(saved){P=JSON.parse(saved);ativar();}
 });
 </script>
 </body>
