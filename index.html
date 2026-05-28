@@ -23,8 +23,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
-
-/* ── SETUP ── */
 .setup{position:fixed;inset:0;background:#0C0C0B;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .setup.off{display:none}
 .setup-wrap{max-width:560px;width:100%;padding:44px;background:#141412;border:1px solid rgba(176,125,58,.2);border-radius:20px}
@@ -36,7 +34,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .f-label{font-size:10px;font-weight:600;color:rgba(176,125,58,.8);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
 .f-input{width:100%;background:#1C1C1A;border:1px solid rgba(176,125,58,.18);border-radius:var(--r);padding:12px 14px;color:#fff;font-family:var(--body);font-size:13px;outline:none;margin-bottom:16px}
 .f-input:focus{border-color:var(--gold)}
-.f-input.secret{letter-spacing:.05em}
 .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .f-select{width:100%;background:#1C1C1A;border:1px solid rgba(176,125,58,.18);border-radius:var(--r);padding:12px 14px;color:#fff;font-family:var(--body);font-size:13px;outline:none;margin-bottom:16px;cursor:pointer}
 .f-select option{background:#1C1C1A}
@@ -44,12 +41,8 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .f-btn:hover{background:#C49040}
 .f-note{font-size:11px;color:#454540;line-height:1.7;margin-top:14px}
 .f-api-note{background:rgba(176,125,58,.08);border:1px solid rgba(176,125,58,.15);border-radius:var(--r);padding:12px 14px;font-size:11px;color:rgba(176,125,58,.8);line-height:1.7;margin-bottom:16px}
-
-/* ── APP ── */
 .app{display:flex;min-height:100vh}
 .app.off{display:none}
-
-/* ── SIDEBAR ── */
 .sidebar{width:232px;background:#0F0F0E;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
 .sb-top{padding:26px 20px 22px;border-bottom:.5px solid rgba(255,255,255,.05)}
 .sb-eyebrow{font-size:9px;font-weight:600;color:rgba(176,125,58,.4);text-transform:uppercase;letter-spacing:.18em;margin-bottom:8px}
@@ -68,8 +61,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .sb-foot{margin-top:auto;padding:16px 20px;border-top:.5px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:8px}
 .sb-small-btn{font-size:11px;color:#454540;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:none;font-family:var(--body)}
 .sb-small-btn:hover{color:var(--gold)}
-
-/* ── TOPBAR ── */
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{background:var(--bg);border-bottom:.5px solid var(--line);padding:18px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
 .pg-title{font-family:var(--display);font-size:22px;color:var(--ink);font-weight:500;line-height:1.2}
@@ -81,33 +72,23 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .period-wrap{display:flex;background:var(--sub);border-radius:var(--r);padding:3px;gap:2px}
 .pbtn{font-size:11px;padding:5px 12px;border-radius:8px;border:none;background:transparent;color:var(--ink3);cursor:pointer;font-family:var(--body);transition:all .15s}
 .pbtn.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.1)}
-
-/* ── LOADING ── */
 .loading{position:fixed;inset:0;background:rgba(246,244,240,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 .loading.off{display:none}
 .spinner{width:40px;height:40px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{font-size:13px;color:var(--ink3)}
-
-/* ── ERRO ── */
 .erro-box{background:var(--red-l);border:.5px solid var(--red);border-radius:var(--rl);padding:14px 18px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
 .erro-box.off{display:none}
 .erro-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:3px}
 .erro-desc{font-size:12px;color:var(--ink2);line-height:1.5}
-
-/* ── CONTENT ── */
 .content{padding:28px 32px;flex:1}
 .page{display:none}.page.on{display:block}
-
-/* ── PRÓXIMO PASSO ── */
 .proximo{background:var(--ink);border-radius:var(--rl);padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px}
 .prox-icon{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .prox-icon i{font-size:16px;color:var(--ink)}
 .prox-eyebrow{font-size:9px;font-weight:600;color:rgba(176,125,58,.6);text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px}
 .prox-text{font-size:13px;color:#fff;line-height:1.65}
 .prox-text strong{color:var(--gold)}
-
-/* ── SEMÁFORO ── */
 .semaforo{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
 .sem{background:var(--card);border-radius:var(--rl);padding:16px 18px;border:.5px solid var(--line);display:flex;align-items:center;gap:12px}
 .sem-circle{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
@@ -119,8 +100,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .s-warn .sem-status{color:var(--amber)}
 .s-bad .sem-circle{background:var(--red-l);color:var(--red)}
 .s-bad .sem-status{color:var(--red)}
-
-/* ── KPI ── */
 .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:20px}
 .kpi{background:var(--card);border-radius:var(--rl);padding:18px 20px;border:.5px solid var(--line);position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--line)}
@@ -134,39 +113,30 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .kpi-val{font-family:var(--display);font-size:28px;color:var(--ink);line-height:1}
 .kpi.k-dark .kpi-val{color:var(--gold)}
 .kpi-note{font-size:11px;margin-top:5px;color:var(--ink3)}
-
-/* ── LAYOUT ── */
 .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px}
 .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
 .card{background:var(--card);border-radius:var(--rl);padding:22px 24px;border:.5px solid var(--line);margin-bottom:16px}
 .card:last-child{margin-bottom:0}
 .ct{font-family:var(--display);font-size:17px;color:var(--ink);margin-bottom:5px;display:flex;align-items:center;gap:8px;font-weight:500}
 .ct i{font-size:16px;color:var(--gold)}
 .ct-sub{font-size:11px;color:var(--ink3);margin-bottom:16px;line-height:1.5}
-
-/* ── ROW ── */
 .row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:.5px solid var(--line)}
 .row:last-child{border-bottom:none}
 .row-lbl{font-size:12px;color:var(--ink2);flex:1;min-width:0;line-height:1.4}
 .row-val{font-size:13px;font-weight:600;color:var(--ink)}
 .mbar{width:72px;height:4px;background:var(--sub);border-radius:2px;overflow:hidden;flex-shrink:0}
 .mbar-f{height:4px;border-radius:2px}
-
-/* ── DIAGNÓSTICO ── */
 .diag{border-radius:var(--rl);padding:16px 20px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;border-left:3px solid}
 .diag:last-child{margin-bottom:0}
 .diag i{font-size:20px;flex-shrink:0;margin-top:1px}
 .diag-title{font-size:13px;font-weight:600;margin-bottom:5px;line-height:1.4}
 .diag-desc{font-size:12px;line-height:1.7;color:var(--ink2)}
 .diag-acao{margin-top:9px;padding:8px 12px;background:rgba(0,0,0,.04);border-radius:var(--r);font-size:12px;line-height:1.6}
-
-/* ── BADGE ── */
 .badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;flex-shrink:0}
 .b-ok{background:var(--green-l);color:var(--green)}
 .b-warn{background:var(--amber-l);color:var(--amber)}
 .b-bad{background:var(--red-l);color:var(--red)}
-
-/* ── CHECKLIST ── */
 .chk{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:.5px solid var(--line)}
 .chk:last-child{border-bottom:none}
 .chk-ico{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
@@ -175,81 +145,57 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .c-bad .chk-ico{background:var(--red-l);color:var(--red)}
 .chk-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:2px}
 .chk-desc{font-size:11px;color:var(--ink3);line-height:1.5}
-
-/* ── AUD ── */
 .aud-row{display:flex;align-items:center;gap:10px;padding:7px 0}
 .aud-lbl{font-size:12px;color:var(--ink2);min-width:90px}
 .aud-bar{flex:1;height:6px;background:var(--sub);border-radius:3px;overflow:hidden}
 .aud-fill{height:6px;border-radius:3px}
 .aud-pct{font-size:11px;color:var(--ink3);min-width:32px;text-align:right}
-
-/* ── HEATMAP ── */
 .hm-row{display:flex;align-items:center;gap:4px;margin-bottom:3px}
 .hm-lbl{font-size:10px;color:var(--ink3);min-width:28px}
 .hm-cells{display:flex;gap:2px;flex:1}
 .hm-cell{flex:1;height:14px;border-radius:2px}
-
-/* ── PLANO ── */
 .plano-item{display:flex;gap:14px;padding:13px 0;border-bottom:.5px solid var(--line)}
 .plano-item:last-child{border-bottom:none}
 .plano-dia{font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;min-width:40px;padding-top:2px}
 .plano-titulo{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px}
 .plano-desc{font-size:12px;color:var(--ink2);line-height:1.65}
 .plano-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-top:6px;font-weight:500}
-
-/* ── SCRIPT ── */
 .script-box{background:#0F0F0E;border-radius:var(--r);padding:16px 18px;border:.5px solid rgba(176,125,58,.18)}
 .script-tag{font-size:9px;color:rgba(176,125,58,.55);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
 .script-text{font-size:12px;color:rgba(255,255,255,.82);line-height:2;font-family:var(--body)}
 .script-tip{margin-top:10px;padding-top:10px;border-top:.5px solid rgba(255,255,255,.06);font-size:10px;color:#454540}
-
-/* ── POSTS TABLE ── */
 .ptbl{width:100%;border-collapse:collapse;font-size:12px}
 .ptbl th{font-size:10px;color:var(--ink3);font-weight:600;padding:8px 10px;text-align:left;border-bottom:.5px solid var(--line);text-transform:uppercase;letter-spacing:.06em}
 .ptbl td{padding:10px 10px;border-bottom:.5px solid var(--line);vertical-align:middle}
 .ptbl tr:last-child td{border-bottom:none}
 .ptbl tr:hover td{background:var(--sub)}
 .pill{font-size:10px;padding:3px 8px;border-radius:8px;font-weight:500}
-
-/* ── FOOTER ── */
 .footer{padding:14px 32px;border-top:.5px solid var(--line);font-size:11px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .footer-logo{font-family:var(--display);color:var(--gold);font-size:14px}
-
 @media(max-width:768px){.sidebar{display:none}.content,.topbar{padding:16px}.kgrid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading off" id="loading">
   <div class="spinner"></div>
-  <div class="loading-txt" id="loadingTxt">Conectando à API do Instagram...</div>
+  <div class="loading-txt" id="loadingTxt">Conectando...</div>
 </div>
 
-<!-- SETUP -->
 <div class="setup" id="setup">
 <div class="setup-wrap">
   <div class="setup-logo">Dashboard Social · Imobiliário</div>
   <div class="setup-title">Configure uma vez.<br>O sistema se adapta.</div>
   <div class="setup-sub">Preencha os dados do cliente. O dashboard conecta na conta real do Instagram e entrega o diagnóstico automaticamente.</div>
-
   <div class="f-section">Dados da conta do Instagram</div>
-
-  <div class="f-api-note">
-    <strong>Como obter o Token de Acesso:</strong> acesse developers.facebook.com → seu app → Configuração da API → Gerar tokens de acesso. O token é específico por conta de cliente.
-  </div>
-
+  <div class="f-api-note">Como obter o Token: developers.facebook.com → seu app → Configuração da API → Gerar tokens de acesso.</div>
   <div class="f-label">Nome do cliente / imobiliária</div>
   <input class="f-input" id="s-nome" placeholder="Ex: Imóveis Atlântico Premium">
-
   <div class="f-label">Token de Acesso (Instagram Graph API)</div>
-  <input class="f-input f-secret" id="s-token" type="password" placeholder="Cole o token de acesso aqui">
-
+  <input class="f-input" id="s-token" type="password" placeholder="Cole o token de acesso aqui">
   <div class="f-label">ID da conta do Instagram</div>
   <input class="f-input" id="s-userid" placeholder="Ex: 17841463478285841">
-
   <div class="f-section">Perfil do negócio</div>
-
   <div class="f-row">
     <div>
       <div class="f-label">Segmento</div>
@@ -262,17 +208,16 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
     <div>
       <div class="f-label">Ticket médio</div>
       <select class="f-select" id="s-ticket">
-        <option value="300">R$ 300k – 500k</option>
-        <option value="600" selected>R$ 500k – 1M</option>
-        <option value="1000">R$ 1M – 3M</option>
+        <option value="300">R$ 300k a 500k</option>
+        <option value="600" selected>R$ 500k a 1M</option>
+        <option value="1000">R$ 1M a 3M</option>
         <option value="3000">Acima de R$ 3M</option>
       </select>
     </div>
   </div>
-
   <div class="f-row">
     <div>
-      <div class="f-label">Tempo médio de resposta no DM</div>
+      <div class="f-label">Resposta no DM</div>
       <select class="f-select" id="s-resp">
         <option value="3">Até 5 minutos</option>
         <option value="15" selected>5 a 30 minutos</option>
@@ -281,48 +226,39 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
       </select>
     </div>
     <div>
-      <div class="f-label">Meta de novos seguidores/mês</div>
+      <div class="f-label">Meta seguidores/mês</div>
       <select class="f-select" id="s-meta">
         <option value="100">Até 100</option>
         <option value="300" selected>100 a 500</option>
-        <option value="800">500 a 1.500</option>
-        <option value="2000">Mais de 1.500</option>
+        <option value="800">500 a 1500</option>
+        <option value="2000">Mais de 1500</option>
       </select>
     </div>
   </div>
-
-  <button class="f-btn" onclick="iniciar()">Conectar e abrir dashboard →</button>
-  <div class="f-note">Token e configurações ficam salvos no navegador. Para cada cliente, abra em aba separada e configure com o token e ID da conta desse cliente.</div>
+  <button class="f-btn" onclick="iniciar()">Conectar e abrir dashboard</button>
+  <div class="f-note">Para cada cliente, abra em aba separada e configure com o token e ID da conta desse cliente.</div>
 </div>
 </div>
 
-<!-- APP -->
 <div class="app off" id="app">
 <aside class="sidebar">
   <div class="sb-top">
     <div class="sb-eyebrow">Dashboard Social</div>
     <div class="sb-name">Imobiliário</div>
-    <div class="sb-client">
-      <span class="sb-dot" id="sbDot"></span>
-      <span class="sb-status-txt" id="sbNome">—</span>
-    </div>
+    <div class="sb-client"><span class="sb-dot" id="sbDot"></span><span class="sb-status-txt" id="sbNome">—</span></div>
   </div>
-
   <div class="sb-sec">Visão do cliente</div>
   <button class="sb-btn on" data-pg="resumo"><i class="ti ti-layout-dashboard"></i>Resumo geral</button>
   <button class="sb-btn" data-pg="saude"><i class="ti ti-heartbeat"></i>Saúde do perfil</button>
-  <button class="sb-btn" data-pg="direct"><i class="ti ti-message-circle"></i>Direct & Relacionamento</button>
-
+  <button class="sb-btn" data-pg="direct"><i class="ti ti-message-circle"></i>Direct e Relacionamento</button>
   <div class="sb-sec">Performance</div>
   <button class="sb-btn" data-pg="engajamento"><i class="ti ti-flame"></i>Engajamento real</button>
-  <button class="sb-btn" data-pg="conteudo"><i class="ti ti-photo"></i>Conteúdo & Criativos</button>
+  <button class="sb-btn" data-pg="conteudo"><i class="ti ti-photo"></i>Conteúdo e Criativos</button>
   <button class="sb-btn" data-pg="audiencia"><i class="ti ti-users"></i>Audiência</button>
-
   <div class="sb-sec">Estratégia</div>
   <button class="sb-btn" data-pg="gargalos"><i class="ti ti-stethoscope"></i>Diagnóstico de gargalos</button>
   <button class="sb-btn" data-pg="plano"><i class="ti ti-calendar-week"></i>Plano de ação</button>
   <button class="sb-btn" data-pg="branding"><i class="ti ti-eye"></i>Branding</button>
-
   <div class="sb-foot">
     <button class="sb-small-btn" onclick="recarregar()"><i class="ti ti-refresh" style="font-size:13px"></i> Atualizar dados</button>
     <button class="sb-small-btn" onclick="resetar()"><i class="ti ti-settings" style="font-size:13px"></i> Reconfigurar</button>
@@ -345,264 +281,124 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   </div>
 </div>
 <div class="content">
-
-<!-- ERRO -->
 <div class="erro-box off" id="erroBox">
   <i class="ti ti-alert-circle" style="font-size:18px;color:var(--red);flex-shrink:0;margin-top:1px"></i>
   <div><div class="erro-title" id="erroTitle">Erro</div><div class="erro-desc" id="erroDesc"></div></div>
 </div>
 
-<!-- ═══ RESUMO GERAL ═══ -->
 <div class="page on" id="pg-resumo">
-  <div class="proximo" id="proxResumo">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxResumoTxt">Carregando...</div></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxResumoTxt">Carregando...</div></div></div>
   <div class="semaforo" id="semaforoEl"></div>
   <div class="kgrid" id="kpiResumo"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-trending-up"></i>Crescimento de seguidores</div>
-      <div class="ct-sub">Novos seguidores por dia nos últimos 7 dias</div>
-      <div style="position:relative;height:190px"><canvas id="cGrowth"></canvas></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-compass"></i>De onde vieram os novos seguidores</div>
-      <div class="ct-sub">Cada origem tem um comportamento diferente</div>
-      <div id="origensEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-trending-up"></i>Crescimento de seguidores</div><div class="ct-sub">Novos seguidores por dia nos últimos 7 dias</div><div style="position:relative;height:190px"><canvas id="cGrowth"></canvas></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-compass"></i>De onde vieram os novos seguidores</div><div class="ct-sub">Cada origem tem um comportamento diferente</div><div id="origensEl"></div></div>
   </div>
 </div>
 
-<!-- ═══ SAÚDE DO PERFIL ═══ -->
 <div class="page" id="pg-saude">
-  <div class="proximo" id="proxSaude">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxSaudeTxt">—</div></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-user-circle"></i>O perfil como vitrine</div>
-    <div class="ct-sub">O que acontece quando alguém visita o perfil pela primeira vez</div>
-    <div id="vitrineEl"></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxSaudeTxt">—</div></div></div>
+  <div class="card"><div class="ct"><i class="ti ti-user-circle"></i>O perfil como vitrine</div><div class="ct-sub">O que acontece quando alguém visita o perfil pela primeira vez</div><div id="vitrineEl"></div></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-bookmark"></i>Destaques (Highlights)</div>
-      <div class="ct-sub">Qual destaque as pessoas mais acessam</div>
-      <div id="highlightsEl"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-calendar-stats"></i>Consistência de publicação</div>
-      <div class="ct-sub">Regularidade constrói autoridade no mercado imobiliário</div>
-      <div id="consistenciaEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-bookmark"></i>Destaques</div><div class="ct-sub">Qual destaque as pessoas mais acessam</div><div id="highlightsEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-calendar-stats"></i>Consistência de publicação</div><div class="ct-sub">Regularidade constrói autoridade no mercado imobiliário</div><div id="consistenciaEl"></div></div>
   </div>
 </div>
 
-<!-- ═══ DIRECT ═══ -->
 <div class="page" id="pg-direct">
-  <div class="proximo" id="proxDirect">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxDirectTxt">—</div></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxDirectTxt">—</div></div></div>
   <div class="kgrid" id="kpiDirect"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-clock"></i>Velocidade de resposta no Direct</div>
-      <div class="ct-sub">No imobiliário, quem responde primeiro tem vantagem real</div>
-      <div id="velocDirectEl"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-messages"></i>De onde vieram as mensagens</div>
-      <div class="ct-sub">Cada origem indica um nível de interesse diferente</div>
-      <div id="origemDmEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Velocidade de resposta no Direct</div><div class="ct-sub">No imobiliário, quem responde primeiro tem vantagem real</div><div id="velocDirectEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-messages"></i>De onde vieram as mensagens</div><div class="ct-sub">Cada origem indica um nível de interesse diferente</div><div id="origemDmEl"></div></div>
   </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-message-2-heart"></i>Comentários com intenção de compra</div>
-    <div class="ct-sub">"Tem disponível?" e "qual o valor?" são leads — precisam de resposta em até 10 minutos</div>
-    <div id="comentIntencaoEl"></div>
-  </div>
+  <div class="card"><div class="ct"><i class="ti ti-message-2-heart"></i>Comentários com intenção de compra</div><div class="ct-sub">Perguntas nos comentários são leads — precisam de resposta em até 10 minutos</div><div id="comentIntencaoEl"></div></div>
 </div>
 
-<!-- ═══ ENGAJAMENTO ═══ -->
 <div class="page" id="pg-engajamento">
-  <div class="proximo" id="proxEng">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxEngTxt">—</div></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxEngTxt">—</div></div></div>
   <div class="kgrid" id="kpiEng"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-chart-pie"></i>Engajamento por tipo</div>
-      <div class="ct-sub">Saves e compartilhamentos valem mais que curtidas no imobiliário</div>
-      <div id="engLegEl" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--ink3)"></div>
-      <div style="position:relative;height:180px"><canvas id="cEngPizza"></canvas></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-bookmark"></i>Saves — sinal de intenção real</div>
-      <div class="ct-sub">"Salvei para mostrar para minha esposa/marido" — é assim que o save funciona no imobiliário</div>
-      <div style="position:relative;height:200px"><canvas id="cSaves"></canvas></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-pie"></i>Engajamento por tipo</div><div class="ct-sub">Saves e compartilhamentos valem mais que curtidas no imobiliário</div><div id="engLegEl" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--ink3)"></div><div style="position:relative;height:180px"><canvas id="cEngPizza"></canvas></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-bookmark"></i>Saves — sinal de intenção real</div><div class="ct-sub">Saves indicam que alguém quer mostrar o imóvel para outra pessoa</div><div style="position:relative;height:200px"><canvas id="cSaves"></canvas></div></div>
   </div>
   <div class="g2" style="margin-top:0">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-share"></i>Compartilhamentos — indicação orgânica</div>
-      <div class="ct-sub">Cada compartilhamento alcança pessoas fora da sua base sem custo</div>
-      <div style="position:relative;height:180px"><canvas id="cShares"></canvas></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-eye"></i>Alcance e impressões</div>
-      <div class="ct-sub">Quantas pessoas únicas viram o conteúdo</div>
-      <div style="position:relative;height:180px"><canvas id="cReach"></canvas></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-share"></i>Compartilhamentos</div><div class="ct-sub">Cada compartilhamento alcança pessoas fora da base sem custo</div><div style="position:relative;height:180px"><canvas id="cShares"></canvas></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-eye"></i>Alcance e impressões</div><div class="ct-sub">Quantas pessoas únicas viram o conteúdo</div><div style="position:relative;height:180px"><canvas id="cReach"></canvas></div></div>
   </div>
 </div>
 
-<!-- ═══ CONTEÚDO ═══ -->
 <div class="page" id="pg-conteudo">
-  <div class="proximo" id="proxCont">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxContTxt">—</div></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-photo"></i>Posts — desempenho individual</div>
-    <div class="ct-sub">O que cada publicação gerou de interesse real (saves + compartilhamentos)</div>
-    <div style="overflow-x:auto" id="postsTableEl"></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxContTxt">—</div></div></div>
+  <div class="card"><div class="ct"><i class="ti ti-photo"></i>Posts — desempenho individual</div><div class="ct-sub">O que cada publicação gerou de interesse real</div><div style="overflow-x:auto" id="postsTableEl"></div></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-chart-donut"></i>Mix de conteúdo</div>
-      <div class="ct-sub">O que você tem publicado vs. o que recomendamos para imobiliário</div>
-      <div id="mixEl"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-clock"></i>Melhor horário para publicar</div>
-      <div class="ct-sub">Quando sua audiência está mais ativa</div>
-      <div id="horariosEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-donut"></i>Mix de conteúdo</div><div class="ct-sub">O que você tem publicado vs. o recomendado</div><div id="mixEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Melhor horário para publicar</div><div class="ct-sub">Quando sua audiência está mais ativa</div><div id="horariosEl"></div></div>
   </div>
 </div>
 
-<!-- ═══ AUDIÊNCIA ═══ -->
 <div class="page" id="pg-audiencia">
+  <div class="g4" id="kpiAud"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-calendar"></i>Faixa etária</div>
-      <div class="ct-sub">O comprador de médio/alto padrão tem entre 35 e 55 anos</div>
-      <div id="ageEl"></div>
-      <div id="ageDiagEl" style="margin-top:14px;padding:10px 12px;border-radius:var(--r);font-size:11px;line-height:1.6"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-gender-bigender"></i>Gênero</div>
-      <div id="genEl"></div>
-      <div style="position:relative;height:150px;margin-top:12px"><canvas id="cGen"></canvas></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-calendar"></i>Faixa etária</div><div class="ct-sub">O comprador de médio/alto padrão tem entre 35 e 55 anos</div><div id="ageEl"></div><div id="ageDiagEl" style="margin-top:14px;padding:10px 12px;border-radius:var(--r);font-size:11px;line-height:1.6"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-gender-bigender"></i>Gênero</div><div id="genEl"></div><div style="position:relative;height:150px;margin-top:12px"><canvas id="cGen"></canvas></div></div>
   </div>
   <div class="g2" style="margin-top:0">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-map-pin"></i>Onde estão seus seguidores</div>
-      <div id="locEl"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-user-check"></i>Fit com o perfil do comprador</div>
-      <div class="ct-sub">Sua audiência tem o perfil de quem compra imóvel de médio/alto padrão?</div>
-      <div id="fitEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-map-pin"></i>Onde estão seus seguidores</div><div id="locEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-user-check"></i>Fit com o perfil do comprador</div><div class="ct-sub">Sua audiência tem o perfil de quem compra imóvel?</div><div id="fitEl"></div></div>
   </div>
 </div>
 
-<!-- ═══ DIAGNÓSTICO DE GARGALOS ═══ -->
 <div class="page" id="pg-gargalos">
-  <div class="card">
-    <div class="ct"><i class="ti ti-stethoscope"></i>Diagnóstico completo</div>
-    <div class="ct-sub">Baseado nos dados reais da conta — cada gargalo identificado com a causa e o que resolver</div>
-    <div id="diagCompleto"></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-scale"></i>Performance vs. mercado imobiliário</div>
-    <div class="ct-sub">Sua performance comparada com os benchmarks do segmento</div>
-    <table class="ptbl" id="benchTbl"></table>
-  </div>
+  <div class="card"><div class="ct"><i class="ti ti-stethoscope"></i>Diagnóstico completo</div><div class="ct-sub">Baseado nos dados reais da conta — cada gargalo com causa e solução</div><div id="diagCompleto"></div></div>
+  <div class="card"><div class="ct"><i class="ti ti-scale"></i>Performance vs. mercado imobiliário</div><div class="ct-sub">Sua performance comparada com os benchmarks do segmento</div><div style="overflow-x:auto"><table class="ptbl" id="benchTbl"></table></div></div>
 </div>
 
-<!-- ═══ PLANO DE AÇÃO ═══ -->
 <div class="page" id="pg-plano">
-  <div class="proximo" id="proxPlano">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Ação desta semana</div><div class="prox-text" id="proxPlanoTxt">—</div></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Ação desta semana</div><div class="prox-text" id="proxPlanoTxt">—</div></div></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-calendar-week"></i>Plano de conteúdo semanal</div>
-      <div class="ct-sub" id="planoSubEl">—</div>
-      <div id="planoEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-calendar-week"></i>Plano de conteúdo semanal</div><div class="ct-sub" id="planoSubEl">—</div><div id="planoEl"></div></div>
     <div>
-      <div class="card" style="margin-bottom:12px">
-        <div class="ct"><i class="ti ti-message-2"></i>Script de resposta no Direct</div>
-        <div class="ct-sub">Como responder uma mensagem de interesse — adaptado ao segmento</div>
-        <div id="scriptEl"></div>
-      </div>
-      <div class="card" style="margin-bottom:0">
-        <div class="ct"><i class="ti ti-checklist"></i>Checklist de segunda-feira</div>
-        <div id="checkEl"></div>
-      </div>
+      <div class="card" style="margin-bottom:12px"><div class="ct"><i class="ti ti-message-2"></i>Script de resposta no Direct</div><div class="ct-sub">Como responder uma mensagem de interesse</div><div id="scriptEl"></div></div>
+      <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-checklist"></i>Checklist de segunda-feira</div><div id="checkEl"></div></div>
     </div>
   </div>
 </div>
 
-<!-- ═══ BRANDING ═══ -->
 <div class="page" id="pg-branding">
-  <div class="proximo" id="proxBrand">
-    <div class="prox-icon"><i class="ti ti-arrow-right"></i></div>
-    <div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxBrandTxt">—</div></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-eye"></i>A identidade está fazendo sentido?</div>
-    <div class="ct-sub">O perfil está comunicando o padrão correto para o público certo?</div>
-    <div id="brandingEl"></div>
-  </div>
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxBrandTxt">—</div></div></div>
+  <div class="card"><div class="ct"><i class="ti ti-eye"></i>A identidade está fazendo sentido?</div><div class="ct-sub">O perfil está comunicando o padrão correto para o público certo?</div><div id="brandingEl"></div></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-palette"></i>Identidade visual</div>
-      <div id="identVisualEl"></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct"><i class="ti ti-speakerphone"></i>Linguagem e comunicação</div>
-      <div id="linguagemEl"></div>
-    </div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-palette"></i>Identidade visual</div><div id="identVisualEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-speakerphone"></i>Linguagem e comunicação</div><div id="linguagemEl"></div></div>
   </div>
 </div>
 
-</div><!-- content -->
+</div>
 <footer class="footer">
   <span><span class="footer-logo">Dashboard Social</span> · Imobiliário</span>
   <span id="footerTxt" style="color:var(--ink3)">—</span>
 </footer>
 </div>
-</div><!-- app -->
+</div>
 
 <script>
-// ── ESTADO ────────────────────────────────────────────────────────────────
-let P = {}, D = null, period = 30, isLive = false;
-const charts = {};
+var P = {}, D = null, period = 30, isLive = false;
+var charts = {};
 
-// ── BENCHMARKS IMOBILIÁRIOS ───────────────────────────────────────────────
-const BENCH = {
-  alto:   { eng:{min:3,ref:5},  ctr:{min:8,ref:18},  seg:{min:5000,ref:15000},  saves:{min:200,ref:600},  alcance:{min:0.3,ref:0.6}  },
-  medio:  { eng:{min:4,ref:7},  ctr:{min:10,ref:22}, seg:{min:3000,ref:10000},  saves:{min:300,ref:900},  alcance:{min:0.35,ref:0.65} },
-  lancamento: { eng:{min:5,ref:9}, ctr:{min:12,ref:25}, seg:{min:8000,ref:25000}, saves:{min:500,ref:1500}, alcance:{min:0.4,ref:0.7} }
+var BENCH = {
+  alto: { eng:{min:3,ref:5}, ctr:{min:8,ref:18}, seg:{min:5000,ref:15000}, saves:{min:200,ref:600} },
+  medio: { eng:{min:4,ref:7}, ctr:{min:10,ref:22}, seg:{min:3000,ref:10000}, saves:{min:300,ref:900} },
+  lancamento: { eng:{min:5,ref:9}, ctr:{min:12,ref:25}, seg:{min:8000,ref:25000}, saves:{min:500,ref:1500} }
 };
 
-// ── DADOS DEMO ────────────────────────────────────────────────────────────
-const DEMO = {
+var DEMO = {
   username:'exemplo_imoveis',
   followers:4820, following:308, mediaCount:142,
   engRate:5.8, reach:28400, impressions:71200,
   profileViews:3480, linkClicks:910,
   likes:2140, comments:188, saves:438, shares:112, mentions:24,
-  newFollowers:186, churnFollowers:22,
+  newFollowers:186,
   growth:[140,165,142,188,155,198,186],
   reach7:[3900,4200,3700,4900,4200,5300,4400],
   imp7:[9800,10600,9200,12200,10500,13200,11000],
@@ -611,62 +407,112 @@ const DEMO = {
   link7:[95,110,85,140,100,155,90],
   horas:[1,1,1,1,2,3,4,6,9,14,18,22,20,18,16,14,12,18,26,30,24,16,8,3],
   posts:[
-    {caption:'Tour Reel — Cobertura 180m²',mediaType:'REEL',reach:12400,likes:940,comments:62,saves:264,shares:28,timestamp:'2026-05-20'},
-    {caption:'Lifestyle — manhã no terraço',mediaType:'REEL',reach:9800,likes:720,comments:44,saves:198,shares:22,timestamp:'2026-05-18'},
-    {caption:'Depoimento comprador — 3 meses morando',mediaType:'VIDEO',reach:6100,likes:410,comments:52,saves:88,shares:18,timestamp:'2026-05-15'},
-    {caption:'Tour vídeo — sala integrada 60m²',mediaType:'VIDEO',reach:8200,likes:620,comments:38,saves:182,shares:16,timestamp:'2026-05-12'},
-    {caption:'Carrossel — tudo sobre o bairro',mediaType:'CAROUSEL_ALBUM',reach:5800,likes:380,comments:22,saves:96,shares:24,timestamp:'2026-05-10'},
-    {caption:'Planta 180m² com decoração',mediaType:'CAROUSEL_ALBUM',reach:4600,likes:290,comments:14,saves:74,shares:8,timestamp:'2026-05-08'},
-    {caption:'Foto fachada do empreendimento',mediaType:'IMAGE',reach:3200,likes:180,comments:8,saves:22,shares:4,timestamp:'2026-05-06'},
+    {caption:'Tour Reel — Cobertura 180m2',mediaType:'REEL',reach:12400,likes:940,comments:62,saves:264,shares:28,timestamp:'2026-05-20'},
+    {caption:'Lifestyle — manha no terraco',mediaType:'REEL',reach:9800,likes:720,comments:44,saves:198,shares:22,timestamp:'2026-05-18'},
+    {caption:'Depoimento comprador',mediaType:'VIDEO',reach:6100,likes:410,comments:52,saves:88,shares:18,timestamp:'2026-05-15'},
+    {caption:'Tour video — sala integrada',mediaType:'VIDEO',reach:8200,likes:620,comments:38,saves:182,shares:16,timestamp:'2026-05-12'},
+    {caption:'Carrossel — o bairro',mediaType:'CAROUSEL_ALBUM',reach:5800,likes:380,comments:22,saves:96,shares:24,timestamp:'2026-05-10'},
+    {caption:'Planta com decoracao',mediaType:'CAROUSEL_ALBUM',reach:4600,likes:290,comments:14,saves:74,shares:8,timestamp:'2026-05-08'},
+    {caption:'Foto fachada',mediaType:'IMAGE',reach:3200,likes:180,comments:8,saves:22,shares:4,timestamp:'2026-05-06'}
   ],
   gender:[{l:'Masculino',p:54,c:'#1A3A6E'},{l:'Feminino',p:44,c:'#8C1F1F'},{l:'Outro',p:2,c:'#B07D3A'}],
-  age:[{l:'18–24',p:8},{l:'25–34',p:26},{l:'35–44',p:38},{l:'45–54',p:22},{l:'55+',p:6}],
-  cities:[{l:'São Paulo, SP',p:42},{l:'Campinas, SP',p:12},{l:'Santos, SP',p:8},{l:'Rio de Janeiro',p:7},{l:'Outros',p:31}],
+  age:[{l:'18-24',p:8},{l:'25-34',p:26},{l:'35-44',p:38},{l:'45-54',p:22},{l:'55+',p:6}],
+  cities:[{l:'Sao Paulo, SP',p:42},{l:'Campinas, SP',p:12},{l:'Santos, SP',p:8},{l:'Rio de Janeiro',p:7},{l:'Outros',p:31}]
 };
 
-// ── UTILITÁRIOS ───────────────────────────────────────────────────────────
-function fmt(n){if(n===null||n===undefined||isNaN(n))return'—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(Math.round(n))}
-function dc(k){if(charts[k]){try{charts[k].destroy()}catch(e){}charts[k]=null}}
-function setLoading(on,txt='Carregando dados...'){const el=document.getElementById('loading');document.getElementById('loadingTxt').textContent=txt;el.classList.toggle('off',!on)}
-function setErro(on,title='',desc=''){const el=document.getElementById('erroBox');el.classList.toggle('off',!on);if(on){document.getElementById('erroTitle').textContent=title;document.getElementById('erroDesc').textContent=desc}}
+function fmt(n){
+  if(n===null||n===undefined||isNaN(n))return'—';
+  if(n>=1000000)return(n/1000000).toFixed(1)+'M';
+  if(n>=1000)return(n/1000).toFixed(1)+'k';
+  return String(Math.round(n));
+}
 
-// ── API DO INSTAGRAM ──────────────────────────────────────────────────────
+function dc(k){
+  if(charts[k]){try{charts[k].destroy();}catch(e){} charts[k]=null;}
+}
+
+function setLoading(on,txt){
+  var el=document.getElementById('loading');
+  document.getElementById('loadingTxt').textContent=txt||'Carregando...';
+  if(on){el.classList.remove('off');}else{el.classList.add('off');}
+}
+
+function setErro(on,title,desc){
+  var el=document.getElementById('erroBox');
+  if(on){
+    el.classList.remove('off');
+    document.getElementById('erroTitle').textContent=title||'Erro';
+    document.getElementById('erroDesc').textContent=desc||'';
+  } else {
+    el.classList.add('off');
+  }
+}
+
+function mk(tag,attrs,html){
+  var el='<'+tag;
+  if(attrs){Object.keys(attrs).forEach(function(k){el+=' '+k+'="'+attrs[k]+'"';});}
+  el+='>'+( html||'')+'</'+tag+'>';
+  return el;
+}
+
+function row(lbl,val,note,cor){
+  var v=cor?'<span style="font-weight:600;color:'+cor+'">'+val+'</span>':'<span class="row-val">'+val+'</span>';
+  return '<div class="row"><div class="row-lbl">'+lbl+'</div>'+v+(note?'<span style="font-size:11px;color:var(--ink3)">'+note+'</span>':'')+' </div>';
+}
+
+function chk(status,title,desc){
+  var s=status==='ok'?'c-ok':status==='warn'?'c-warn':'c-bad';
+  var ico=status==='ok'?'&#10003;':status==='warn'?'&#9651;':'&#10007;';
+  return '<div class="chk '+s+'"><div class="chk-ico">'+ico+'</div><div><div class="chk-title">'+title+'</div>'+(desc?'<div class="chk-desc">'+desc+'</div>':'')+'</div></div>';
+}
+
+function kpi(lbl,val,note,cls){
+  return '<div class="kpi '+(cls||'')+'"><div class="kpi-lbl">'+lbl+'</div><div class="kpi-val">'+val+'</div><div class="kpi-note">'+(note||'')+'</div></div>';
+}
+
+function aud(lbl,pct,cor){
+  return '<div class="aud-row"><span class="aud-lbl">'+lbl+'</span><div class="aud-bar"><div class="aud-fill" style="width:'+pct+'%;background:'+(cor||'#B07D3A')+'"></div></div><span class="aud-pct">'+pct+'%</span></div>';
+}
+
+function barRow(lbl,desc,pct,cor){
+  return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+lbl+'</div>'+(desc?'<div style="font-size:11px;color:var(--ink3)">'+desc+'</div>':'')+'</div><div class="mbar"><div class="mbar-f" style="width:'+pct+'%;background:'+(cor||'#B07D3A')+'"></div></div><div class="row-val">'+pct+'%</div></div>';
+}
+
+function prox(id,html){
+  document.getElementById(id).innerHTML=html;
+}
+
 async function fetchAPI(endpoint){
-  const base='https://graph.instagram.com/v21.0';
-  const sep=endpoint.includes('?')?'&':'?';
-  const url=`${base}${endpoint}${sep}access_token=${P.token}`;
-  const r=await fetch(url);
-  const data=await r.json();
+  var base='https://graph.instagram.com/v21.0';
+  var sep=endpoint.indexOf('?')>=0?'&':'?';
+  var url=base+endpoint+sep+'access_token='+P.token;
+  var r=await fetch(url);
+  var data=await r.json();
   if(data.error)throw new Error(data.error.message||'Erro na API');
   return data;
 }
 
 async function carregarAPI(){
-  setLoading(true,'Conectando à conta do Instagram...');
+  setLoading(true,'Conectando a conta do Instagram...');
   setErro(false);
   try{
     setLoading(true,'Buscando dados do perfil...');
-    const profile=await fetchAPI(`/${P.userId}?fields=username,name,followers_count,follows_count,media_count,biography`);
-
-    setLoading(true,'Buscando métricas dos últimos 30 dias...');
-    const since=Math.floor(Date.now()/1000)-86400*28;
-    const until=Math.floor(Date.now()/1000);
-    let insightsData=[];
+    var profile=await fetchAPI('/'+P.userId+'?fields=username,name,followers_count,follows_count,media_count,biography');
+    setLoading(true,'Buscando metricas...');
+    var since=Math.floor(Date.now()/1000)-86400*28;
+    var until=Math.floor(Date.now()/1000);
+    var insightsData=[];
     try{
-      const ins=await fetchAPI(`/${P.userId}/insights?metric=reach,profile_views,website_clicks&period=day&since=${since}&until=${until}`);
+      var ins=await fetchAPI('/'+P.userId+'/insights?metric=reach,profile_views,website_clicks&period=day&since='+since+'&until='+until);
       insightsData=ins.data||[];
-    }catch(e){console.log('Insights parciais:',e.message)}
-
-    setLoading(true,'Buscando publicações recentes...');
-    const media=await fetchAPI(`/${P.userId}/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit=15`);
-
-    setLoading(true,'Buscando dados de audiência...');
-    let audData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
+    }catch(e){console.log('Insights parciais:',e.message);}
+    setLoading(true,'Buscando publicacoes...');
+    var media=await fetchAPI('/'+P.userId+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit=15');
+    var audData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
     try{
-      const aud=await fetchAPI(`/${P.userId}/insights?metric=audience_gender_age,audience_city&period=lifetime`);
-      audData=processarAudiencia(aud.data||[]);
-    }catch(e){console.log('Audiência detalhada indisponível — usando estimativa')}
-
+      var aud2=await fetchAPI('/'+P.userId+'/insights?metric=audience_gender_age,audience_city&period=lifetime');
+      audData=processarAudiencia(aud2.data||[]);
+    }catch(e){console.log('Audiencia indisponivel');}
     D=montarDados(profile,insightsData,media.data||[],audData);
     setConnectedState(profile.username||P.nome);
     setLoading(false);
@@ -680,421 +526,407 @@ async function carregarAPI(){
 }
 
 function processarAudiencia(data){
-  let gender=DEMO.gender,age=DEMO.age,cities=DEMO.cities;
+  var gender=DEMO.gender,age=DEMO.age,cities=DEMO.cities;
   try{
-    const ga=data.find(d=>d.name==='audience_gender_age');
+    var ga=data.find(function(d){return d.name==='audience_gender_age';});
     if(ga&&ga.values&&ga.values[0]){
-      const vals=ga.values[0].value;
-      let f=0,m=0,u=0,total=0;
-      const ageMap={};
-      Object.entries(vals).forEach(([k,v])=>{
-        const[g,a]=k.split('.');
+      var vals=ga.values[0].value;
+      var f=0,m=0,u=0,total=0;
+      var ageMap={};
+      Object.keys(vals).forEach(function(k){
+        var parts=k.split('.');
+        var g=parts[0],a=parts[1];
+        var v=vals[k];
         total+=v;
         if(g==='F')f+=v;else if(g==='M')m+=v;else u+=v;
-        if(!ageMap[a])ageMap[a]=0;ageMap[a]+=v;
+        if(!ageMap[a])ageMap[a]=0;
+        ageMap[a]+=v;
       });
       if(total>0){
         gender=[{l:'Masculino',p:Math.round(m/total*100),c:'#1A3A6E'},{l:'Feminino',p:Math.round(f/total*100),c:'#8C1F1F'},{l:'Outro',p:Math.round(u/total*100),c:'#B07D3A'}];
-        age=Object.entries(ageMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>({l:k,p:Math.round(v/total*100)}));
+        age=Object.keys(ageMap).sort().map(function(k){return{l:k,p:Math.round(ageMap[k]/total*100)};});
       }
     }
-    const cd=data.find(d=>d.name==='audience_city');
+    var cd=data.find(function(d){return d.name==='audience_city';});
     if(cd&&cd.values&&cd.values[0]){
-      const vals=cd.values[0].value;
-      const total=Object.values(vals).reduce((a,b)=>a+b,0);
-      cities=Object.entries(vals).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>({l:k,p:Math.round(v/total*100)}));
+      var cvals=cd.values[0].value;
+      var ctotal=Object.values(cvals).reduce(function(a,b){return a+b;},0);
+      cities=Object.keys(cvals).sort(function(a,b){return cvals[b]-cvals[a];}).slice(0,5).map(function(k){return{l:k,p:Math.round(cvals[k]/ctotal*100)};});
     }
-  }catch(e){console.log('Erro processando audiência:',e)}
-  return{gender,age,cities};
+  }catch(e){console.log('Erro audiencia:',e);}
+  return{gender:gender,age:age,cities:cities};
 }
 
 function montarDados(profile,insights,posts,aud){
-  let reach=0,profileViews=0,linkClicks=0;
-  let reach7=[...DEMO.reach7],imp7=[...DEMO.imp7],link7=[...DEMO.link7];
+  var reach=0,profileViews=0,linkClicks=0;
+  var reach7=DEMO.reach7.slice(),imp7=DEMO.imp7.slice(),link7=DEMO.link7.slice();
   try{
-    const find=name=>insights.find(d=>d.name===name);
-    const sum=d=>d&&d.values?d.values.reduce((a,b)=>a+(b.value||0),0):0;
-    const last7=d=>d&&d.values?d.values.slice(-7).map(v=>v.value||0):null;
-    const rd=find('reach');
-    if(rd){reach=sum(rd);const r7=last7(rd);if(r7){reach7=r7;imp7=r7.map(v=>Math.round(v*2.5));}}
-    const pvd=find('profile_views');if(pvd)profileViews=sum(pvd);
-    const wcd=find('website_clicks');if(wcd){linkClicks=sum(wcd);const l7=last7(wcd);if(l7)link7=l7;}
-  }catch(e){console.log('Erro montando insights:',e)}
-
-  const mediaItems=posts.map(p=>({
-    caption:(p.caption||'').substring(0,50)||'(sem legenda)',
-    mediaType:p.media_type||'IMAGE',
-    timestamp:p.timestamp,
-    reach:p.reach||0,
-    likes:p.like_count||0,
-    comments:p.comments_count||0,
-    saves:p.saved||0,
-    shares:p.shares||0,
-  }));
-
-  const totalLikes=mediaItems.reduce((a,p)=>a+p.likes,0);
-  const totalComments=mediaItems.reduce((a,p)=>a+p.comments,0);
-  const totalSaves=mediaItems.reduce((a,p)=>a+p.saves,0);
-  const totalShares=mediaItems.reduce((a,p)=>a+p.shares,0);
-  const followers=profile.followers_count||DEMO.followers;
-  const engRate=followers>0&&totalLikes>0?parseFloat(((totalLikes+totalComments+totalSaves)/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):DEMO.engRate;
-
+    var find=function(name){return insights.find(function(d){return d.name===name;});};
+    var sum=function(d){return d&&d.values?d.values.reduce(function(a,b){return a+(b.value||0);},0):0;};
+    var last7=function(d){return d&&d.values?d.values.slice(-7).map(function(v){return v.value||0;}):null;};
+    var rd=find('reach');
+    if(rd){reach=sum(rd);var r7=last7(rd);if(r7){reach7=r7;imp7=r7.map(function(v){return Math.round(v*2.5);});}}
+    var pvd=find('profile_views');if(pvd)profileViews=sum(pvd);
+    var wcd=find('website_clicks');if(wcd){linkClicks=sum(wcd);var l7=last7(wcd);if(l7)link7=l7;}
+  }catch(e){console.log('Erro insights:',e);}
+  var mediaItems=posts.map(function(p){
+    return{caption:(p.caption||'').substring(0,50)||'(sem legenda)',mediaType:p.media_type||'IMAGE',timestamp:p.timestamp,reach:p.reach||0,likes:p.like_count||0,comments:p.comments_count||0,saves:p.saved||0,shares:p.shares||0};
+  });
+  var totalLikes=mediaItems.reduce(function(a,p){return a+p.likes;},0);
+  var totalComments=mediaItems.reduce(function(a,p){return a+p.comments;},0);
+  var totalSaves=mediaItems.reduce(function(a,p){return a+p.saves;},0);
+  var totalShares=mediaItems.reduce(function(a,p){return a+p.shares;},0);
+  var followers=profile.followers_count||DEMO.followers;
+  var engRate=followers>0&&totalLikes>0?parseFloat(((totalLikes+totalComments+totalSaves)/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):DEMO.engRate;
   return{
     username:profile.username||P.nome,
-    followers,following:profile.follows_count||DEMO.following,
-    mediaCount:parseInt(profile.media_count)||0,
-    engRate,reach:reach||DEMO.reach,
-    impressions:Math.round((reach||DEMO.reach)*2.5),
-    profileViews:profileViews||DEMO.profileViews,
-    linkClicks:linkClicks||DEMO.linkClicks,
-    likes:totalLikes||DEMO.likes,
-    comments:totalComments||DEMO.comments,
-    saves:totalSaves||DEMO.saves,
-    shares:totalShares||DEMO.shares,
-    mentions:DEMO.mentions,
-    newFollowers:DEMO.newFollowers,
-    growth:DEMO.growth,
-    reach7,imp7,
-    saves7:DEMO.saves7,
-    shares7:DEMO.shares7,
-    link7,
-    horas:DEMO.horas,
+    followers:followers,following:profile.follows_count||DEMO.following,mediaCount:parseInt(profile.media_count)||0,
+    engRate:engRate,reach:reach||DEMO.reach,impressions:Math.round((reach||DEMO.reach)*2.5),
+    profileViews:profileViews||DEMO.profileViews,linkClicks:linkClicks||DEMO.linkClicks,
+    likes:totalLikes||DEMO.likes,comments:totalComments||DEMO.comments,saves:totalSaves||DEMO.saves,shares:totalShares||DEMO.shares,mentions:DEMO.mentions,newFollowers:DEMO.newFollowers,
+    growth:DEMO.growth,reach7:reach7,imp7:imp7,saves7:DEMO.saves7,shares7:DEMO.shares7,link7:link7,horas:DEMO.horas,
     posts:mediaItems.length>0?mediaItems:DEMO.posts,
-    gender:aud.gender,age:aud.age,cities:aud.cities,
+    gender:aud.gender,age:aud.age,cities:aud.cities
   };
 }
 
 function setConnectedState(username){
   isLive=true;
   document.getElementById('sbDot').className='sb-dot live';
-  document.getElementById('sbNome').textContent='@'+username+' · ao vivo';
+  document.getElementById('sbNome').textContent='@'+username+' ao vivo';
   document.getElementById('apiBadge').className='api-badge live';
   document.getElementById('apiBadge').innerHTML='<i class="ti ti-wifi"></i><span>API conectada</span>';
   document.getElementById('footerTxt').textContent='@'+username+' · Instagram Graph API';
 }
 
-// ── SETUP ─────────────────────────────────────────────────────────────────
 async function iniciar(){
-  const nome=document.getElementById('s-nome').value.trim()||'Meu Cliente';
-  const token=document.getElementById('s-token').value.trim();
-  const userId=document.getElementById('s-userid').value.trim();
-  P={nome,token,userId,seg:document.getElementById('s-seg').value,ticket:parseInt(document.getElementById('s-ticket').value),resp:parseInt(document.getElementById('s-resp').value),meta:parseInt(document.getElementById('s-meta').value)};
-  localStorage.setItem('si_imobi_v2',JSON.stringify(P));
+  var nome=document.getElementById('s-nome').value.trim()||'Meu Cliente';
+  var token=document.getElementById('s-token').value.trim();
+  var userId=document.getElementById('s-userid').value.trim();
+  P={nome:nome,token:token,userId:userId,seg:document.getElementById('s-seg').value,ticket:parseInt(document.getElementById('s-ticket').value),resp:parseInt(document.getElementById('s-resp').value),meta:parseInt(document.getElementById('s-meta').value)};
+  localStorage.setItem('si_imobi_v3',JSON.stringify(P));
   document.getElementById('setup').classList.add('off');
   document.getElementById('app').classList.remove('off');
   document.getElementById('sbNome').textContent=nome;
   document.getElementById('sbDot').className='sb-dot demo';
   if(token&&userId){await carregarAPI();}
-  else{D=DEMO;document.getElementById('sbNome').textContent=nome+' · demo';render();}
+  else{D=DEMO;render();}
 }
 
-function resetar(){localStorage.removeItem('si_imobi_v2');document.getElementById('setup').classList.remove('off');document.getElementById('app').classList.add('off')}
+function resetar(){localStorage.removeItem('si_imobi_v3');document.getElementById('setup').classList.remove('off');document.getElementById('app').classList.add('off');}
 async function recarregar(){if(P.token&&P.userId){await carregarAPI();}else{render();}}
 
-// ── RENDER TUDO ───────────────────────────────────────────────────────────
 function render(){rResumo();rSaude();rDirect();rEngajamento();rConteudo();rAudiencia();rGargalos();rPlano();rBranding();}
 
-// ── RESUMO ────────────────────────────────────────────────────────────────
 function rResumo(){
-  const d=D, b=BENCH[P.seg]||BENCH.medio;
-  const ctr=(d.linkClicks/d.profileViews*100);
-  const engOk=d.engRate>=b.eng.min, savesOk=d.saves>=b.saves.min, ctrOk=ctr>=b.ctr.min, respOk=P.resp<=20;
-
-  // Próximo passo principal
-  let proxTxt='';
-  if(!respOk)proxTxt=`O Direct está sendo respondido em <strong>${P.resp} minutos</strong>. Configurar resposta automática reduz esse tempo e não deixa nenhum lead sem resposta.`;
-  else if(!ctrOk)proxTxt=`O CTR do perfil está em <strong>${ctr.toFixed(1)}%</strong>. A bio não está convertendo visitantes. Reescrever com foco no que o comprador busca: região, padrão e próximo passo.`;
-  else if(!savesOk)proxTxt=`Os saves estão em <strong>${fmt(d.saves)}</strong> no mês. Publicar mais conteúdo de lifestyle do bairro e tours com narração — esse tipo de conteúdo é salvo para mostrar a parceiros.`;
-  else proxTxt=`Perfil <strong>saudável</strong>. Manter regularidade de publicação e garantir resposta a todos os comentários com pergunta em até 30 minutos.`;
-  document.getElementById('proxResumoTxt').innerHTML=proxTxt;
-
-  // Semáforo
-  document.getElementById('semaforoEl').innerHTML=[
-    {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudável':'Atenção',desc:d.engRate.toFixed(1)+'% de taxa'},
+  var d=D,b=BENCH[P.seg]||BENCH.medio;
+  var ctr=d.linkClicks/d.profileViews*100;
+  var engOk=d.engRate>=b.eng.min,savesOk=d.saves>=b.saves.min,ctrOk=ctr>=b.ctr.min,respOk=P.resp<=20;
+  var ptxt='';
+  if(!respOk)ptxt='O Direct esta sendo respondido em <strong>'+P.resp+' minutos</strong>. Configurar resposta automatica reduz esse tempo e nao deixa nenhum lead sem resposta.';
+  else if(!ctrOk)ptxt='O CTR do perfil esta em <strong>'+ctr.toFixed(1)+'%</strong>. A bio nao esta convertendo visitantes. Reescrever com foco no que o comprador busca: regiao, padrao e proximo passo.';
+  else if(!savesOk)ptxt='Os saves estao em <strong>'+fmt(d.saves)+'</strong> no mes. Publicar mais conteudo de lifestyle do bairro e tours com narracao.';
+  else ptxt='Perfil <strong>saudavel</strong>. Manter regularidade de publicacao e garantir resposta a todos os comentarios com pergunta em ate 30 minutos.';
+  prox('proxResumoTxt',ptxt);
+  var sems=[
+    {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate.toFixed(1)+'% de taxa'},
     {area:'Direct',icon:'ti-message-circle',s:respOk?'s-ok':'s-warn',label:respOk?'Respondendo bem':'Pode melhorar',desc:'~'+P.resp+' min de resposta'},
-    {area:'Crescimento',icon:'ti-trending-up',s:d.newFollowers>=100?'s-ok':'s-warn',label:d.newFollowers>=100?'Crescendo':'Lento',desc:'+'+fmt(d.newFollowers)+' este mês'},
-    {area:'Conteúdo',icon:'ti-bookmark',s:savesOk?'s-ok':'s-warn',label:savesOk?'Gerando interesse':'Pouco impacto',desc:fmt(d.saves)+' saves este mês'},
-  ].map(s=>`<div class="sem ${s.s}"><div class="sem-circle"><i class="ti ${s.icon}"></i></div><div><div class="sem-label">${s.area}</div><div class="sem-status">${s.label}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">${s.desc}</div></div></div>`).join('');
-
-  // KPIs
-  document.getElementById('kpiResumo').innerHTML=[
-    {l:'Seguidores',v:fmt(d.followers),n:'+'+fmt(d.newFollowers)+' este mês',cls:'k-gold'},
-    {l:'Taxa de engajamento',v:d.engRate.toFixed(1)+'%',n:engOk?'✓ acima do mínimo':'⚠ abaixo do esperado',cls:engOk?'k-green':''},
-    {l:'Alcance (30d)',v:fmt(d.reach),n:'pessoas únicas',cls:'k-blue'},
-    {l:'Saves no mês',v:fmt(d.saves),n:'intenção de compra',cls:'k-dark'},
-    {l:'Compartilhamentos',v:fmt(d.shares),n:'indicação orgânica',cls:''},
-    {l:'Cliques no link',v:fmt(d.linkClicks),n:ctr.toFixed(1)+'% dos visitantes',cls:'k-dark'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-lbl">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-note">${k.n}</div></div>`).join('');
-
-  dc('cGrowth');
-  charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{data:d.growth,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-
-  document.getElementById('origensEl').innerHTML=[
-    {l:'Explorar / Reels',p:44,c:'#B07D3A',d:'Descoberta orgânica — seguidor novo'},
-    {l:'Busca direta',p:22,c:'#1A3A6E',d:'Já te conhecia — mais qualificado'},
-    {l:'Compartilhamento de post',p:18,c:'#1A5C3A',d:'Indicação — seguidor quente'},
-    {l:'Perfil de outro usuário',p:10,c:'#7A5010',d:'Parceiro ou cliente te marcou'},
-    {l:'Outros',p:6,c:'#8C8C85',d:''},
-  ].map(o=>`<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">${o.l}</div><div style="font-size:11px;color:var(--ink3)">${o.d}</div></div><div class="mbar"><div class="mbar-f" style="width:${o.p}%;background:${o.c}"></div></div><div class="row-val">${o.p}%</div></div>`).join('');
-}
-
-// ── SAÚDE ─────────────────────────────────────────────────────────────────
-function rSaude(){
-  const d=D;
-  const ctr=(d.linkClicks/d.profileViews*100), convSeg=(d.newFollowers/d.profileViews*100);
-  const ctrOk=ctr>=8, convOk=convSeg>=3;
-  let pTxt=convOk?`Taxa de conversão do perfil está boa — <strong>${convSeg.toFixed(1)}%</strong> dos visitantes seguem. Manter a bio atualizada com imóveis disponíveis e link ativo.`:`Apenas <strong>${convSeg.toFixed(1)}%</strong> dos visitantes estão seguindo. A bio precisa comunicar mais claramente o que você oferece e para quem.`;
-  document.getElementById('proxSaudeTxt').innerHTML=pTxt;
-
-  document.getElementById('vitrineEl').innerHTML=[
-    {t:'Visitas ao perfil este mês',v:fmt(d.profileViews),ok:d.profileViews>=2000,d:'Pessoas que abriram o perfil para saber mais'},
-    {t:'Taxa visitante → seguidor',v:convSeg.toFixed(1)+'%',ok:convOk,d:'Acima de 3% é saudável para imobiliário'},
-    {t:'Clique no link da bio',v:ctr.toFixed(1)+'%',ok:ctrOk,d:'Acima de 8% indica que a bio está convertendo'},
-    {t:'Menções e marcações',v:fmt(d.mentions)+'/sem',ok:d.mentions>=10,d:'Clientes marcando você — prova social orgânica'},
-  ].map(x=>`<div class="chk ${x.ok?'c-ok':'c-warn'}"><div class="chk-ico">${x.ok?'✓':'⚠'}</div><div><div class="chk-title">${x.t}: <strong>${x.v}</strong></div><div class="chk-desc">${x.d}</div></div></div>`).join('');
-
-  document.getElementById('highlightsEl').innerHTML=[
-    {l:'Imóveis disponíveis',v:1840,p:32},{l:'Depoimentos',v:1160,p:20},
-    {l:'O bairro',v:920,p:16},{l:'Sobre nós',v:696,p:12},{l:'Dicas de compra',v:580,p:10},
-  ].map(h=>`<div class="row"><div class="row-lbl">${h.l}</div><div class="mbar"><div class="mbar-f" style="width:${h.p}%;background:#B07D3A"></div></div><div class="row-val">${fmt(h.v)}</div><div style="font-size:11px;color:var(--ink3);min-width:40px;text-align:right">${h.p}%</div></div>`).join('');
-
-  const dias=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  const semanas=[[1,1,1,0,1,1,0],[1,1,0,1,1,0,1],[1,0,1,1,1,1,0],[1,1,1,0,1,0,1]];
-  document.getElementById('consistenciaEl').innerHTML=`<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Últimas 4 semanas — ● publicou · ○ não publicou</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px"><tr>${dias.map(d=>`<td style="text-align:center;font-size:10px;color:var(--ink3)">${d}</td>`).join('')}</tr>${semanas.map(s=>`<tr>${s.map(v=>`<td style="text-align:center"><div style="width:26px;height:26px;border-radius:50%;background:${v?'#B07D3A':'#E5E2DB'};margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:${v?'#fff':'#8C8C85'}">${v?'●':'○'}</div></td>`).join('')}</tr>`).join('')}</table></div><div style="margin-top:12px;padding:10px 12px;background:var(--green-l);border-radius:var(--r);font-size:11px;color:var(--green)">✓ Publicação regular detectada. Consistência é o principal fator de crescimento orgânico.</div>`;
-}
-
-// ── DIRECT ────────────────────────────────────────────────────────────────
-function rDirect(){
-  const respOk=P.resp<=20, rateOk=true;
-  document.getElementById('proxDirectTxt').innerHTML=!respOk?`Tempo de resposta: <strong>${P.resp} minutos</strong>. Configure uma mensagem automática no Instagram para responder instantaneamente fora do horário comercial.`:`<strong>Direct funcionando bem.</strong> Garantir que comentários com perguntas também sejam respondidos em até 30 minutos — eles são leads disfarçados.`;
-
-  document.getElementById('kpiDirect').innerHTML=[
-    {l:'DMs recebidos/semana',v:'~'+fmt(P.resp<=10?30:P.resp<=30?20:12),n:'volume estimado',cls:''},
-    {l:'Taxa de resposta',v:'89%',n:'✓ bom',cls:'k-green'},
-    {l:'Tempo de resposta',v:P.resp+'min',n:respOk?'✓ aceitável':'⚠ melhorar',cls:respOk?'k-dark':''},
-    {l:'DMs com pergunta de compra',v:'~12/sem',n:'leads no Direct',cls:'k-gold'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-lbl">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-note">${k.n}</div></div>`).join('');
-
-  const faixas=[{l:'Até 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — crítico',ref:999}];
-  document.getElementById('velocDirectEl').innerHTML=faixas.map((f,i)=>{
-    const prev=i>0?faixas[i-1].ref:0;
-    const ativo=P.resp>prev&&P.resp<=f.ref;
-    const c=f.ref<=5?'var(--green)':f.ref<=30?'var(--amber)':'var(--red)';
-    const bg=f.ref<=5?'var(--green-l)':f.ref<=30?'var(--amber-l)':'var(--red-l)';
-    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:${ativo?bg:'var(--sub)'};border:${ativo?'1.5px solid '+c:'.5px solid var(--line)'}"><div style="width:10px;height:10px;border-radius:50%;background:${ativo?c:'var(--line)'}"></div><div style="flex:1;font-size:12px;font-weight:${ativo?600:400};color:${ativo?c:'var(--ink3)'}"> ${f.l}</div>${ativo?`<span class="badge ${f.ref<=5?'b-ok':f.ref<=30?'b-warn':'b-bad'}">${f.ref<=5?'Ideal':f.ref<=30?'Bom':'Melhorar'}</span>`:''}</div>`;
-  }).join('')+`<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrão avalia vários imóveis ao mesmo tempo. A resposta mais rápida tem vantagem real.</div>`;
-
-  document.getElementById('origemDmEl').innerHTML=[
-    {l:'DM após ver Reel ou vídeo',p:45,c:'#B07D3A',d:'Interesse alto — viu o imóvel'},
-    {l:'DM após comentar no post',p:22,c:'#1A3A6E',d:'Interesse médio — já interagiu'},
-    {l:'DM direto pelo perfil',p:18,c:'#1A5C3A',d:'Interesse alto — foi buscar contato'},
-    {l:'DM após Story com sticker',p:10,c:'#7A5010',d:'Resposta ao CTA'},
-    {l:'DM via tráfego pago',p:5,c:'#8C8C85',d:'Lead do gestor de tráfego'},
-  ].map(o=>`<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">${o.l}</div><div style="font-size:11px;color:var(--ink3)">${o.d}</div></div><div class="mbar"><div class="mbar-f" style="width:${o.p}%;background:${o.c}"></div></div><div class="row-val">${o.p}%</div></div>`).join('');
-
-  document.getElementById('comentIntencaoEl').innerHTML=[
-    {t:'"Tem disponível?"',f:8,acao:'Responder e chamar no DM'},
-    {t:'"Qual o valor?"',f:6,acao:'Não dar o preço no comentário — chamar no DM'},
-    {t:'"Fica em qual bairro?"',f:4,acao:'Responder e convidar para ver mais'},
-    {t:'"Quero conhecer"',f:3,acao:'Lead quente — responder em até 10 min'},
-    {t:'Marcação de amigo',f:12,acao:'Agradecer e incluir os dois na conversa'},
-  ].map(c=>`<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">${c.t}</div><div style="font-size:11px;color:var(--ink3)">Ação: ${c.acao}</div></div><div class="row-val">${c.f}×/sem</div><span class="badge b-warn">Lead</span></div>`).join('');
-}
-
-// ── ENGAJAMENTO ───────────────────────────────────────────────────────────
-function rEngajamento(){
-  const d=D, b=BENCH[P.seg]||BENCH.medio;
-  const engOk=d.engRate>=b.eng.min;
-  document.getElementById('proxEngTxt').innerHTML=d.saves<b.saves.min?`Os saves estão em <strong>${fmt(d.saves)}</strong>. Publicar conteúdo de lifestyle do bairro e carrosséis com dicas de compra. Saves acontecem quando o conteúdo tem valor para ser guardado.`:`<strong>Engajamento saudável.</strong> Manter o ritmo de Reels e focar em compartilhamentos — cada compartilhamento alcança pessoas fora da base sem custo.`;
-
-  document.getElementById('kpiEng').innerHTML=[
-    {l:'Taxa de engajamento',v:d.engRate.toFixed(1)+'%',n:engOk?'✓ acima do mínimo':'⚠ abaixo do esperado',cls:engOk?'k-dark':''},
-    {l:'Saves no mês',v:fmt(d.saves),n:'intenção de compra',cls:'k-green'},
-    {l:'Compartilhamentos',v:fmt(d.shares),n:'indicação orgânica',cls:''},
-    {l:'Comentários',v:fmt(d.comments),n:'~12 com pergunta de compra',cls:''},
-    {l:'Menções e marcações',v:fmt(d.mentions)+'/sem',n:'prova social',cls:''},
-    {l:'Alcance (30d)',v:fmt(d.reach),n:'pessoas únicas',cls:'k-blue'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-lbl">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-note">${k.n}</div></div>`).join('');
-
-  const ec=[d.likes,d.comments,d.saves,d.shares,d.mentions];
-  const ecl=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
-  const ell=['Curtidas','Comentários','Saves','Compart.','Menções'];
-  document.getElementById('engLegEl').innerHTML=ell.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${ecl[i]}"></span>${l} ${fmt(ec[i])}</span>`).join('');
-  dc('cEngPizza');charts.cEngPizza=new Chart(document.getElementById('cEngPizza'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
-  dc('cSaves');charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'#1A5C3A18',fill:true,tension:.4,pointRadius:4,borderWidth:2,pointBackgroundColor:'#fff',pointBorderColor:'#1A5C3A',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-  dc('cShares');charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-  dc('cReach');charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'#1A3A6E55',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressões',data:d.imp7,backgroundColor:'#B07D3A33',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}},x:{grid:{display:false}}}}});
-}
-
-// ── CONTEÚDO ──────────────────────────────────────────────────────────────
-function rConteudo(){
-  const d=D;
-  const best=d.posts.reduce((a,b)=>b.saves>a.saves?b:a,d.posts[0]);
-  document.getElementById('proxContTxt').innerHTML=`O post com mais saves foi <strong>"${best.caption}"</strong> (${best.saves} saves). <strong>Criar mais conteúdo neste formato e estilo</strong> — o que gera save é o que mais conecta com o comprador.`;
-
-  const tipos={REEL:'Reel',VIDEO:'Vídeo',CAROUSEL_ALBUM:'Carrossel',IMAGE:'Foto'};
-  const tc={REEL:['#FAF0E0','#7A5520'],VIDEO:['#FAF0D8','#7A5010'],CAROUSEL_ALBUM:['#E0E8FA','#1A3A6E'],IMAGE:['#E0F0E8','#1A5C3A']};
-  document.getElementById('postsTableEl').innerHTML=`<table class="ptbl"><thead><tr><th>Publicação</th><th>Tipo</th><th>Alcance</th><th>Curtidas</th><th>Saves</th><th>Compart.</th><th>Resultado</th></tr></thead><tbody>${d.posts.map(p=>{const c=tc[p.mediaType]||['#EFECE6','#454540'];const s=p.saves>=80?'Ótimo':p.saves>=30?'Bom':'Baixo';const sc=s==='Ótimo'?'b-ok':s==='Bom'?'b-warn':'b-bad';return`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${p.caption}</td><td><span class="pill" style="background:${c[0]};color:${c[1]}">${tipos[p.mediaType]||p.mediaType}</span></td><td>${fmt(p.reach)}</td><td>${fmt(p.likes)}</td><td style="font-weight:600;color:var(--green)">${fmt(p.saves)}</td><td>${fmt(p.shares)}</td><td><span class="badge ${sc}">${s}</span></td></tr>`;}).join('')}</tbody></table>`;
-
-  const mix=[{l:'Tour em vídeo / Reel',a:38,r:35,c:'#B07D3A'},{l:'Lifestyle do bairro',a:20,r:25,c:'#1A5C3A'},{l:'Depoimento de comprador',a:10,r:20,c:'#8C1F1F'},{l:'Educativo (dicas de compra)',a:18,r:12,c:'#1A3A6E'},{l:'Foto estática do imóvel',a:14,r:8,c:'#8C8C85'}];
-  document.getElementById('mixEl').innerHTML=mix.map(m=>`<div class="row"><div class="row-lbl">${m.l}</div><div style="text-align:right;font-size:11px;color:var(--ink3)">atual ${m.a}% → ideal ${m.r}%</div><div class="mbar"><div class="mbar-f" style="width:${m.a}%;background:${m.c}"></div></div></div>`).join('');
-
-  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  document.getElementById('horariosEl').innerHTML=days.map((day)=>`<div class="hm-row"><span class="hm-lbl">${day}</span><div class="hm-cells">${d.horas.map(v=>{const o=Math.min(v/32,1);return`<div class="hm-cell" style="background:${v>22?`rgba(176,125,58,${Math.max(o,.7)})`:v>12?`rgba(176,125,58,${Math.max(o*.5,.25)})`:v>5?'rgba(176,125,58,.12)':'rgba(176,125,58,.04)'}"></div>`;}).join('')}</div></div>`).join('')+'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ink3);margin-top:5px;padding-left:33px"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>';
-}
-
-// ── AUDIÊNCIA ─────────────────────────────────────────────────────────────
-function rAudiencia(){
-  const d=D;
-  const ac=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
-  const fit35=d.age.filter(a=>a.l==='35–44'||a.l==='45–54').reduce((s,a)=>s+a.p,0);
-  const fitOk=fit35>=45;
-
-  document.getElementById('ageEl').innerHTML=d.age.map((g,i)=>`<div class="aud-row"><span class="aud-lbl">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p*2}%;background:${ac[i]}"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
-  document.getElementById('ageDiagEl').innerHTML=`<span style="color:${fitOk?'var(--green)':'var(--amber)'}"><strong>${fitOk?'✓':'⚠'} ${fit35}% da audiência tem 35–54 anos</strong> — ${fitOk?'excelente fit com o perfil de comprador de médio/alto padrão.':'abaixo do ideal. O comprador de alto padrão tende a ter 35–55 anos. Revisar o conteúdo para atrair esse perfil.'}</span>`;
-
-  document.getElementById('genEl').innerHTML=d.gender.map(g=>`<div class="aud-row"><span class="aud-lbl">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p}%;background:${g.c}"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
-  dc('cGen');charts.cGen=new Chart(document.getElementById('cGen'),{type:'doughnut',data:{labels:d.gender.map(g=>g.l),datasets:[{data:d.gender.map(g=>g.p),backgroundColor:d.gender.map(g=>g.c),borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
-
-  document.getElementById('locEl').innerHTML=d.cities.map(g=>`<div class="aud-row"><span class="aud-lbl" style="min-width:140px">${g.l}</span><div class="aud-bar"><div class="aud-fill" style="width:${g.p*2}%;background:#B07D3A"></div></div><span class="aud-pct">${g.p}%</span></div>`).join('');
-
-  document.getElementById('fitEl').innerHTML=[
-    {l:'Faixa etária 35–54 anos',v:fit35+'%',ok:fitOk},
-    {l:'Audiência na região dos imóveis',v:(d.cities[0].p+d.cities[1].p)+'%',ok:true},
-    {l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4},
-    {l:'Saves (intenção de compra)',v:fmt(d.saves)+'/mês',ok:d.saves>=300},
-  ].map(x=>`<div class="row"><div class="row-lbl">${x.l}</div><div class="row-val" style="color:${x.ok?'var(--green)':'var(--amber)'}">${x.v}</div><span class="badge ${x.ok?'b-ok':'b-warn'}">${x.ok?'OK':'Atenção'}</span></div>`).join('')+`<div style="margin-top:12px;padding:10px 12px;background:${fitOk?'var(--green-l)':'var(--amber-l)'};border-radius:var(--r);font-size:11px;color:${fitOk?'var(--green)':'var(--amber)'}"><strong>${fitOk?'✓':'⚠'} ${fitOk?'Boa qualidade de audiência para o segmento imobiliário.':'Audiência com fit parcial. Ajustar linha editorial para atrair faixa com maior poder de compra.'}</strong></div>`;
-}
-
-// ── DIAGNÓSTICO DE GARGALOS ───────────────────────────────────────────────
-function rGargalos(){
-  const d=D, b=BENCH[P.seg]||BENCH.medio;
-  const ctr=(d.linkClicks/d.profileViews*100);
-  const diags=[];
-
-  if(P.resp>30)diags.push({icon:'ti-clock-off',c:'var(--red)',bg:'var(--red-l)',t:`Resposta no Direct demora ${P.resp} minutos`,desc:'No imobiliário de médio/alto padrão, o comprador está avaliando vários imóveis ao mesmo tempo. Cada 10 minutos a mais reduz a chance de conversão em até 7%.',acao:'<strong>O que fazer:</strong> Configurar resposta automática no WhatsApp Business e Instagram com qualificação inicial: "Está buscando para morar ou investir? Qual prazo ideal?" Isso qualifica o lead enquanto o atendimento não está disponível.'});
-
-  if(d.engRate<b.eng.min)diags.push({icon:'ti-heart-off',c:'var(--amber)',bg:'var(--amber-l)',t:`Engajamento abaixo do esperado — ${d.engRate.toFixed(1)}%`,desc:`O benchmark para ${P.seg} padrão é ${b.eng.min}–${b.eng.ref}%. O conteúdo não está gerando identificação com o comprador. Especificações técnicas engajam menos que lifestyle e prova social.`,acao:'<strong>O que fazer:</strong> Substituir 2 posts técnicos por semana por conteúdo de lifestyle. "Como é acordar com essa vista?" converte mais que "Área privativa 180m²". Carrosséis educativos geram saves.'});
-
-  if(ctr<b.ctr.min)diags.push({icon:'ti-link-off',c:'var(--red)',bg:'var(--red-l)',t:`Bio não está convertendo — CTR de ${ctr.toFixed(1)}%`,desc:`O visitante chega ao perfil, vê o conteúdo e sai sem tomar ação. O benchmark é ${b.ctr.min}–${b.ctr.ref}%. A bio precisa de uma promessa clara e um próximo passo específico.`,acao:'<strong>O que fazer:</strong> Reescrever a bio com: o que você oferece + para quem + CTA direto. Exemplo: "Imóveis ${P.seg==='alto'?'de alto padrão':'premium'} em SP • Tour virtual disponível • Clique para ver →"'});
-
-  if(d.saves<b.saves.min)diags.push({icon:'ti-bookmark-off',c:'var(--amber)',bg:'var(--amber-l)',t:`Saves baixos — ${fmt(d.saves)} no mês`,desc:`O save é o indicador mais honesto de intenção de compra no imobiliário. "Salvei para mostrar para minha esposa" — é assim que funciona. Benchmark: ${b.saves.min}–${b.saves.ref} saves/mês.`,acao:'<strong>O que fazer:</strong> Publicar conteúdo que as pessoas querem guardar: tour completo com narração, comparativo de bairros, guia de documentação, dicas de negociação. Esses conteúdos são salvos e compartilhados.'});
-
-  const fit35=d.age.filter(a=>a.l==='35–44'||a.l==='45–54').reduce((s,a)=>s+a.p,0);
-  if(fit35<45)diags.push({icon:'ti-users-minus',c:'var(--amber)',bg:'var(--amber-l)',t:`Audiência com fit parcial — ${fit35}% na faixa 35–54 anos`,desc:'O comprador de médio/alto padrão geralmente tem entre 35 e 55 anos, renda consolidada e família. Se a audiência é muito jovem, o conteúdo está atraindo o perfil errado.',acao:'<strong>O que fazer:</strong> Ajustar a linguagem e os temas para o público 35+. Falar sobre etapas de vida (família crescendo, upgrade de imóvel, investimento seguro) em vez de apenas lifestyle jovem.'});
-
-  if(diags.length===0)diags.push({icon:'ti-circle-check',c:'var(--green)',bg:'var(--green-l)',t:'Nenhum gargalo crítico identificado',desc:'As métricas estão dentro do esperado para o segmento. O foco agora é manter a consistência e escalar o que já está funcionando.',acao:'<strong>Próximo passo:</strong> Identificar os 3 posts com maior engajamento e criar variações do mesmo formato e tema. O que funciona uma vez, tende a funcionar de novo.'});
-
-  document.getElementById('diagCompleto').innerHTML=diags.map(dg=>`<div class="diag" style="background:${dg.bg};border-left-color:${dg.c}"><i class="ti ${dg.icon}" style="color:${dg.c};font-size:20px;flex-shrink:0;margin-top:1px"></i><div><div class="diag-title" style="color:${dg.c}">${dg.t}</div><div class="diag-desc">${dg.desc}</div><div class="diag-acao">${dg.acao}</div></div></div>`).join('');
-
-  // Benchmark table
-  const rows=[
-    {m:'Taxa de engajamento',s:d.engRate.toFixed(1)+'%',b:b.eng.min+'–'+b.eng.ref+'%',ok:d.engRate>=b.eng.min},
-    {m:'CTR do perfil',s:ctr.toFixed(1)+'%',b:b.ctr.min+'–'+b.ctr.ref+'%',ok:ctr>=b.ctr.min},
-    {m:'Saves/mês',s:fmt(d.saves),b:fmt(b.saves.min)+'–'+fmt(b.saves.ref),ok:d.saves>=b.saves.min},
-    {m:'Seguidores',s:fmt(d.followers),b:fmt(b.seg.min)+'–'+fmt(b.seg.ref),ok:d.followers>=b.seg.min},
-    {m:'Tempo de resposta DM',s:P.resp+'min',b:'até 10 min',ok:P.resp<=10},
-    {m:'Faixa etária 35–54',s:fit35+'%',b:'acima de 45%',ok:fit35>=45},
+    {area:'Crescimento',icon:'ti-trending-up',s:d.newFollowers>=100?'s-ok':'s-warn',label:d.newFollowers>=100?'Crescendo':'Lento',desc:'+'+fmt(d.newFollowers)+' este mes'},
+    {area:'Conteudo',icon:'ti-bookmark',s:savesOk?'s-ok':'s-warn',label:savesOk?'Gerando interesse':'Pouco impacto',desc:fmt(d.saves)+' saves este mes'}
   ];
-  document.getElementById('benchTbl').innerHTML=`<thead><tr><th>Métrica</th><th>Você</th><th>Referência do mercado</th><th>Situação</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="font-weight:500">${r.m}</td><td style="font-family:var(--body);font-weight:600">${r.s}</td><td style="color:var(--ink3)">${r.b}</td><td><span class="badge ${r.ok?'b-ok':'b-bad'}">${r.ok?'Dentro do esperado':'Abaixo do esperado'}</span></td></tr>`).join('')}</tbody>`;
+  document.getElementById('semaforoEl').innerHTML=sems.map(function(s){
+    return '<div class="sem '+s.s+'"><div class="sem-circle"><i class="ti '+s.icon+'"></i></div><div><div class="sem-label">'+s.area+'</div><div class="sem-status">'+s.label+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">'+s.desc+'</div></div></div>';
+  }).join('');
+  document.getElementById('kpiResumo').innerHTML=[
+    kpi('Seguidores',fmt(d.followers),'+'+fmt(d.newFollowers)+' este mes','k-gold'),
+    kpi('Engajamento',d.engRate.toFixed(1)+'%',engOk?'acima do minimo':'abaixo do esperado',engOk?'k-green':''),
+    kpi('Alcance 30d',fmt(d.reach),'pessoas unicas','k-blue'),
+    kpi('Saves',fmt(d.saves),'intencao de compra','k-dark'),
+    kpi('Compartilhamentos',fmt(d.shares),'indicacao organica',''),
+    kpi('Cliques no link',fmt(d.linkClicks),ctr.toFixed(1)+'% dos visitantes','k-dark')
+  ].join('');
+  dc('cGrowth');
+  charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.growth,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+  document.getElementById('origensEl').innerHTML=[
+    {l:'Explorar / Reels',p:44,c:'#B07D3A',d:'Descoberta organica — seguidor novo'},
+    {l:'Busca direta',p:22,c:'#1A3A6E',d:'Ja te conhecia — mais qualificado'},
+    {l:'Compartilhamento de post',p:18,c:'#1A5C3A',d:'Indicacao — seguidor quente'},
+    {l:'Perfil de outro usuario',p:10,c:'#7A5010',d:'Parceiro ou cliente te marcou'},
+    {l:'Outros',p:6,c:'#8C8C85',d:''}
+  ].map(function(o){return barRow(o.l,o.d,o.p,o.c);}).join('');
 }
 
-// ── PLANO DE AÇÃO ─────────────────────────────────────────────────────────
+function rSaude(){
+  var d=D;
+  var ctr=d.linkClicks/d.profileViews*100,convSeg=d.newFollowers/d.profileViews*100;
+  var ctrOk=ctr>=8,convOk=convSeg>=3;
+  prox('proxSaudeTxt',convOk?'Taxa de conversao do perfil esta boa — <strong>'+convSeg.toFixed(1)+'%</strong> dos visitantes seguem. Manter a bio atualizada com imoveis disponiveis.':'Apenas <strong>'+convSeg.toFixed(1)+'%</strong> dos visitantes estao seguindo. A bio precisa comunicar mais claramente o que voce oferece e para quem.');
+  document.getElementById('vitrineEl').innerHTML=[
+    chk(d.profileViews>=2000?'ok':'warn','Visitas ao perfil este mes: '+fmt(d.profileViews),'Pessoas que abriram o perfil para saber mais'),
+    chk(convOk?'ok':'warn','Taxa visitante para seguidor: '+convSeg.toFixed(1)+'%','Acima de 3% e saudavel para imobiliario'),
+    chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio esta convertendo'),
+    chk(d.mentions>=10?'ok':'warn','Mencoes e marcacoes: '+fmt(d.mentions)+'/sem','Clientes marcando voce — prova social organica')
+  ].join('');
+  document.getElementById('highlightsEl').innerHTML=[
+    {l:'Imoveis disponiveis',v:1840,p:32},{l:'Depoimentos',v:1160,p:20},
+    {l:'O bairro',v:920,p:16},{l:'Sobre nos',v:696,p:12},{l:'Dicas de compra',v:580,p:10}
+  ].map(function(h){
+    return '<div class="row"><div class="row-lbl">'+h.l+'</div><div class="mbar"><div class="mbar-f" style="width:'+h.p+'%;background:#B07D3A"></div></div><div class="row-val">'+fmt(h.v)+'</div><div style="font-size:11px;color:var(--ink3);min-width:40px;text-align:right">'+h.p+'%</div></div>';
+  }).join('');
+  var dias=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+  var semanas=[[1,1,1,0,1,1,0],[1,1,0,1,1,0,1],[1,0,1,1,1,1,0],[1,1,1,0,1,0,1]];
+  var diasH='<tr>'+dias.map(function(d){return '<td style="text-align:center;font-size:10px;color:var(--ink3)">'+d+'</td>';}).join('')+'</tr>';
+  var semH=semanas.map(function(s){
+    return '<tr>'+s.map(function(v){
+      var bg=v?'#B07D3A':'#E5E2DB';
+      var col=v?'#fff':'#8C8C85';
+      return '<td style="text-align:center"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:'+col+'">'+(v?'●':'○')+'</div></td>';
+    }).join('')+'</tr>';
+  }).join('');
+  document.getElementById('consistenciaEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Ultimas 4 semanas — publicou ou nao publicou</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px">'+diasH+semH+'</table></div><div style="margin-top:12px;padding:10px 12px;background:var(--green-l);border-radius:var(--r);font-size:11px;color:var(--green)">Publicacao regular detectada. Consistencia e o principal fator de crescimento organico.</div>';
+}
+
+function rDirect(){
+  var respOk=P.resp<=20;
+  prox('proxDirectTxt',!respOk?'Tempo de resposta: <strong>'+P.resp+' minutos</strong>. Configure uma mensagem automatica no Instagram para responder instantaneamente fora do horario comercial.':'<strong>Direct funcionando bem.</strong> Garantir que comentarios com perguntas tambem sejam respondidos em ate 30 minutos.');
+  document.getElementById('kpiDirect').innerHTML=[
+    kpi('DMs recebidos/semana','~'+fmt(P.resp<=10?30:P.resp<=30?20:12),'volume estimado',''),
+    kpi('Taxa de resposta','89%','bom','k-green'),
+    kpi('Tempo de resposta',P.resp+'min',respOk?'aceitavel':'melhorar',respOk?'k-dark':''),
+    kpi('DMs de compra','~12/sem','leads no Direct','k-gold')
+  ].join('');
+  var faixas=[{l:'Ate 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — critico',ref:999}];
+  document.getElementById('velocDirectEl').innerHTML=faixas.map(function(f,i){
+    var prev=i>0?faixas[i-1].ref:0;
+    var ativo=P.resp>prev&&P.resp<=f.ref;
+    var c=f.ref<=5?'var(--green)':f.ref<=30?'var(--amber)':'var(--red)';
+    var bg=f.ref<=5?'var(--green-l)':f.ref<=30?'var(--amber-l)':'var(--red-l)';
+    var bstatus=f.ref<=5?'b-ok':f.ref<=30?'b-warn':'b-bad';
+    var blabel=f.ref<=5?'Ideal':f.ref<=30?'Bom':'Melhorar';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:'+(ativo?bg:'var(--sub)')+';border:'+(ativo?'1.5px solid '+c:'.5px solid var(--line)')+'"><div style="width:10px;height:10px;border-radius:50%;background:'+(ativo?c:'var(--line)')+'"></div><div style="flex:1;font-size:12px;font-weight:'+(ativo?600:400)+';color:'+(ativo?c:'var(--ink3)')+'"> '+f.l+'</div>'+(ativo?'<span class="badge '+bstatus+'">'+blabel+'</span>':'')+'</div>';
+  }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrao avalia varios imoveis ao mesmo tempo. A resposta mais rapida tem vantagem real.</div>';
+  document.getElementById('origemDmEl').innerHTML=[
+    {l:'DM apos ver Reel ou video',p:45,c:'#B07D3A',d:'Interesse alto — viu o imovel'},
+    {l:'DM apos comentar no post',p:22,c:'#1A3A6E',d:'Interesse medio — ja interagiu'},
+    {l:'DM direto pelo perfil',p:18,c:'#1A5C3A',d:'Interesse alto — foi buscar contato'},
+    {l:'DM apos Story com sticker',p:10,c:'#7A5010',d:'Resposta ao CTA'},
+    {l:'DM via trafego pago',p:5,c:'#8C8C85',d:'Lead do gestor de trafego'}
+  ].map(function(o){return barRow(o.l,o.d,o.p,o.c);}).join('');
+  document.getElementById('comentIntencaoEl').innerHTML=[
+    {t:'Tem disponivel?',f:8,a:'Responder e chamar no DM'},
+    {t:'Qual o valor?',f:6,a:'Nao dar o preco no comentario — chamar no DM'},
+    {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
+    {t:'Quero conhecer',f:3,a:'Lead quente — responder em ate 10 min'},
+    {t:'Marcacao de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
+  ].map(function(c){
+    return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Acao: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
+  }).join('');
+}
+
+function rEngajamento(){
+  var d=D,b=BENCH[P.seg]||BENCH.medio;
+  var engOk=d.engRate>=b.eng.min;
+  prox('proxEngTxt',d.saves<b.saves.min?'Os saves estao em <strong>'+fmt(d.saves)+'</strong>. Publicar conteudo de lifestyle do bairro e carrosseis com dicas de compra.':'<strong>Engajamento saudavel.</strong> Manter o ritmo de Reels e focar em compartilhamentos.');
+  document.getElementById('kpiEng').innerHTML=[
+    kpi('Taxa de engajamento',d.engRate.toFixed(1)+'%',engOk?'acima do minimo':'abaixo do esperado',engOk?'k-dark':''),
+    kpi('Saves',fmt(d.saves),'intencao de compra','k-green'),
+    kpi('Compartilhamentos',fmt(d.shares),'indicacao organica',''),
+    kpi('Comentarios',fmt(d.comments),'~12 com pergunta de compra',''),
+    kpi('Mencoes',fmt(d.mentions)+'/sem','prova social',''),
+    kpi('Alcance 30d',fmt(d.reach),'pessoas unicas','k-blue')
+  ].join('');
+  var ec=[d.likes,d.comments,d.saves,d.shares,d.mentions];
+  var ecl=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
+  var ell=['Curtidas','Comentarios','Saves','Compart.','Mencoes'];
+  document.getElementById('engLegEl').innerHTML=ell.map(function(l,i){return '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:'+ecl[i]+'"></span>'+l+' '+fmt(ec[i])+'</span>';}).join('');
+  dc('cEngPizza');charts.cEngPizza=new Chart(document.getElementById('cEngPizza'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
+  dc('cSaves');charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  dc('cShares');charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+  dc('cReach');charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});
+}
+
+function rConteudo(){
+  var d=D;
+  var best=d.posts.reduce(function(a,b){return b.saves>a.saves?b:a;},d.posts[0]);
+  prox('proxContTxt','O post com mais saves foi <strong>'+best.caption+'</strong> ('+best.saves+' saves). <strong>Criar mais conteudo neste formato e estilo</strong>.');
+  var tipos={REEL:'Reel',VIDEO:'Video',CAROUSEL_ALBUM:'Carrossel',IMAGE:'Foto'};
+  var tc={REEL:['#FAF0E0','#7A5520'],VIDEO:['#FAF0D8','#7A5010'],CAROUSEL_ALBUM:['#E0E8FA','#1A3A6E'],IMAGE:['#E0F0E8','#1A5C3A']};
+  var tbl='<table class="ptbl"><thead><tr><th>Publicacao</th><th>Tipo</th><th>Alcance</th><th>Curtidas</th><th>Saves</th><th>Compart.</th><th>Resultado</th></tr></thead><tbody>';
+  d.posts.forEach(function(p){
+    var c=tc[p.mediaType]||['#EFECE6','#454540'];
+    var s=p.saves>=80?'Otimo':p.saves>=30?'Bom':'Baixo';
+    var sc=s==='Otimo'?'b-ok':s==='Bom'?'b-warn':'b-bad';
+    tbl+='<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">'+p.caption+'</td><td><span class="pill" style="background:'+c[0]+';color:'+c[1]+'">'+( tipos[p.mediaType]||p.mediaType)+'</span></td><td>'+fmt(p.reach)+'</td><td>'+fmt(p.likes)+'</td><td style="font-weight:600;color:var(--green)">'+fmt(p.saves)+'</td><td>'+fmt(p.shares)+'</td><td><span class="badge '+sc+'">'+s+'</span></td></tr>';
+  });
+  tbl+='</tbody></table>';
+  document.getElementById('postsTableEl').innerHTML=tbl;
+  var mix=[{l:'Tour em video / Reel',a:38,r:35,c:'#B07D3A'},{l:'Lifestyle do bairro',a:20,r:25,c:'#1A5C3A'},{l:'Depoimento de comprador',a:10,r:20,c:'#8C1F1F'},{l:'Educativo',a:18,r:12,c:'#1A3A6E'},{l:'Foto estatica',a:14,r:8,c:'#8C8C85'}];
+  document.getElementById('mixEl').innerHTML=mix.map(function(m){
+    return '<div class="row"><div class="row-lbl">'+m.l+'</div><div style="text-align:right;font-size:11px;color:var(--ink3)">atual '+m.a+'% ideal '+m.r+'%</div><div class="mbar"><div class="mbar-f" style="width:'+m.a+'%;background:'+m.c+'"></div></div></div>';
+  }).join('');
+  var days=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+  var horasHTML=days.map(function(day){
+    var cells=d.horas.map(function(v){
+      var o=Math.min(v/32,1);
+      var bg=v>22?'rgba(176,125,58,'+Math.max(o,0.7)+')':v>12?'rgba(176,125,58,'+Math.max(o*0.5,0.25)+')':v>5?'rgba(176,125,58,.12)':'rgba(176,125,58,.04)';
+      return '<div class="hm-cell" style="background:'+bg+'"></div>';
+    }).join('');
+    return '<div class="hm-row"><span class="hm-lbl">'+day+'</span><div class="hm-cells">'+cells+'</div></div>';
+  }).join('');
+  document.getElementById('horariosEl').innerHTML=horasHTML+'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ink3);margin-top:5px;padding-left:33px"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>';
+}
+
+function rAudiencia(){
+  var d=D;
+  var ac=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
+  var fit35=d.age.filter(function(a){return a.l==='35-44'||a.l==='45-54'||a.l==='35–44'||a.l==='45–54';}).reduce(function(s,a){return s+a.p;},0);
+  var fitOk=fit35>=45;
+  document.getElementById('kpiAud').innerHTML=[
+    kpi('Seguidores totais',fmt(d.followers),'',''),
+    kpi('Faixa 35-54 anos',fit35+'%','',''),
+    kpi('Audiencia local',( d.cities[0].p+d.cities[1].p)+'%','',''),
+    kpi('Engajamento',d.engRate.toFixed(1)+'%','','')
+  ].join('');
+  document.getElementById('ageEl').innerHTML=d.age.map(function(g,i){return aud(g.l,g.p,ac[i]);}).join('');
+  document.getElementById('ageDiagEl').innerHTML='<span style="color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'':'')+''+fit35+'% da audiencia tem 35-54 anos</strong> — '+(fitOk?'excelente fit com o perfil de comprador.':'abaixo do ideal. O comprador de alto padrao tende a ter 35-55 anos.')+'</span>';
+  document.getElementById('genEl').innerHTML=d.gender.map(function(g){return aud(g.l,g.p,g.c);}).join('');
+  dc('cGen');charts.cGen=new Chart(document.getElementById('cGen'),{type:'doughnut',data:{labels:d.gender.map(function(g){return g.l;}),datasets:[{data:d.gender.map(function(g){return g.p;}),backgroundColor:d.gender.map(function(g){return g.c;}),borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
+  document.getElementById('locEl').innerHTML=d.cities.map(function(g){return aud(g.l,g.p,'#B07D3A');}).join('');
+  document.getElementById('fitEl').innerHTML=[
+    {l:'Faixa etaria 35-54',v:fit35+'%',ok:fitOk},
+    {l:'Audiencia na regiao',v:(d.cities[0].p+d.cities[1].p)+'%',ok:true},
+    {l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4},
+    {l:'Saves (intencao)',v:fmt(d.saves)+'/mes',ok:d.saves>=300}
+  ].map(function(x){
+    return '<div class="row"><div class="row-lbl">'+x.l+'</div><div class="row-val" style="color:'+(x.ok?'var(--green)':'var(--amber)')+'">'+x.v+'</div><span class="badge '+(x.ok?'b-ok':'b-warn')+'">'+(x.ok?'OK':'Atencao')+'</span></div>';
+  }).join('')+'<div style="margin-top:12px;padding:10px 12px;background:'+(fitOk?'var(--green-l)':'var(--amber-l)')+';border-radius:var(--r);font-size:11px;color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'Boa qualidade de audiencia para o segmento imobiliario.':'Audiencia com fit parcial. Ajustar linha editorial para atrair faixa com maior poder de compra.')+'</strong></div>';
+}
+
+function rGargalos(){
+  var d=D,b=BENCH[P.seg]||BENCH.medio;
+  var ctr=d.linkClicks/d.profileViews*100;
+  var fit35=d.age.filter(function(a){return a.l==='35-44'||a.l==='45-54'||a.l==='35–44'||a.l==='45–54';}).reduce(function(s,a){return s+a.p;},0);
+  var diags=[];
+  if(P.resp>30)diags.push({icon:'ti-clock-off',c:'var(--red)',bg:'var(--red-l)',t:'Resposta no Direct demora '+P.resp+' minutos',desc:'No imobiliario de medio/alto padrao, o comprador avalia varios imoveis ao mesmo tempo. Cada 10 minutos a mais reduz a chance de conversao em ate 7%.',acao:'Configurar resposta automatica com qualificacao inicial: Esta buscando para morar ou investir? Qual prazo ideal?'});
+  if(d.engRate<b.eng.min)diags.push({icon:'ti-heart-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Engajamento abaixo do esperado: '+d.engRate.toFixed(1)+'%',desc:'O benchmark para o segmento e '+b.eng.min+' a '+b.eng.ref+'%. O conteudo nao esta gerando identificacao com o comprador.',acao:'Substituir 2 posts tecnicos por semana por conteudo de lifestyle. Carrosseis educativos geram saves.'});
+  if(ctr<b.ctr.min)diags.push({icon:'ti-link-off',c:'var(--red)',bg:'var(--red-l)',t:'Bio nao esta convertendo: CTR de '+ctr.toFixed(1)+'%',desc:'O visitante chega ao perfil e sai sem tomar acao. O benchmark e '+b.ctr.min+' a '+b.ctr.ref+'%.',acao:'Reescrever a bio com: o que voce oferece + para quem + CTA direto. Imoveis de alto padrao na sua regiao — Tour virtual disponivel — Clique para ver.'});
+  if(d.saves<b.saves.min)diags.push({icon:'ti-bookmark-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Saves baixos: '+fmt(d.saves)+' no mes',desc:'O save e o indicador mais honesto de intencao de compra. Benchmark: '+b.saves.min+' a '+b.saves.ref+' saves/mes.',acao:'Publicar conteudo que as pessoas querem guardar: tour completo com narracao, comparativo de bairros, guia de documentacao.'});
+  if(fit35<45)diags.push({icon:'ti-users-minus',c:'var(--amber)',bg:'var(--amber-l)',t:'Audiencia com fit parcial: '+fit35+'% na faixa 35-54 anos',desc:'O comprador de medio/alto padrao geralmente tem entre 35 e 55 anos. Se a audiencia e muito jovem, o conteudo esta atraindo o perfil errado.',acao:'Ajustar a linguagem e os temas para o publico 35+. Falar sobre etapas de vida: familia crescendo, upgrade de imovel, investimento seguro.'});
+  if(diags.length===0)diags.push({icon:'ti-circle-check',c:'var(--green)',bg:'var(--green-l)',t:'Nenhum gargalo critico identificado',desc:'As metricas estao dentro do esperado para o segmento. O foco agora e manter a consistencia e escalar o que ja esta funcionando.',acao:'Identificar os 3 posts com maior engajamento e criar variacoes do mesmo formato e tema.'});
+  document.getElementById('diagCompleto').innerHTML=diags.map(function(dg){
+    return '<div class="diag" style="background:'+dg.bg+';border-left-color:'+dg.c+'"><i class="ti '+dg.icon+'" style="color:'+dg.c+';font-size:20px;flex-shrink:0;margin-top:1px"></i><div><div class="diag-title" style="color:'+dg.c+'">'+dg.t+'</div><div class="diag-desc">'+dg.desc+'</div><div class="diag-acao"><strong>O que fazer:</strong> '+dg.acao+'</div></div></div>';
+  }).join('');
+  var rows=[
+    {m:'Taxa de engajamento',s:d.engRate.toFixed(1)+'%',b:b.eng.min+' a '+b.eng.ref+'%',ok:d.engRate>=b.eng.min},
+    {m:'CTR do perfil',s:ctr.toFixed(1)+'%',b:b.ctr.min+' a '+b.ctr.ref+'%',ok:ctr>=b.ctr.min},
+    {m:'Saves/mes',s:fmt(d.saves),b:fmt(b.saves.min)+' a '+fmt(b.saves.ref),ok:d.saves>=b.saves.min},
+    {m:'Seguidores',s:fmt(d.followers),b:fmt(b.seg.min)+' a '+fmt(b.seg.ref),ok:d.followers>=b.seg.min},
+    {m:'Tempo resposta DM',s:P.resp+'min',b:'ate 10 min',ok:P.resp<=10},
+    {m:'Faixa etaria 35-54',s:fit35+'%',b:'acima de 45%',ok:fit35>=45}
+  ];
+  var tbl='<thead><tr><th>Metrica</th><th>Voce</th><th>Referencia do mercado</th><th>Situacao</th></tr></thead><tbody>';
+  rows.forEach(function(r){tbl+='<tr><td style="font-weight:500">'+r.m+'</td><td style="font-weight:600">'+r.s+'</td><td style="color:var(--ink3)">'+r.b+'</td><td><span class="badge '+(r.ok?'b-ok':'b-bad')+'">'+(r.ok?'Dentro do esperado':'Abaixo do esperado')+'</span></td></tr>';});
+  tbl+='</tbody>';
+  document.getElementById('benchTbl').innerHTML=tbl;
+}
+
 function rPlano(){
-  const d=D, b=BENCH[P.seg]||BENCH.medio;
-  const isAlto=P.seg==='alto';
-
-  // Ação prioritária baseada nos dados reais
-  const ctr=(d.linkClicks/d.profileViews*100);
-  let proxAcao='';
-  if(P.resp>30)proxAcao=`<strong>Configurar resposta automática no Direct e WhatsApp esta semana</strong>. Com ${P.resp} minutos de resposta, leads estão sendo perdidos para concorrentes mais rápidos.`;
-  else if(ctr<b.ctr.min)proxAcao=`<strong>Reescrever a bio até sexta-feira</strong>. CTR de ${ctr.toFixed(1)}% significa que ${fmt(d.profileViews)} pessoas visitaram o perfil e a maioria saiu sem ação. Uma bio com CTA claro pode dobrar esse número.`;
-  else if(d.saves<b.saves.min)proxAcao=`<strong>Publicar 1 Reel de tour com narração esta semana</strong>. Saves estão em ${fmt(d.saves)} — abaixo do esperado. Tour com narração é o formato com maior taxa de save no imobiliário.`;
-  else proxAcao=`<strong>Manter a consistência e aumentar a frequência de Stories</strong>. O perfil está saudável. Publicar Stories diários com link sticker aumenta o tráfego para o WhatsApp sem custo adicional.`;
-  document.getElementById('proxPlanoTxt').innerHTML=proxAcao;
-
-  document.getElementById('planoSubEl').textContent=`Adaptado para imobiliário de ${isAlto?'alto':'médio'} padrão — ticket R$${P.ticket}k+`;
-  document.getElementById('planoEl').innerHTML=[
-    {dia:'SEG',titulo:'Reel de tour',desc:`Gravar 60–90 segundos de um ambiente com narração. ${isAlto?'Destacar acabamento, pé-direito e vista.':'Destacar funcionalidade e custo-benefício.'} Terminar com: "Quer conhecer? Link na bio."`,tag:'Gera DM',c:'#1A5C3A'},
-    {dia:'TER',titulo:'Stories com link sticker',desc:'4 Stories seguidos: imóvel → área de lazer → localização → CTA com link para WhatsApp. Medir os cliques. Essa sequência qualifica o lead antes de entrar no DM.',tag:'Gera lead',c:'#8C1F1F'},
-    {dia:'QUA',titulo:'Carrossel educativo',desc:`"${isAlto?'O que ninguém te conta sobre comprar imóvel de alto padrão':'3 erros que fazem perder o imóvel dos sonhos'}". Conteúdo para ser salvo e compartilhado — aumenta o alcance orgânico.`,tag:'Gera saves',c:'#1A3A6E'},
-    {dia:'QUI',titulo:'Prova social',desc:'Vídeo de depoimento (60s) ou print de conversa com permissão. O comprador de alto padrão compra confiança antes de comprar o imóvel. Depoimento é o conteúdo com maior taxa de conversão.',tag:'Gera confiança',c:'#B07D3A'},
-    {dia:'SEX',titulo:'Lifestyle do bairro',desc:'"Não é só o imóvel — é onde você vai viver." Mostrar restaurantes, parques, comércio local. Esse conteúdo atinge quem está na fase de decisão de região.',tag:'Gera alcance',c:'#7A5010'},
-    {dia:'SAB',titulo:'Bastidores',desc:'30 segundos mostrando o processo — visita ao imóvel, o que você observa, dicas de avaliação. Humaniza a marca. Diferencial no mercado imobiliário onde todos mostram só o produto.',tag:'Relacionamento',c:'#B07D3A'},
-    {dia:'DOM',titulo:'Story de relacionamento',desc:'Enquete simples: "Prefere piscina ou academia?" ou caixinha de perguntas. Ativa o algoritmo, mostra que o perfil está ativo e gera dados sobre o que a audiência quer.',tag:'Engajamento',c:'#1A3A6E'},
-  ].map(p=>`<div class="plano-item"><div class="plano-dia">${p.dia}</div><div><div class="plano-titulo">${p.titulo}</div><div class="plano-desc">${p.desc}</div><span class="plano-tag" style="background:${p.c}14;color:${p.c}">${p.tag}</span></div></div>`).join('');
-
-  document.getElementById('scriptEl').innerHTML=`<div class="script-box"><div class="script-tag">Responder em até ${P.resp} min — script de qualificação</div><div class="script-text">Oi, [Nome]! 👋<br><br>Que bom ter sua mensagem!<br>Para te indicar o imóvel certo,<br>me ajuda com 2 perguntas:<br><br>1️⃣ Está buscando para morar<br>&nbsp;&nbsp;&nbsp;&nbsp;ou investir?<br>2️⃣ Qual é o prazo ideal de<br>&nbsp;&nbsp;&nbsp;&nbsp;mudança?<br><br>Assim consigo te mostrar algo<br>realmente no seu perfil. 🏡</div><div class="script-tip">⚡ Resposta rápida + qualificação = lead pronto para o corretor fechar</div></div>`;
-
+  var d=D,b=BENCH[P.seg]||BENCH.medio;
+  var ctr=d.linkClicks/d.profileViews*100;
+  var isAlto=P.seg==='alto';
+  var proxAcao='';
+  if(P.resp>30)proxAcao='<strong>Configurar resposta automatica no Direct e WhatsApp esta semana</strong>. Com '+P.resp+' minutos de resposta, leads estao sendo perdidos para concorrentes mais rapidos.';
+  else if(ctr<b.ctr.min)proxAcao='<strong>Reescrever a bio ate sexta-feira</strong>. CTR baixo significa que muitas pessoas visitaram o perfil e saíram sem acao.';
+  else if(d.saves<b.saves.min)proxAcao='<strong>Publicar 1 Reel de tour com narracao esta semana</strong>. Saves abaixo do esperado. Tour com narracao e o formato com maior taxa de save no imobiliario.';
+  else proxAcao='<strong>Manter a consistencia e aumentar a frequencia de Stories</strong>. O perfil esta saudavel. Publicar Stories diarios com link sticker aumenta o trafego para o WhatsApp.';
+  prox('proxPlanoTxt',proxAcao);
+  document.getElementById('planoSubEl').textContent='Adaptado para imobiliario de '+(isAlto?'alto':'medio')+' padrao — ticket R$'+P.ticket+'k+';
+  var planos=[
+    {dia:'SEG',titulo:'Reel de tour',desc:'Gravar 60-90 segundos de um ambiente com narracao. '+(isAlto?'Destacar acabamento, pe-direito e vista.':'Destacar funcionalidade e custo-beneficio.')+' Terminar com: Quer conhecer? Link na bio.',tag:'Gera DM',c:'#1A5C3A'},
+    {dia:'TER',titulo:'Stories com link sticker',desc:'4 Stories seguidos: imovel, area de lazer, localizacao, CTA com link para WhatsApp. Medir os cliques. Essa sequencia qualifica o lead antes de entrar no DM.',tag:'Gera lead',c:'#8C1F1F'},
+    {dia:'QUA',titulo:'Carrossel educativo',desc:(isAlto?'O que ninguem te conta sobre comprar imovel de alto padrao':'3 erros que fazem perder o imovel dos sonhos')+'. Conteudo para ser salvo e compartilhado.',tag:'Gera saves',c:'#1A3A6E'},
+    {dia:'QUI',titulo:'Prova social',desc:'Video de depoimento 60 segundos ou print de conversa com permissao. O comprador de alto padrao compra confianca antes de comprar o imovel.',tag:'Gera confianca',c:'#B07D3A'},
+    {dia:'SEX',titulo:'Lifestyle do bairro',desc:'Nao e so o imovel, e onde voce vai viver. Mostrar restaurantes, parques, comercio local. Esse conteudo atinge quem esta na fase de decisao de regiao.',tag:'Gera alcance',c:'#7A5010'},
+    {dia:'SAB',titulo:'Bastidores',desc:'30 segundos mostrando o processo: visita ao imovel, o que voce observa, dicas de avaliacao. Humaniza a marca.',tag:'Relacionamento',c:'#B07D3A'},
+    {dia:'DOM',titulo:'Story de relacionamento',desc:'Enquete simples: Prefere piscina ou academia? ou caixinha de perguntas. Ativa o algoritmo e mostra que o perfil esta ativo.',tag:'Engajamento',c:'#1A3A6E'}
+  ];
+  document.getElementById('planoEl').innerHTML=planos.map(function(p){
+    return '<div class="plano-item"><div class="plano-dia">'+p.dia+'</div><div><div class="plano-titulo">'+p.titulo+'</div><div class="plano-desc">'+p.desc+'</div><span class="plano-tag" style="background:'+p.c+'14;color:'+p.c+'">'+p.tag+'</span></div></div>';
+  }).join('');
+  document.getElementById('scriptEl').innerHTML='<div class="script-box"><div class="script-tag">Responder em ate '+P.resp+' min — script de qualificacao</div><div class="script-text">Oi, [Nome]!<br><br>Que bom ter sua mensagem!<br>Para te indicar o imovel certo,<br>me ajuda com 2 perguntas:<br><br>1. Esta buscando para morar ou investir?<br>2. Qual e o prazo ideal de mudanca?<br><br>Assim consigo te mostrar algo<br>realmente no seu perfil.</div><div class="script-tip">Resposta rapida + qualificacao = lead pronto para o corretor fechar</div></div>';
   document.getElementById('checkEl').innerHTML=[
-    {t:'Verificar métricas da semana anterior',d:'Quais posts tiveram mais saves e DMs?'},
-    {t:'Responder todos os comentários em aberto',d:'Comentários sem resposta são leads perdidos'},
-    {t:'Checar DMs e solicitações de mensagem',d:'Aba "Solicitações" esconde DMs de não-seguidores'},
-    {t:'Planejar os posts da semana',d:'Conteúdo planejado performa melhor que improvisado'},
-    {t:'Atualizar Stories com imóveis disponíveis',d:'Audiência ativa quer ver o que tem hoje'},
-  ].map(x=>`<div class="chk c-ok"><div class="chk-ico">○</div><div><div class="chk-title">${x.t}</div><div class="chk-desc">${x.d}</div></div></div>`).join('');
+    {t:'Verificar metricas da semana anterior',d:'Quais posts tiveram mais saves e DMs?'},
+    {t:'Responder todos os comentarios em aberto',d:'Comentarios sem resposta sao leads perdidos'},
+    {t:'Checar DMs e solicitacoes de mensagem',d:'Aba Solicitacoes esconde DMs de nao-seguidores'},
+    {t:'Planejar os posts da semana',d:'Conteudo planejado performa melhor que improvisado'},
+    {t:'Atualizar Stories com imoveis disponiveis',d:'Audiencia ativa quer ver o que tem hoje'}
+  ].map(function(x){return chk('ok',x.t,x.d);}).join('');
 }
 
-// ── BRANDING ──────────────────────────────────────────────────────────────
 function rBranding(){
-  document.getElementById('proxBrandTxt').innerHTML=`<strong>Auditar os últimos 12 posts do feed</strong>: todos seguem o guia de identidade visual? Grid coeso gera confiança em visitantes novos — especialmente no ${P.seg==='alto'?'alto':'médio'} padrão.`;
-
+  var isAlto=P.seg==='alto';
+  document.getElementById('proxBrandTxt').innerHTML='<strong>Auditar os ultimos 12 posts do feed</strong>: todos seguem o guia de identidade visual? Grid coeso gera confianca em visitantes novos — essencial no imobiliario de alto padrao.';
   document.getElementById('brandingEl').innerHTML=[
-    {s:'ok',t:'Identidade visual definida',d:'Pré-requisito para este produto — confirmado no setup'},
-    {s:'ok',t:'Tom de comunicação alinhado ao ticket',d:`Linguagem adequada para imóveis de R$${P.ticket}k+`},
-    {s:'warn',t:'Grid do feed visualmente coeso',d:'Últimos posts com variação de estilo — revisar consistência'},
-    {s:'warn',t:'Bio comunicando o segmento claramente',d:'A bio deve comunicar o segmento e região em até 3 segundos'},
-    {s:'bad',t:'Stories diários ativos',d:'Stories irregular reduz o relacionamento com a audiência existente'},
-    {s:'ok',t:'Destaques organizados',d:'Highlights de imóveis, depoimentos e bairro presentes'},
-    {s:'warn',t:'Prova social visível no perfil',d:'Depoimentos e resultados precisam de mais destaque'},
-  ].map(x=>{const ico={ok:'✓',warn:'⚠',bad:'✗'}[x.s];return`<div class="chk c-${x.s==='ok'?'ok':x.s==='warn'?'warn':'bad'}"><div class="chk-ico">${ico}</div><div><div class="chk-title">${x.t}</div><div class="chk-desc">${x.d}</div></div></div>`;}).join('');
-
+    chk('ok','Identidade visual definida','Pre-requisito para este produto — confirmado no setup'),
+    chk('ok','Tom de comunicacao alinhado ao ticket','Linguagem adequada para o segmento configurado'),
+    chk('warn','Grid do feed visualmente coeso','Ultimos posts com variacao de estilo — revisar consistencia'),
+    chk('warn','Bio comunicando o segmento claramente','A bio deve comunicar o segmento e regiao em ate 3 segundos'),
+    chk('bad','Stories diarios ativos','Stories irregular reduz o relacionamento com a audiencia existente'),
+    chk('ok','Destaques organizados','Highlights de imoveis, depoimentos e bairro presentes'),
+    chk('warn','Prova social visivel no perfil','Depoimentos e resultados precisam de mais destaque')
+  ].join('');
   document.getElementById('identVisualEl').innerHTML=[
-    {l:'Paleta de cores consistente',s:'ok'},{l:'Tipografia coerente nos posts',s:'ok'},
-    {l:'Qualidade fotográfica profissional',s:'ok'},{l:'Grid do feed com harmonia',s:'warn'},
-    {l:'Logo e marca bem posicionados',s:'ok'},{l:'Stories com identidade da marca',s:'warn'},
-  ].map(x=>`<div class="chk c-${x.s==='ok'?'ok':'warn'}"><div class="chk-ico">${x.s==='ok'?'✓':'⚠'}</div><div class="chk-title">${x.l}</div></div>`).join('');
-
+    chk('ok','Paleta de cores consistente',''),
+    chk('ok','Tipografia coerente nos posts',''),
+    chk('ok','Qualidade fotografica profissional',''),
+    chk('warn','Grid do feed com harmonia',''),
+    chk('ok','Logo e marca bem posicionados',''),
+    chk('warn','Stories com identidade da marca','')
+  ].join('');
   document.getElementById('linguagemEl').innerHTML=[
-    {l:'Tom sofisticado sem ser distante',s:'ok',d:'Adequado para médio/alto padrão'},
-    {l:'Foco em estilo de vida, não só produto',s:'warn',d:'Ainda muito conteúdo técnico'},
-    {l:'CTA claro em cada publicação',s:'bad',d:'Muitos posts sem chamada para ação'},
-    {l:'Legenda com gancho nos primeiros 3s',s:'warn',d:'Maioria começa com descrição do imóvel'},
-    {l:'Linguagem de conversa nos Stories',s:'ok',d:'Tom próximo e natural'},
-  ].map(x=>`<div class="chk c-${x.s==='ok'?'ok':x.s==='warn'?'warn':'bad'}"><div class="chk-ico">${x.s==='ok'?'✓':x.s==='warn'?'⚠':'✗'}</div><div><div class="chk-title">${x.l}</div><div class="chk-desc">${x.d}</div></div></div>`).join('');
+    chk('ok','Tom sofisticado sem ser distante','Adequado para medio/alto padrao'),
+    chk('warn','Foco em estilo de vida, nao so produto','Ainda muito conteudo tecnico'),
+    chk('bad','CTA claro em cada publicacao','Muitos posts sem chamada para acao'),
+    chk('warn','Legenda com gancho nos primeiros 3s','Maioria comeca com descricao do imovel'),
+    chk('ok','Linguagem de conversa nos Stories','Tom proximo e natural')
+  ].join('');
 }
 
-// ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────
-const PGS={
-  resumo:['Resumo geral','Como está o perfil — visão rápida para o cliente e o time'],
-  saude:['Saúde do perfil','O perfil está funcionando bem como vitrine?'],
-  direct:['Direct & Relacionamento','Como está o atendimento e o relacionamento no Direct'],
-  engajamento:['Engajamento real','Saves, compartilhamentos, comentários — o que gera interesse de verdade'],
-  conteudo:['Conteúdo & Criativos','O que está performando e o que pode melhorar'],
-  audiencia:['Audiência','Quem são os seguidores e qual o fit com o perfil de comprador'],
-  gargalos:['Diagnóstico de gargalos','O que está impedindo mais resultados — causa e solução'],
-  plano:['Plano de ação','O que publicar, quando e como — baseado nos dados reais'],
-  branding:['Branding','A identidade visual e a comunicação estão fazendo sentido?'],
+var PGS={
+  resumo:['Resumo geral','Como esta o perfil — visao rapida para o cliente e o time'],
+  saude:['Saude do perfil','O perfil esta funcionando bem como vitrine?'],
+  direct:['Direct e Relacionamento','Como esta o atendimento e o relacionamento no Direct'],
+  engajamento:['Engajamento real','Saves, compartilhamentos, comentarios — o que gera interesse de verdade'],
+  conteudo:['Conteudo e Criativos','O que esta performando e o que pode melhorar'],
+  audiencia:['Audiencia','Quem sao os seguidores e qual o fit com o perfil de comprador'],
+  gargalos:['Diagnostico de gargalos','O que esta impedindo mais resultados — causa e solucao'],
+  plano:['Plano de acao','O que publicar, quando e como — baseado nos dados reais'],
+  branding:['Branding','A identidade visual e a comunicacao estao fazendo sentido?']
 };
-document.querySelectorAll('.sb-btn').forEach(btn=>{
+
+document.querySelectorAll('.sb-btn').forEach(function(btn){
   btn.addEventListener('click',function(){
-    document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('on'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    this.classList.add('on');const pg=this.dataset.pg;
+    document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('on');});
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+    this.classList.add('on');
+    var pg=this.getAttribute('data-pg');
     document.getElementById('pg-'+pg).classList.add('on');
-    const t=PGS[pg]||['',''];
+    var t=PGS[pg]||['',''];
     document.getElementById('pgTitle').textContent=t[0];
     document.getElementById('pgSub').textContent=t[1];
   });
 });
-document.querySelectorAll('.pbtn').forEach(b=>b.addEventListener('click',function(){
-  document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('on'));
-  this.classList.add('on');period=parseInt(this.dataset.p);
-}));
 
-// ── BOOT ──────────────────────────────────────────────────────────────────
-window.addEventListener('load',async()=>{
-  const saved=localStorage.getItem('si_imobi_v2');
+document.querySelectorAll('.pbtn').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.pbtn').forEach(function(x){x.classList.remove('on');});
+    this.classList.add('on');
+    period=parseInt(this.getAttribute('data-p'));
+  });
+});
+
+window.addEventListener('load',async function(){
+  var saved=localStorage.getItem('si_imobi_v3');
   if(saved){
     P=JSON.parse(saved);
     document.getElementById('setup').classList.add('off');
