@@ -7,7 +7,168 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+// ── IA ────────────────────────────────────────────────────────────────────
+let iaKey = '', nivelIA = 'simples', chatAberto = false;
+
+function salvarChaveIA(){
+  const k = document.getElementById('iaKeyInput').value.trim();
+  if(!k){alert('Cole sua chave de API antes de salvar');return;}
+  iaKey = k;
+  localStorage.setItem('ia_key', k);
+  document.getElementById('iaKeyWarn').classList.add('off');
+  document.getElementById('iaPanelDiagBtn').classList.remove('off');
+  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat flutuante no canto da tela.';
+  alert('Chave salva! A IA está pronta para usar.');
+}
+
+function setNivel(n){
+  nivelIA = n;
+  document.querySelectorAll('.ia-nivel-btn').forEach(b=>{
+    b.classList.toggle('on', b.textContent.toLowerCase().includes(n==='simples'?'simpl':'pro'));
+  });
+}
+
+function toggleChat(){
+  chatAberto = !chatAberto;
+  document.getElementById('iaPanel').classList.toggle('off', !chatAberto);
+  if(!iaKey){
+    document.getElementById('iaKeyWarn').classList.remove('off');
+    document.getElementById('iaPanelDiagBtn').classList.add('off');
+  }
+}
+
+function perguntaRapida(txt){
+  document.getElementById('iaPanelInput').value = txt;
+  enviarPanelMsg();
+}
+
+function montarContexto(){
+  if(!D) return 'Dados não disponíveis ainda.';
+  const b = BENCH[P.seg]||BENCH.medio;
+  const ctr = (D.linkClicks/D.profileViews*100).toFixed(1);
+  const fit35 = D.age ? D.age.filter(a=>a.l==='35-44'||a.l==='45-54').reduce((s,a)=>s+a.p,0) : 0;
+  return 'DADOS REAIS DO PERFIL @'+D.username+':'+
+    ' Segmento: '+P.seg+' padrao, Ticket medio: R$'+P.ticket+'k+,'+
+    ' Seguidores: '+D.followers+', Engajamento: '+D.engRate+'%,'+
+    ' Alcance 30d: '+D.reach+', Saves: '+D.saves+', Compartilhamentos: '+D.shares+','+
+    ' Visitas ao perfil: '+D.profileViews+', Cliques no link: '+D.linkClicks+', CTR: '+ctr+'%,'+
+    ' Tempo de resposta DM: '+P.resp+' minutos,'+
+    ' Audiencia 35-54 anos: '+fit35+'%,'+
+    ' Benchmark engajamento para o segmento: '+b.eng.min+'-'+b.eng.ref+'%,'+
+    ' Benchmark CTR: '+b.ctr.min+'-'+b.ctr.ref+'%.'+
+    ' Posts recentes: '+D.posts.slice(0,3).map(p=>p.caption+'(saves:'+p.saves+')').join(', ')+'.';
+}
+
+function montarSystemPrompt(){
+  const isSimples = nivelIA === 'simples';
+  if(isSimples){
+    return 'Voce e uma consultora especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
+      'Fale de forma simples, direta e humana, como uma consultora explicando para o dono do negocio. '+
+      'Use portugues do Brasil sem erros. Evite jargoes tecnicos. Seja pratica e objetiva. '+
+      'Sempre termine com UMA acao concreta e simples para o cliente fazer. '+
+      'Maximo 3 paragrafos curtos. Use emojis com moderacao (1-2 por resposta).';
+  } else {
+    return 'Voce e uma estrategista especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
+      'Use linguagem tecnica e precisa, com dados e benchmarks do setor. '+
+      'Analise causa raiz, impacto nos KPIs e solucao com metricas esperadas. '+
+      'Seja direto e profissional. Use portugues do Brasil sem erros. '+
+      'Estruture em: Diagnostico, Causa, Solucao, Resultado esperado.';
+  }
+}
+
+async function chamarIA(mensagens){
+  if(!iaKey) return 'Configure sua chave de API primeiro na secao Analise com IA.';
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1000,
+        system: montarSystemPrompt(),
+        messages: mensagens
+      })
+    });
+    const data = await resp.json();
+    if(data.error) return 'Erro: '+data.error.message;
+    return data.content[0].text;
+  }catch(e){
+    return 'Erro ao conectar com a IA. Verifique sua chave de API.';
+  }
+}
+
+async function gerarDiagIA(noPanel){
+  if(!iaKey){alert('Configure sua chave de API na secao Analise com IA primeiro.');return;}
+  const ctx = montarContexto();
+  const prompt = 'Com base nos dados abaixo, gere um diagnostico completo do perfil imobiliario. Identifique os 3 principais gargalos, explique a causa de cada um e sugira a acao prioritaria. '+ctx;
+
+  if(noPanel){
+    adicionarMsgPanel('Gerando diagnostico completo do perfil...','loading');
+  } else {
+    document.getElementById('iaDiagResultado').innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink3);font-size:13px"><i class="ti ti-loader-2" style="font-size:24px;display:block;margin-bottom:8px;animation:spin 1s linear infinite"></i>Analisando dados do perfil...</div>';
+  }
+
+  const resp = await chamarIA([{role:'user',content:prompt}]);
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+
+  if(noPanel){
+    document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+    adicionarMsgPanel(html,'bot');
+  } else {
+    document.getElementById('iaDiagResultado').innerHTML = '<div style="font-size:12px;line-height:1.75;color:var(--ink);padding:4px 0">'+html+'</div>';
+  }
+}
+
+function adicionarMsgPanel(txt, tipo){
+  const msgs = document.getElementById('iaPanelMsgs');
+  const div = document.createElement('div');
+  div.className = 'ia-msg '+tipo;
+  div.innerHTML = txt;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function enviarPanelMsg(){
+  const input = document.getElementById('iaPanelInput');
+  const txt = input.value.trim();
+  if(!txt) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
+  input.value = '';
+  adicionarMsgPanel(txt,'user');
+  adicionarMsgPanel('Pensando...','loading');
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto do perfil: '+ctx+'. Pergunta: '+txt}]);
+  document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  adicionarMsgPanel(html,'bot');
+}
+
+async function enviarMsgIA(){
+  const input = document.getElementById('iaChatInput');
+  const txt = input.value.trim();
+  if(!txt) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
+  input.value = '';
+  const msgs = document.getElementById('iaChatMsgs');
+  const userDiv = document.createElement('div');
+  userDiv.className='ia-msg user';userDiv.textContent=txt;msgs.appendChild(userDiv);
+  const loadDiv = document.createElement('div');
+  loadDiv.className='ia-msg loading';loadDiv.textContent='Pensando...';msgs.appendChild(loadDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+txt}]);
+  loadDiv.remove();
+  const botDiv=document.createElement('div');
+  botDiv.className='ia-msg bot';
+  botDiv.innerHTML=(function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  msgs.appendChild(botDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// IA inicializada
+
+</script>
 <style>
 :root{
   --ink:#0F0F0E;--ink2:#454540;--ink3:#8C8C85;
@@ -173,6 +334,46 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .footer{padding:14px 32px;border-top:.5px solid var(--line);font-size:11px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .footer-logo{font-family:var(--display);color:var(--gold);font-size:14px}
 @media(max-width:768px){.sidebar{display:none}.content,.topbar{padding:16px}.kgrid{grid-template-columns:1fr 1fr}}
+
+/* ── IA ── */
+.ia-fab{position:fixed;bottom:28px;right:28px;width:56px;height:56px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(176,125,58,.4);z-index:100;transition:all .2s}
+.ia-fab:hover{transform:scale(1.08);background:#C49040}
+.ia-fab i{font-size:22px;color:var(--ink)}
+.ia-fab .ia-badge{position:absolute;top:-4px;right:-4px;background:var(--green);color:#fff;font-size:9px;padding:2px 5px;border-radius:8px;font-weight:700}
+.ia-panel{position:fixed;bottom:96px;right:28px;width:400px;max-height:600px;background:var(--card);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.15);z-index:100;display:flex;flex-direction:column;border:.5px solid var(--line);overflow:hidden;transition:all .25s}
+.ia-panel.off{display:none}
+.ia-header{background:var(--ink);padding:16px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ia-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ia-avatar i{font-size:17px;color:var(--ink)}
+.ia-title{font-family:var(--display);font-size:15px;color:#fff}
+.ia-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.ia-close{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:18px;padding:4px}
+.ia-close:hover{color:#fff}
+.ia-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:380px}
+.ia-msg{max-width:88%;border-radius:14px;padding:10px 13px;font-size:12px;line-height:1.65}
+.ia-msg.bot{background:var(--sub);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
+.ia-msg.user{background:var(--gold);color:var(--ink);align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
+.ia-msg.loading{background:var(--sub);color:var(--ink3);align-self:flex-start}
+.ia-msg strong{color:var(--gold-d)}
+.ia-msg.bot strong{color:var(--green)}
+.ia-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}
+.ia-chip{font-size:11px;padding:5px 10px;border-radius:20px;border:.5px solid var(--line);background:var(--sub);color:var(--ink2);cursor:pointer;transition:all .15s;font-family:var(--body)}
+.ia-chip:hover{background:var(--gold-l);border-color:var(--gold);color:var(--gold-d)}
+.ia-input-row{display:flex;gap:8px;padding:10px 14px;border-top:.5px solid var(--line);flex-shrink:0}
+.ia-input{flex:1;border:.5px solid var(--line);border-radius:20px;padding:8px 14px;font-size:12px;font-family:var(--body);outline:none;background:var(--sub)}
+.ia-input:focus{border-color:var(--gold)}
+.ia-send{width:34px;height:34px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.ia-send:hover{background:#C49040}
+.ia-send i{font-size:14px;color:var(--ink)}
+.ia-key-warn{background:var(--amber-l);border-radius:var(--r);padding:10px 13px;font-size:11px;color:var(--amber);margin:0 14px 10px;line-height:1.6;display:flex;gap:8px;align-items:flex-start}
+.ia-key-warn.off{display:none}
+.ia-diag-btn{margin:0 14px 10px;background:var(--ink);color:var(--gold);border:none;border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:8px;justify-content:center;transition:background .2s;width:calc(100% - 28px)}
+.ia-diag-btn:hover{background:#1E1E1C}
+.ia-diag-btn.off{display:none}
+.ia-nivel{display:flex;gap:6px;padding:0 14px 8px}
+.ia-nivel-btn{font-size:10px;padding:3px 10px;border-radius:12px;border:.5px solid var(--line);background:transparent;color:var(--ink3);cursor:pointer;font-family:var(--body);transition:all .15s}
+.ia-nivel-btn.on{background:var(--ink);color:var(--gold);border-color:var(--ink)}
+@media(max-width:768px){.ia-panel{width:calc(100vw - 32px);right:16px}.ia-fab{right:16px;bottom:16px}}
 </style>
 </head>
 <body>
@@ -259,6 +460,8 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <button class="sb-btn" data-pg="gargalos"><i class="ti ti-stethoscope"></i>Diagnóstico de gargalos</button>
   <button class="sb-btn" data-pg="plano"><i class="ti ti-calendar-week"></i>Plano de ação</button>
   <button class="sb-btn" data-pg="branding"><i class="ti ti-eye"></i>Branding</button>
+  <div class="sb-sec">Inteligência</div>
+  <button class="sb-btn" data-pg="ia"><i class="ti ti-robot"></i>Análise com IA</button>
   <div class="sb-foot">
     <button class="sb-small-btn" onclick="recarregar()"><i class="ti ti-refresh" style="font-size:13px"></i> Atualizar dados</button>
     <button class="sb-small-btn" onclick="resetar()"><i class="ti ti-settings" style="font-size:13px"></i> Reconfigurar</button>
@@ -937,6 +1140,200 @@ window.addEventListener('load',async function(){
     else{D=DEMO;render();}
   }
 });
+
+// ── IA ────────────────────────────────────────────────────────────────────
+let iaKey = '', nivelIA = 'simples', chatAberto = false;
+
+function salvarChaveIA(){
+  const k = document.getElementById('iaKeyInput').value.trim();
+  if(!k){alert('Cole sua chave de API antes de salvar');return;}
+  iaKey = k;
+  localStorage.setItem('ia_key', k);
+  document.getElementById('iaKeyWarn').classList.add('off');
+  document.getElementById('iaPanelDiagBtn').classList.remove('off');
+  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat flutuante no canto da tela.';
+  alert('Chave salva! A IA está pronta para usar.');
+}
+
+function setNivel(n){
+  nivelIA = n;
+  document.querySelectorAll('.ia-nivel-btn').forEach(b=>{
+    b.classList.toggle('on', b.textContent.toLowerCase().includes(n==='simples'?'simpl':'pro'));
+  });
+}
+
+function toggleChat(){
+  chatAberto = !chatAberto;
+  document.getElementById('iaPanel').classList.toggle('off', !chatAberto);
+  if(!iaKey){
+    document.getElementById('iaKeyWarn').classList.remove('off');
+    document.getElementById('iaPanelDiagBtn').classList.add('off');
+  }
+}
+
+function perguntaRapida(txt){
+  document.getElementById('iaPanelInput').value = txt;
+  enviarPanelMsg();
+}
+
+function montarContexto(){
+  if(!D) return 'Dados não disponíveis ainda.';
+  const b = BENCH[P.seg]||BENCH.medio;
+  const ctr = (D.linkClicks/D.profileViews*100).toFixed(1);
+  const fit35 = D.age ? D.age.filter(a=>a.l==='35-44'||a.l==='45-54').reduce((s,a)=>s+a.p,0) : 0;
+  return 'DADOS REAIS DO PERFIL @'+D.username+':'+
+    ' Segmento: '+P.seg+' padrao, Ticket medio: R$'+P.ticket+'k+,'+
+    ' Seguidores: '+D.followers+', Engajamento: '+D.engRate+'%,'+
+    ' Alcance 30d: '+D.reach+', Saves: '+D.saves+', Compartilhamentos: '+D.shares+','+
+    ' Visitas ao perfil: '+D.profileViews+', Cliques no link: '+D.linkClicks+', CTR: '+ctr+'%,'+
+    ' Tempo de resposta DM: '+P.resp+' minutos,'+
+    ' Audiencia 35-54 anos: '+fit35+'%,'+
+    ' Benchmark engajamento para o segmento: '+b.eng.min+'-'+b.eng.ref+'%,'+
+    ' Benchmark CTR: '+b.ctr.min+'-'+b.ctr.ref+'%.'+
+    ' Posts recentes: '+D.posts.slice(0,3).map(p=>p.caption+'(saves:'+p.saves+')').join(', ')+'.';
+}
+
+function montarSystemPrompt(){
+  const isSimples = nivelIA === 'simples';
+  if(isSimples){
+    return 'Voce e uma consultora especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
+      'Fale de forma simples, direta e humana, como uma consultora explicando para o dono do negocio. '+
+      'Use portugues do Brasil sem erros. Evite jargoes tecnicos. Seja pratica e objetiva. '+
+      'Sempre termine com UMA acao concreta e simples para o cliente fazer. '+
+      'Maximo 3 paragrafos curtos. Use emojis com moderacao (1-2 por resposta).';
+  } else {
+    return 'Voce e uma estrategista especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
+      'Use linguagem tecnica e precisa, com dados e benchmarks do setor. '+
+      'Analise causa raiz, impacto nos KPIs e solucao com metricas esperadas. '+
+      'Seja direto e profissional. Use portugues do Brasil sem erros. '+
+      'Estruture em: Diagnostico, Causa, Solucao, Resultado esperado.';
+  }
+}
+
+async function chamarIA(mensagens){
+  if(!iaKey) return 'Configure sua chave de API primeiro na secao Analise com IA.';
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1000,
+        system: montarSystemPrompt(),
+        messages: mensagens
+      })
+    });
+    const data = await resp.json();
+    if(data.error) return 'Erro: '+data.error.message;
+    return data.content[0].text;
+  }catch(e){
+    return 'Erro ao conectar com a IA. Verifique sua chave de API.';
+  }
+}
+
+async function gerarDiagIA(noPanel){
+  if(!iaKey){alert('Configure sua chave de API na secao Analise com IA primeiro.');return;}
+  const ctx = montarContexto();
+  const prompt = 'Com base nos dados abaixo, gere um diagnostico completo do perfil imobiliario. Identifique os 3 principais gargalos, explique a causa de cada um e sugira a acao prioritaria. '+ctx;
+
+  if(noPanel){
+    adicionarMsgPanel('Gerando diagnostico completo do perfil...','loading');
+  } else {
+    document.getElementById('iaDiagResultado').innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink3);font-size:13px"><i class="ti ti-loader-2" style="font-size:24px;display:block;margin-bottom:8px;animation:spin 1s linear infinite"></i>Analisando dados do perfil...</div>';
+  }
+
+  const resp = await chamarIA([{role:'user',content:prompt}]);
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+
+  if(noPanel){
+    document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+    adicionarMsgPanel(html,'bot');
+  } else {
+    document.getElementById('iaDiagResultado').innerHTML = '<div style="font-size:12px;line-height:1.75;color:var(--ink);padding:4px 0">'+html+'</div>';
+  }
+}
+
+function adicionarMsgPanel(txt, tipo){
+  const msgs = document.getElementById('iaPanelMsgs');
+  const div = document.createElement('div');
+  div.className = 'ia-msg '+tipo;
+  div.innerHTML = txt;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function enviarPanelMsg(){
+  const input = document.getElementById('iaPanelInput');
+  const txt = input.value.trim();
+  if(!txt) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
+  input.value = '';
+  adicionarMsgPanel(txt,'user');
+  adicionarMsgPanel('Pensando...','loading');
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto do perfil: '+ctx+'. Pergunta: '+txt}]);
+  document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  adicionarMsgPanel(html,'bot');
+}
+
+async function enviarMsgIA(){
+  const input = document.getElementById('iaChatInput');
+  const txt = input.value.trim();
+  if(!txt) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
+  input.value = '';
+  const msgs = document.getElementById('iaChatMsgs');
+  const userDiv = document.createElement('div');
+  userDiv.className='ia-msg user';userDiv.textContent=txt;msgs.appendChild(userDiv);
+  const loadDiv = document.createElement('div');
+  loadDiv.className='ia-msg loading';loadDiv.textContent='Pensando...';msgs.appendChild(loadDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+txt}]);
+  loadDiv.remove();
+  const botDiv=document.createElement('div');
+  botDiv.className='ia-msg bot';
+  botDiv.innerHTML=(function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  msgs.appendChild(botDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// IA inicializada
+
 </script>
+
+<!-- CHAT FLUTUANTE IA -->
+<div class="ia-panel off" id="iaPanel">
+  <div class="ia-header">
+    <div class="ia-avatar"><i class="ti ti-robot"></i></div>
+    <div><div class="ia-title">Consultora IA</div><div class="ia-sub" id="iaPanelSub">Especialista em Instagram imobiliário</div></div>
+    <button class="ia-close" onclick="toggleChat()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="ia-messages" id="iaPanelMsgs">
+    <div class="ia-msg bot">Olá! Sou sua consultora de Instagram imobiliário. Posso analisar os dados do perfil e responder suas dúvidas. O que quer saber?</div>
+  </div>
+  <div class="ia-key-warn off" id="iaKeyWarn"><i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i><span>Configure sua chave de API na seção "Análise com IA" para ativar o chat.</span></div>
+  <button class="ia-diag-btn" id="iaPanelDiagBtn" onclick="gerarDiagIA(true)"><i class="ti ti-sparkles"></i>Gerar diagnóstico automático</button>
+  <div class="ia-nivel">
+    <button class="ia-nivel-btn on" onclick="setNivel('simples')">Simples</button>
+    <button class="ia-nivel-btn" onclick="setNivel('pro')">Profissional</button>
+  </div>
+  <div class="ia-chips" id="iaChips">
+    <span class="ia-chip" onclick="perguntaRapida('Por que meu engajamento está baixo?')">Engajamento baixo</span>
+    <span class="ia-chip" onclick="perguntaRapida('O que devo postar esta semana?')">O que postar?</span>
+    <span class="ia-chip" onclick="perguntaRapida('Como atrair mais compradores de alto padrão?')">Atrair compradores</span>
+    <span class="ia-chip" onclick="perguntaRapida('Minha bio está boa?')">Analisar bio</span>
+  </div>
+  <div class="ia-input-row">
+    <input class="ia-input" id="iaPanelInput" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter')enviarPanelMsg()">
+    <button class="ia-send" onclick="enviarPanelMsg()"><i class="ti ti-send"></i></button>
+  </div>
+</div>
+<button class="ia-fab" id="iaFab" onclick="toggleChat()" title="Consultora IA">
+  <i class="ti ti-robot"></i>
+  <span class="ia-badge">IA</span>
+</button>
+
 </body>
 </html>
