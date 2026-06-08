@@ -750,7 +750,7 @@ function prox(id,html){
 }
 
 async function fetchAPI(endpoint){
-  var base='https://graph.instagram.com/v21.0';
+  var base='https://graph.facebook.com/v21.0';
   var sep=endpoint.indexOf('?')>=0?'&':'?';
   var url=base+endpoint+sep+'access_token='+P.token;
   var r=await fetch(url);
