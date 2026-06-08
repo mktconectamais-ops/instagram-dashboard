@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { code, redirect_uri } = req.body;
-  const REDIRECT = 'https://instagram-dashboard-drab.vercel.app';
+  const REDIRECT = 'https://instagram-dashboard-drab.vercel.app/';
 
   const url = 'https://graph.facebook.com/v21.0/oauth/access_token'
     + '?client_id=1495381002138022'
