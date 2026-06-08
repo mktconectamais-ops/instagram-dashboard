@@ -916,7 +916,7 @@ async function trocarCodigoPorToken(code){
   var r = await fetch('/api/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code })
+    body: JSON.stringify({ code: code, redirect_uri: OAUTH_REDIRECT })
   });
   var data = await r.json();
   if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
