@@ -909,7 +909,9 @@ function iniciarOAuth(){
     + '&scope=' + encodeURIComponent(OAUTH_SCOPE)
     + '&state=' + state
     + '&response_type=code';
-  window.location.href = url;
+  // DEBUG TEMPORÁRIO — remover depois
+  alert('URL gerada:\n\n' + url);
+  // window.location.href = url;
 }
 
 async function trocarCodigoPorToken(code){
