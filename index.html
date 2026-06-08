@@ -912,13 +912,12 @@ function iniciarOAuth(){
 }
 
 async function trocarCodigoPorToken(code){
-  // Facebook OAuth — troca code por token via Graph API
-  var tokenUrl = 'https://graph.facebook.com/v21.0/oauth/access_token'
-    + '?client_id=' + OAUTH_CLIENT_ID
-    + '&client_secret=7066ee1731bc964cbfdab7c373ca09e9'
-    + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
-    + '&code=' + code;
-  var r = await fetch(tokenUrl);
+  // Chama o proxy serverless em /api/token para evitar CORS com client_secret
+  var r = await fetch('/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  });
   var data = await r.json();
   if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   return data.access_token;
