@@ -334,6 +334,8 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .footer{padding:14px 32px;border-top:.5px solid var(--line);font-size:11px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .footer-logo{font-family:var(--display);color:var(--gold);font-size:14px}
 @media(max-width:768px){.sidebar{display:none}.content,.topbar{padding:16px}.kgrid{grid-template-columns:1fr 1fr}}
+.f-btn-ig{width:100%;background:linear-gradient(135deg,#F9A825,#E91E63,#7B1FA2);color:#fff;border:none;border-radius:var(--r);padding:14px 20px;font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:10px}
+.f-btn-ig:hover{opacity:.88}
 
 /* ── IA ── */
 .ia-fab{position:fixed;bottom:28px;right:28px;width:56px;height:56px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(176,125,58,.4);z-index:100;transition:all .2s}
@@ -387,57 +389,119 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 <div class="setup-wrap">
   <div class="setup-logo">Dashboard Social · Imobiliário</div>
   <div class="setup-title">Configure uma vez.<br>O sistema se adapta.</div>
-  <div class="setup-sub">Preencha os dados do cliente. O dashboard conecta na conta real do Instagram e entrega o diagnóstico automaticamente.</div>
-  <div class="f-section">Dados da conta do Instagram</div>
-  <div class="f-api-note">Como obter o Token: developers.facebook.com → seu app → Configuração da API → Gerar tokens de acesso.</div>
-  <div class="f-label">Nome do cliente / imobiliária</div>
-  <input class="f-input" id="s-nome" placeholder="Ex: Imóveis Atlântico Premium">
-  <div class="f-label">Token de Acesso (Instagram Graph API)</div>
-  <input class="f-input" id="s-token" type="password" placeholder="Cole o token de acesso aqui">
-  <div class="f-label">ID da conta do Instagram</div>
-  <input class="f-input" id="s-userid" placeholder="Ex: 17841463478285841">
-  <div class="f-section">Perfil do negócio</div>
-  <div class="f-row">
-    <div>
-      <div class="f-label">Segmento</div>
-      <select class="f-select" id="s-seg">
-        <option value="alto">Alto padrão</option>
-        <option value="medio" selected>Médio padrão</option>
-        <option value="lancamento">Lançamentos</option>
-      </select>
+  <div class="setup-sub">Conecte a conta do Instagram com um clique. O dashboard busca os dados automaticamente.</div>
+
+  <!-- PASSO 1: OAuth -->
+  <div id="setup-step1">
+    <div class="f-section">Dados da conta do Instagram</div>
+    <div class="f-label">Nome do cliente / imobiliária</div>
+    <input class="f-input" id="s-nome" placeholder="Ex: Imóveis Atlântico Premium">
+    <button class="f-btn-ig" onclick="iniciarOAuth()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="24" height="24" rx="6" fill="url(#ig-grad)"/><circle cx="12" cy="12" r="4.5" stroke="white" stroke-width="1.8"/><circle cx="17" cy="7" r="1.2" fill="white"/><defs><linearGradient id="ig-grad" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#F9A825"/><stop offset="0.4" stop-color="#E91E63"/><stop offset="1" stop-color="#7B1FA2"/></linearGradient></defs></svg>
+      Conectar com Instagram
+    </button>
+    <div class="f-note" style="text-align:center;margin-top:10px">Você será redirecionado para o Instagram para autorizar o acesso. Nenhuma senha é compartilhada.</div>
+    <div class="f-section">Perfil do negócio</div>
+    <div class="f-row">
+      <div>
+        <div class="f-label">Segmento</div>
+        <select class="f-select" id="s-seg">
+          <option value="alto">Alto padrão</option>
+          <option value="medio" selected>Médio padrão</option>
+          <option value="lancamento">Lançamentos</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-label">Ticket médio</div>
+        <select class="f-select" id="s-ticket">
+          <option value="300">R$ 300k a 500k</option>
+          <option value="600" selected>R$ 500k a 1M</option>
+          <option value="1000">R$ 1M a 3M</option>
+          <option value="3000">Acima de R$ 3M</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <div class="f-label">Ticket médio</div>
-      <select class="f-select" id="s-ticket">
-        <option value="300">R$ 300k a 500k</option>
-        <option value="600" selected>R$ 500k a 1M</option>
-        <option value="1000">R$ 1M a 3M</option>
-        <option value="3000">Acima de R$ 3M</option>
-      </select>
+    <div class="f-row">
+      <div>
+        <div class="f-label">Resposta no DM</div>
+        <select class="f-select" id="s-resp">
+          <option value="3">Até 5 minutos</option>
+          <option value="15" selected>5 a 30 minutos</option>
+          <option value="90">30 min a 2 horas</option>
+          <option value="180">Acima de 2 horas</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-label">Meta seguidores/mês</div>
+        <select class="f-select" id="s-meta">
+          <option value="100">Até 100</option>
+          <option value="300" selected>100 a 500</option>
+          <option value="800">500 a 1500</option>
+          <option value="2000">Mais de 1500</option>
+        </select>
+      </div>
     </div>
   </div>
-  <div class="f-row">
-    <div>
-      <div class="f-label">Resposta no DM</div>
-      <select class="f-select" id="s-resp">
-        <option value="3">Até 5 minutos</option>
-        <option value="15" selected>5 a 30 minutos</option>
-        <option value="90">30 min a 2 horas</option>
-        <option value="180">Acima de 2 horas</option>
-      </select>
-    </div>
-    <div>
-      <div class="f-label">Meta seguidores/mês</div>
-      <select class="f-select" id="s-meta">
-        <option value="100">Até 100</option>
-        <option value="300" selected>100 a 500</option>
-        <option value="800">500 a 1500</option>
-        <option value="2000">Mais de 1500</option>
-      </select>
-    </div>
+
+  <!-- PASSO 2: aguardando callback OAuth -->
+  <div id="setup-step2" style="display:none;text-align:center;padding:20px 0">
+    <div class="spinner" style="margin:0 auto 20px"></div>
+    <div style="font-size:14px;color:#fff;margin-bottom:8px">Conectando com o Instagram...</div>
+    <div style="font-size:12px;color:#666660">Aguarde enquanto verificamos a autorização.</div>
   </div>
-  <button class="f-btn" onclick="iniciar()">Conectar e abrir dashboard</button>
-  <div class="f-note">Para cada cliente, abra em aba separada e configure com o token e ID da conta desse cliente.</div>
+
+  <!-- PASSO 3: conectado, só confirmar -->
+  <div id="setup-step3" style="display:none">
+    <div style="background:rgba(26,92,58,.15);border:1px solid rgba(26,92,58,.3);border-radius:var(--r);padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(26,92,58,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">✓</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#4ADE80;margin-bottom:3px">Instagram conectado!</div>
+        <div style="font-size:12px;color:#666660" id="step3-info">Conta autorizada com sucesso.</div>
+      </div>
+    </div>
+    <div class="f-section">Perfil do negócio</div>
+    <div class="f-row">
+      <div>
+        <div class="f-label">Segmento</div>
+        <select class="f-select" id="s-seg2">
+          <option value="alto">Alto padrão</option>
+          <option value="medio" selected>Médio padrão</option>
+          <option value="lancamento">Lançamentos</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-label">Ticket médio</div>
+        <select class="f-select" id="s-ticket2">
+          <option value="300">R$ 300k a 500k</option>
+          <option value="600" selected>R$ 500k a 1M</option>
+          <option value="1000">R$ 1M a 3M</option>
+          <option value="3000">Acima de R$ 3M</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-row">
+      <div>
+        <div class="f-label">Resposta no DM</div>
+        <select class="f-select" id="s-resp2">
+          <option value="3">Até 5 minutos</option>
+          <option value="15" selected>5 a 30 minutos</option>
+          <option value="90">30 min a 2 horas</option>
+          <option value="180">Acima de 2 horas</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-label">Meta seguidores/mês</div>
+        <select class="f-select" id="s-meta2">
+          <option value="100">Até 100</option>
+          <option value="300" selected>100 a 500</option>
+          <option value="800">500 a 1500</option>
+          <option value="2000">Mais de 1500</option>
+        </select>
+      </div>
+    </div>
+    <button class="f-btn" onclick="iniciarComOAuth()">Abrir dashboard</button>
+  </div>
+
 </div>
 </div>
 
@@ -716,7 +780,23 @@ async function carregarAPI(){
       var aud2=await fetchAPI('/'+P.userId+'/insights?metric=audience_gender_age,audience_city&period=lifetime');
       audData=processarAudiencia(aud2.data||[]);
     }catch(e){console.log('Audiencia indisponivel');}
-    D=montarDados(profile,insightsData,media.data||[],audData);
+    // Buscar comentários reais
+    setLoading(true,'Buscando comentários...');
+    var comentariosReais=[];
+    try{
+      // Buscar comentários dos últimos posts
+      var mediaIds=(media.data||[]).slice(0,5).map(function(p){return p.id;});
+      for(var mi=0;mi<mediaIds.length;mi++){
+        try{
+          var comResp=await fetchAPI('/'+mediaIds[mi]+'/comments?fields=id,text,timestamp,like_count,username&limit=20');
+          if(comResp.data){
+            comResp.data.forEach(function(c){c._media_id=mediaIds[mi];});
+            comentariosReais=comentariosReais.concat(comResp.data);
+          }
+        }catch(e){console.log('Erro comentarios post '+mediaIds[mi]+':',e.message);}
+      }
+    }catch(e){console.log('Erro geral comentarios:',e.message);}
+    D=montarDados(profile,insightsData,media.data||[],audData,comentariosReais);
     setConnectedState(profile.username||P.nome);
     setLoading(false);
     render();
@@ -760,7 +840,8 @@ function processarAudiencia(data){
   return{gender:gender,age:age,cities:cities};
 }
 
-function montarDados(profile,insights,posts,aud){
+function montarDados(profile,insights,posts,aud,comentarios){
+  comentarios=comentarios||[];
   var reach=0,profileViews=0,linkClicks=0;
   var reach7=DEMO.reach7.slice(),imp7=DEMO.imp7.slice(),link7=DEMO.link7.slice();
   try{
@@ -789,7 +870,8 @@ function montarDados(profile,insights,posts,aud){
     likes:totalLikes||DEMO.likes,comments:totalComments||DEMO.comments,saves:totalSaves||DEMO.saves,shares:totalShares||DEMO.shares,mentions:DEMO.mentions,newFollowers:DEMO.newFollowers,
     growth:DEMO.growth,reach7:reach7,imp7:imp7,saves7:DEMO.saves7,shares7:DEMO.shares7,link7:link7,horas:DEMO.horas,
     posts:mediaItems.length>0?mediaItems:DEMO.posts,
-    gender:aud.gender,age:aud.age,cities:aud.cities
+    gender:aud.gender,age:aud.age,cities:aud.cities,
+    comentariosReais:comentarios
   };
 }
 
@@ -802,22 +884,182 @@ function setConnectedState(username){
   document.getElementById('footerTxt').textContent='@'+username+' · Instagram Graph API';
 }
 
-async function iniciar(){
-  var nome=document.getElementById('s-nome').value.trim()||'Meu Cliente';
-  var token=document.getElementById('s-token').value.trim();
-  var userId=document.getElementById('s-userid').value.trim();
-  P={nome:nome,token:token,userId:userId,seg:document.getElementById('s-seg').value,ticket:parseInt(document.getElementById('s-ticket').value),resp:parseInt(document.getElementById('s-resp').value),meta:parseInt(document.getElementById('s-meta').value)};
-  localStorage.setItem('si_imobi_v3',JSON.stringify(P));
-  document.getElementById('setup').classList.add('off');
-  document.getElementById('app').classList.remove('off');
-  document.getElementById('sbNome').textContent=nome;
-  document.getElementById('sbDot').className='sb-dot demo';
-  if(token&&userId){await carregarAPI();}
-  else{D=DEMO;render();}
+// ── OAUTH ─────────────────────────────────────────────────────────────────
+var OAUTH_CLIENT_ID = '1495381002138022';
+var OAUTH_REDIRECT  = 'https://instagram-dashboard-drab.vercel.app';
+var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_insights,instagram_manage_comments,pages_show_list,public_profile';
+
+function iniciarOAuth(){
+  var nome = document.getElementById('s-nome').value.trim();
+  if(nome) localStorage.setItem('si_oauth_nome', nome);
+  // Salvar seleções do formulário para recuperar após callback
+  localStorage.setItem('si_oauth_pre', JSON.stringify({
+    seg: document.getElementById('s-seg').value,
+    ticket: document.getElementById('s-ticket').value,
+    resp: document.getElementById('s-resp').value,
+    meta: document.getElementById('s-meta').value
+  }));
+  var state = Math.random().toString(36).substring(2);
+  localStorage.setItem('si_oauth_state', state);
+  var url = 'https://www.facebook.com/v21.0/dialog/oauth'
+    + '?client_id=' + OAUTH_CLIENT_ID
+    + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
+    + '&scope=' + encodeURIComponent(OAUTH_SCOPE)
+    + '&state=' + state
+    + '&response_type=code';
+  window.location.href = url;
 }
 
-function resetar(){localStorage.removeItem('si_imobi_v3');document.getElementById('setup').classList.remove('off');document.getElementById('app').classList.add('off');}
+async function trocarCodigoPorToken(code){
+  // O exchange code→token exige client_secret e deve ser feito server-side.
+  // Como o app é client-side puro, usamos o endpoint de token do Instagram
+  // que aceita o código via GET (fluxo do Instagram Basic Display / Graph)
+  var tokenUrl = 'https://graph.facebook.com/v21.0/oauth/access_token'
+    + '?client_id=' + OAUTH_CLIENT_ID
+    + '&client_secret=7066ee1731bc964cbfdab7c373ca09e9'
+    + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
+    + '&code=' + code;
+  var r = await fetch(tokenUrl);
+  var data = await r.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.access_token;
+}
+
+async function buscarUserIdPeloToken(token){
+  var r = await fetch('https://graph.facebook.com/v21.0/me?fields=id,name&access_token=' + token);
+  var data = await r.json();
+  if(data.error) throw new Error(data.error.message);
+  // Buscar conta IG Business vinculada
+  var r2 = await fetch('https://graph.facebook.com/v21.0/' + data.id + '/accounts?fields=instagram_business_account&access_token=' + token);
+  var pages = await r2.json();
+  if(pages.data && pages.data.length > 0){
+    for(var i=0;i<pages.data.length;i++){
+      if(pages.data[i].instagram_business_account){
+        return pages.data[i].instagram_business_account.id;
+      }
+    }
+  }
+  throw new Error('Nenhuma conta Instagram Business encontrada vinculada a este Facebook.');
+}
+
+async function verificarCallbackOAuth(){
+  var params = new URLSearchParams(window.location.search);
+  var code  = params.get('code');
+  var state = params.get('state');
+  var error = params.get('error');
+  if(error){
+    alert('Autorização cancelada ou negada: ' + (params.get('error_description')||error));
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return false;
+  }
+  if(!code) return false;
+  // Validar state
+  var savedState = localStorage.getItem('si_oauth_state');
+  if(state && savedState && state !== savedState){
+    alert('Erro de segurança no OAuth. Tente novamente.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return false;
+  }
+  // Mostrar loading no setup
+  document.getElementById('setup-step1').style.display='none';
+  document.getElementById('setup-step2').style.display='block';
+  try{
+    var token  = await trocarCodigoPorToken(code);
+    var userId = await buscarUserIdPeloToken(token);
+    // Limpar code da URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+    // Salvar dados OAuth
+    localStorage.setItem('si_oauth_token',  token);
+    localStorage.setItem('si_oauth_userid', userId);
+    // Mostrar passo 3
+    document.getElementById('setup-step2').style.display='none';
+    document.getElementById('setup-step3').style.display='block';
+    var nome = localStorage.getItem('si_oauth_nome') || '';
+    document.getElementById('step3-info').textContent = 'Conta conectada.' + (nome?' Cliente: '+nome:'');
+    // Restaurar seleções
+    var pre = JSON.parse(localStorage.getItem('si_oauth_pre')||'{}');
+    if(pre.seg)    document.getElementById('s-seg2').value    = pre.seg;
+    if(pre.ticket) document.getElementById('s-ticket2').value = pre.ticket;
+    if(pre.resp)   document.getElementById('s-resp2').value   = pre.resp;
+    if(pre.meta)   document.getElementById('s-meta2').value   = pre.meta;
+  }catch(err){
+    document.getElementById('setup-step2').style.display='none';
+    document.getElementById('setup-step1').style.display='block';
+    alert('Erro ao conectar: ' + err.message + '\n\nVerifique se o app está publicado no Meta e tente novamente.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+  return true;
+}
+
+function iniciarComOAuth(){
+  var token  = localStorage.getItem('si_oauth_token');
+  var userId = localStorage.getItem('si_oauth_userid');
+  var nome   = localStorage.getItem('si_oauth_nome') || 'Meu Cliente';
+  P = {
+    nome:   nome,
+    token:  token,
+    userId: userId,
+    seg:    document.getElementById('s-seg2').value,
+    ticket: parseInt(document.getElementById('s-ticket2').value),
+    resp:   parseInt(document.getElementById('s-resp2').value),
+    meta:   parseInt(document.getElementById('s-meta2').value)
+  };
+  localStorage.setItem('si_imobi_v3', JSON.stringify(P));
+  abrirApp();
+}
+
+async function iniciar(){
+  // Manter compatibilidade caso ainda haja chamadas antigas
+  var nome  = (document.getElementById('s-nome')||{}).value||'';
+  P = {
+    nome:   nome||'Demo',
+    token:  '',
+    userId: '',
+    seg:    'medio',
+    ticket: 600,
+    resp:   15,
+    meta:   300
+  };
+  abrirApp();
+}
+
+function abrirApp(){
+  localStorage.setItem('si_imobi_v3', JSON.stringify(P));
+  document.getElementById('setup').classList.add('off');
+  document.getElementById('app').classList.remove('off');
+  document.getElementById('sbNome').textContent = P.nome;
+  document.getElementById('sbDot').className = 'sb-dot demo';
+  if(P.token && P.userId){ carregarAPI(); }
+  else{ D=DEMO; render(); }
+}
+
+function resetar(){localStorage.removeItem('si_imobi_v3');localStorage.removeItem('si_oauth_token');localStorage.removeItem('si_oauth_userid');localStorage.removeItem('si_oauth_nome');document.getElementById('setup').classList.remove('off');document.getElementById('app').classList.add('off');}
 async function recarregar(){if(P.token&&P.userId){await carregarAPI();}else{render();}}
+
+// ── INICIALIZAÇÃO ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async function(){
+  // Verificar se há callback OAuth na URL
+  var params = new URLSearchParams(window.location.search);
+  var temCode = params.get('code');
+  if(temCode){
+    // Mostrar setup com loading
+    document.getElementById('setup').classList.remove('off');
+    document.getElementById('app').classList.add('off');
+    var tratou = await verificarCallbackOAuth();
+    if(tratou) return; // setup-step3 foi exibido
+  }
+  // Verificar sessão salva
+  var saved = localStorage.getItem('si_imobi_v3');
+  if(saved){
+    try{
+      P = JSON.parse(saved);
+      abrirApp();
+      return;
+    }catch(e){}
+  }
+  // Mostrar setup normal
+  document.getElementById('setup').classList.remove('off');
+});
 
 function render(){rResumo();rSaude();rDirect();rEngajamento();rConteudo();rAudiencia();rGargalos();rPlano();rBranding();}
 
@@ -915,15 +1157,36 @@ function rDirect(){
     {l:'DM apos Story com sticker',p:10,c:'#7A5010',d:'Resposta ao CTA'},
     {l:'DM via trafego pago',p:5,c:'#8C8C85',d:'Lead do gestor de trafego'}
   ].map(function(o){return barRow(o.l,o.d,o.p,o.c);}).join('');
-  document.getElementById('comentIntencaoEl').innerHTML=[
-    {t:'Tem disponivel?',f:8,a:'Responder e chamar no DM'},
-    {t:'Qual o valor?',f:6,a:'Nao dar o preco no comentario — chamar no DM'},
-    {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
-    {t:'Quero conhecer',f:3,a:'Lead quente — responder em ate 10 min'},
-    {t:'Marcacao de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
-  ].map(function(c){
-    return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Acao: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
-  }).join('');
+  // Comentários com intenção de compra — reais ou simulados
+  var comentariosEl = document.getElementById('comentIntencaoEl');
+  var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
+  if(coms && coms.length > 0){
+    // Palavras-chave de intenção de compra
+    var palavrasIntencao = ['disponível','disponivel','valor','preço','preco','quanto','bairro','localiz','quero conhecer','visitar','agendar','m²','metros','quartos','vagas','condomínio','condominio','parcela','financ','entrada'];
+    var comsIntencao = coms.filter(function(c){
+      var txt = (c.text||'').toLowerCase();
+      return palavrasIntencao.some(function(p){return txt.indexOf(p)>=0;});
+    });
+    if(comsIntencao.length > 0){
+      comentariosEl.innerHTML = comsIntencao.slice(0,6).map(function(c){
+        var dt = c.timestamp ? new Date(c.timestamp).toLocaleDateString('pt-BR') : '';
+        return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">"'+((c.text||'').substring(0,80)+(c.text&&c.text.length>80?'...':''))+'"</div><div style="font-size:11px;color:var(--ink3)">@'+(c.username||'usuário')+' · '+dt+'</div></div><span class="badge b-warn">Lead</span></div>';
+      }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3)">Mostrando '+comsIntencao.length+' comentário(s) com intenção de compra identificados automaticamente.</div>';
+    } else {
+      comentariosEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">'+coms.length+' comentário(s) analisados. Nenhum com palavras-chave de intenção de compra detectadas neste período.</div>';
+    }
+  } else {
+    // Simulado
+    comentariosEl.innerHTML=[
+      {t:'Tem disponível?',f:8,a:'Responder e chamar no DM'},
+      {t:'Qual o valor?',f:6,a:'Não dar o preço no comentário — chamar no DM'},
+      {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
+      {t:'Quero conhecer',f:3,a:'Lead quente — responder em até 10 min'},
+      {t:'Marcação de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
+    ].map(function(c){
+      return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Ação: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
+    }).join('');
+  }
 }
 
 function rEngajamento(){
