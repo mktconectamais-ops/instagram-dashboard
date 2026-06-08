@@ -825,25 +825,59 @@ async function carregarAPI(){
 function processarAudiencia(data){
   var gender=DEMO.gender,age=DEMO.age,cities=DEMO.cities;
   try{
+    // Novo formato: follower_demographics com breakdowns
+    var fd=data.find(function(d){return d.name==='follower_demographics';});
+    if(fd && fd.total_value && fd.total_value.breakdowns){
+      var breakdowns=fd.total_value.breakdowns;
+      var results=breakdowns[0]&&breakdowns[0].results ? breakdowns[0].results : [];
+      var f=0,m=0,u=0,total=0;
+      var ageMap={};
+      results.forEach(function(r){
+        var dims=r.dimension_values||[];
+        var ageGroup=dims[0]||'';
+        var gen=dims[1]||'U';
+        var v=r.value||0;
+        total+=v;
+        if(gen==='F')f+=v;
+        else if(gen==='M')m+=v;
+        else u+=v;
+        if(ageGroup){
+          if(!ageMap[ageGroup])ageMap[ageGroup]=0;
+          ageMap[ageGroup]+=v;
+        }
+      });
+      if(total>0){
+        gender=[
+          {l:'Masculino',p:Math.round(m/total*100),c:'#1A3A6E'},
+          {l:'Feminino',p:Math.round(f/total*100),c:'#8C1F1F'},
+          {l:'Outro',p:Math.round(u/total*100),c:'#B07D3A'}
+        ];
+        age=Object.keys(ageMap).sort().map(function(k){
+          return{l:k,p:Math.round(ageMap[k]/total*100)};
+        });
+      }
+    }
+    // Formato legado audience_gender_age (fallback)
     var ga=data.find(function(d){return d.name==='audience_gender_age';});
     if(ga&&ga.values&&ga.values[0]){
       var vals=ga.values[0].value;
-      var f=0,m=0,u=0,total=0;
-      var ageMap={};
+      var f2=0,m2=0,u2=0,total2=0;
+      var ageMap2={};
       Object.keys(vals).forEach(function(k){
         var parts=k.split('.');
         var g=parts[0],a=parts[1];
         var v=vals[k];
-        total+=v;
-        if(g==='F')f+=v;else if(g==='M')m+=v;else u+=v;
-        if(!ageMap[a])ageMap[a]=0;
-        ageMap[a]+=v;
+        total2+=v;
+        if(g==='F')f2+=v;else if(g==='M')m2+=v;else u2+=v;
+        if(!ageMap2[a])ageMap2[a]=0;
+        ageMap2[a]+=v;
       });
-      if(total>0){
-        gender=[{l:'Masculino',p:Math.round(m/total*100),c:'#1A3A6E'},{l:'Feminino',p:Math.round(f/total*100),c:'#8C1F1F'},{l:'Outro',p:Math.round(u/total*100),c:'#B07D3A'}];
-        age=Object.keys(ageMap).sort().map(function(k){return{l:k,p:Math.round(ageMap[k]/total*100)};});
+      if(total2>0){
+        gender=[{l:'Masculino',p:Math.round(m2/total2*100),c:'#1A3A6E'},{l:'Feminino',p:Math.round(f2/total2*100),c:'#8C1F1F'},{l:'Outro',p:Math.round(u2/total2*100),c:'#B07D3A'}];
+        age=Object.keys(ageMap2).sort().map(function(k){return{l:k,p:Math.round(ageMap2[k]/total2*100)};});
       }
     }
+    // Cidades (formato legado)
     var cd=data.find(function(d){return d.name==='audience_city';});
     if(cd&&cd.values&&cd.values[0]){
       var cvals=cd.values[0].value;
