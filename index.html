@@ -919,6 +919,7 @@ async function trocarCodigoPorToken(code){
     body: JSON.stringify({ code: code, redirect_uri: OAUTH_REDIRECT })
   });
   var data = await r.json();
+  console.log('Resposta /api/token:', JSON.stringify(data));
   if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   return data.access_token;
 }
@@ -953,11 +954,13 @@ async function verificarCallbackOAuth(){
     return false;
   }
   if(!code) return false;
+  // Limpar code da URL IMEDIATAMENTE antes de qualquer coisa
+  // para evitar reuso em caso de refresh
+  window.history.replaceState({}, document.title, window.location.pathname);
   // Validar state
   var savedState = localStorage.getItem('si_oauth_state');
   if(state && savedState && state !== savedState){
     alert('Erro de segurança no OAuth. Tente novamente.');
-    window.history.replaceState({}, document.title, window.location.pathname);
     return false;
   }
   // Mostrar loading no setup
@@ -966,8 +969,6 @@ async function verificarCallbackOAuth(){
   try{
     var token  = await trocarCodigoPorToken(code);
     var userId = await buscarUserIdPeloToken(token);
-    // Limpar code da URL
-    window.history.replaceState({}, document.title, window.location.pathname);
     // Salvar dados OAuth
     localStorage.setItem('si_oauth_token',  token);
     localStorage.setItem('si_oauth_userid', userId);
@@ -985,8 +986,7 @@ async function verificarCallbackOAuth(){
   }catch(err){
     document.getElementById('setup-step2').style.display='none';
     document.getElementById('setup-step1').style.display='block';
-    alert('Erro ao conectar: ' + err.message + '\n\nVerifique se o app está publicado no Meta e tente novamente.');
-    window.history.replaceState({}, document.title, window.location.pathname);
+    alert('Erro ao conectar: ' + err.message + '\n\nTente novamente.');
   }
   return true;
 }
