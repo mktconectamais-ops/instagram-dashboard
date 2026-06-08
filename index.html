@@ -891,7 +891,7 @@ function processarAudiencia(data){
 function montarDados(profile,insights,posts,aud,comentarios){
   comentarios=comentarios||[];
   var reach=0,profileViews=0,linkClicks=0;
-  var reach7=DEMO.reach7.slice(),imp7=DEMO.imp7.slice(),link7=DEMO.link7.slice();
+  var reach7=null,imp7=null,link7=null;
   try{
     var find=function(name){return insights.find(function(d){return d.name===name;});};
     var sum=function(d){return d&&d.values?d.values.reduce(function(a,b){return a+(b.value||0);},0):0;};
@@ -908,15 +908,17 @@ function montarDados(profile,insights,posts,aud,comentarios){
   var totalComments=mediaItems.reduce(function(a,p){return a+p.comments;},0);
   var totalSaves=mediaItems.reduce(function(a,p){return a+p.saves;},0);
   var totalShares=mediaItems.reduce(function(a,p){return a+p.shares;},0);
-  var followers=profile.followers_count||DEMO.followers;
-  var engRate=followers>0&&totalLikes>0?parseFloat(((totalLikes+totalComments+totalSaves)/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):DEMO.engRate;
+  var followers=profile.followers_count||0;
+  var engRate=followers>0&&(totalLikes+totalComments)>0?parseFloat(((totalLikes+totalComments+totalSaves)/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):null;
   return{
     username:profile.username||P.nome,
-    followers:followers,following:profile.follows_count||DEMO.following,mediaCount:parseInt(profile.media_count)||0,
-    engRate:engRate,reach:reach||DEMO.reach,impressions:Math.round((reach||DEMO.reach)*2.5),
-    profileViews:profileViews||DEMO.profileViews,linkClicks:linkClicks||DEMO.linkClicks,
-    likes:totalLikes||DEMO.likes,comments:totalComments||DEMO.comments,saves:totalSaves||DEMO.saves,shares:totalShares||DEMO.shares,mentions:DEMO.mentions,newFollowers:DEMO.newFollowers,
-    growth:DEMO.growth,reach7:reach7,imp7:imp7,saves7:DEMO.saves7,shares7:DEMO.shares7,link7:link7,horas:DEMO.horas,
+    followers:followers,following:profile.follows_count||0,mediaCount:parseInt(profile.media_count)||0,
+    engRate:engRate,reach:reach||0,impressions:Math.round((reach||0)*2.5),
+    profileViews:profileViews||0,linkClicks:linkClicks||0,
+    likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
+    // Dados não disponíveis na API — null indica "sem dados"
+    mentions:null,newFollowers:null,
+    growth:null,reach7:reach7,imp7:imp7,saves7:null,shares7:null,link7:link7,horas:DEMO.horas,
     posts:mediaItems.length>0?mediaItems:DEMO.posts,
     gender:aud.gender,age:aud.age,cities:aud.cities,
     comentariosReais:comentarios
@@ -1113,61 +1115,79 @@ function render(){rResumo();rSaude();rDirect();rEngajamento();rConteudo();rAudie
 
 function rResumo(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
-  var ctr=d.linkClicks/d.profileViews*100;
-  var engOk=d.engRate>=b.eng.min,savesOk=d.saves>=b.saves.min,ctrOk=ctr>=b.ctr.min,respOk=P.resp<=20;
+  var ctr=d.profileViews>0?d.linkClicks/d.profileViews*100:0;
+  var engOk=d.engRate!==null&&d.engRate>=b.eng.min,savesOk=d.saves>=b.saves.min,ctrOk=d.profileViews>0&&ctr>=b.ctr.min,respOk=P.resp<=20;
   var ptxt='';
   if(!respOk)ptxt='O Direct esta sendo respondido em <strong>'+P.resp+' minutos</strong>. Configurar resposta automatica reduz esse tempo e nao deixa nenhum lead sem resposta.';
-  else if(!ctrOk)ptxt='O CTR do perfil esta em <strong>'+ctr.toFixed(1)+'%</strong>. A bio nao esta convertendo visitantes. Reescrever com foco no que o comprador busca: regiao, padrao e proximo passo.';
-  else if(!savesOk)ptxt='Os saves estao em <strong>'+fmt(d.saves)+'</strong> no mes. Publicar mais conteudo de lifestyle do bairro e tours com narracao.';
+  else if(d.profileViews>0&&!ctrOk)ptxt='O CTR do perfil esta em <strong>'+ctr.toFixed(1)+'%</strong>. A bio nao esta convertendo visitantes. Reescrever com foco no que o comprador busca: regiao, padrao e proximo passo.';
+  else if(!savesOk&&d.saves>0)ptxt='Os saves estao em <strong>'+fmt(d.saves)+'</strong> no mes. Publicar mais conteudo de lifestyle do bairro e tours com narracao.';
   else ptxt='Perfil <strong>saudavel</strong>. Manter regularidade de publicacao e garantir resposta a todos os comentarios com pergunta em ate 30 minutos.';
   prox('proxResumoTxt',ptxt);
   var sems=[
-    {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate.toFixed(1)+'% de taxa'},
+    {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate!==null?d.engRate.toFixed(1)+'% de taxa':'Calculando...'},
     {area:'Direct',icon:'ti-message-circle',s:respOk?'s-ok':'s-warn',label:respOk?'Respondendo bem':'Pode melhorar',desc:'~'+P.resp+' min de resposta'},
-    {area:'Crescimento',icon:'ti-trending-up',s:d.newFollowers>=100?'s-ok':'s-warn',label:d.newFollowers>=100?'Crescendo':'Lento',desc:'+'+fmt(d.newFollowers)+' este mes'},
+    {area:'Crescimento',icon:'ti-trending-up',s:'s-info',label:'Ver perfil',desc:fmt(d.followers)+' seguidores'},
     {area:'Conteudo',icon:'ti-bookmark',s:savesOk?'s-ok':'s-warn',label:savesOk?'Gerando interesse':'Pouco impacto',desc:fmt(d.saves)+' saves este mes'}
   ];
   document.getElementById('semaforoEl').innerHTML=sems.map(function(s){
     return '<div class="sem '+s.s+'"><div class="sem-circle"><i class="ti '+s.icon+'"></i></div><div><div class="sem-label">'+s.area+'</div><div class="sem-status">'+s.label+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">'+s.desc+'</div></div></div>';
   }).join('');
   document.getElementById('kpiResumo').innerHTML=[
-    kpi('Seguidores',fmt(d.followers),'+'+fmt(d.newFollowers)+' este mes','k-gold'),
-    kpi('Engajamento',d.engRate.toFixed(1)+'%',engOk?'acima do minimo':'abaixo do esperado',engOk?'k-green':''),
-    kpi('Alcance 30d',fmt(d.reach),'pessoas unicas','k-blue'),
-    kpi('Saves',fmt(d.saves),'intencao de compra','k-dark'),
-    kpi('Compartilhamentos',fmt(d.shares),'indicacao organica',''),
-    kpi('Cliques no link',fmt(d.linkClicks),ctr.toFixed(1)+'% dos visitantes','k-dark')
+    kpi('Seguidores',fmt(d.followers),d.following>0?'seguindo '+fmt(d.following):'','k-gold'),
+    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do minimo':'calculado nos posts',engOk?'k-green':''),
+    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas unicas':'indisponivel','k-blue'),
+    kpi('Saves',d.saves>0?fmt(d.saves):'—',d.saves>0?'intencao de compra':'indisponivel na API','k-dark'),
+    kpi('Compartilhamentos',d.shares>0?fmt(d.shares):'—',d.shares>0?'indicacao organica':'indisponivel na API',''),
+    kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0&&d.profileViews>0?ctr.toFixed(1)+'% dos visitantes':'indisponivel','k-dark')
   ].join('');
+  // Gráfico crescimento — só mostra se tiver dados reais de alcance
   dc('cGrowth');
-  charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.growth,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-  document.getElementById('origensEl').innerHTML=[
-    {l:'Explorar / Reels',p:44,c:'#B07D3A',d:'Descoberta organica — seguidor novo'},
-    {l:'Busca direta',p:22,c:'#1A3A6E',d:'Ja te conhecia — mais qualificado'},
-    {l:'Compartilhamento de post',p:18,c:'#1A5C3A',d:'Indicacao — seguidor quente'},
-    {l:'Perfil de outro usuario',p:10,c:'#7A5010',d:'Parceiro ou cliente te marcou'},
-    {l:'Outros',p:6,c:'#8C8C85',d:''}
-  ].map(function(o){return barRow(o.l,o.d,o.p,o.c);}).join('');
-}
+  if(d.reach7){
+    charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.reach7,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+    document.getElementById('cGrowth').parentElement.previousElementSibling&&(document.getElementById('cGrowth').parentElement.previousElementSibling.textContent='Alcance por dia — últimos 7 dias');
+  } else {
+    document.getElementById('cGrowth').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:190px;color:var(--ink3);font-size:13px">Dados de crescimento diário não disponíveis na API</div>';
+  }
+  // Origens de seguidores — não disponível na API, remover
+  var origensEl=document.getElementById('origensEl');
+  if(origensEl) origensEl.closest('.card').style.display='none';
 
 function rSaude(){
   var d=D;
-  var ctr=d.linkClicks/d.profileViews*100,convSeg=d.newFollowers/d.profileViews*100;
-  var ctrOk=ctr>=8,convOk=convSeg>=3;
-  prox('proxSaudeTxt',convOk?'Taxa de conversao do perfil esta boa — <strong>'+convSeg.toFixed(1)+'%</strong> dos visitantes seguem. Manter a bio atualizada com imoveis disponiveis.':'Apenas <strong>'+convSeg.toFixed(1)+'%</strong> dos visitantes estao seguindo. A bio precisa comunicar mais claramente o que voce oferece e para quem.');
-  document.getElementById('vitrineEl').innerHTML=[
-    chk(d.profileViews>=2000?'ok':'warn','Visitas ao perfil este mes: '+fmt(d.profileViews),'Pessoas que abriram o perfil para saber mais'),
-    chk(convOk?'ok':'warn','Taxa visitante para seguidor: '+convSeg.toFixed(1)+'%','Acima de 3% e saudavel para imobiliario'),
-    chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio esta convertendo'),
-    chk(d.mentions>=10?'ok':'warn','Mencoes e marcacoes: '+fmt(d.mentions)+'/sem','Clientes marcando voce — prova social organica')
-  ].join('');
-  document.getElementById('highlightsEl').innerHTML=[
-    {l:'Imoveis disponiveis',v:1840,p:32},{l:'Depoimentos',v:1160,p:20},
-    {l:'O bairro',v:920,p:16},{l:'Sobre nos',v:696,p:12},{l:'Dicas de compra',v:580,p:10}
-  ].map(function(h){
-    return '<div class="row"><div class="row-lbl">'+h.l+'</div><div class="mbar"><div class="mbar-f" style="width:'+h.p+'%;background:#B07D3A"></div></div><div class="row-val">'+fmt(h.v)+'</div><div style="font-size:11px;color:var(--ink3);min-width:40px;text-align:right">'+h.p+'%</div></div>';
-  }).join('');
+  var ctr=d.profileViews>0?d.linkClicks/d.profileViews*100:0;
+  var ctrOk=ctr>=8;
+  var proxTxt=d.profileViews>0?
+    (ctrOk?'Bio convertendo bem — <strong>'+ctr.toFixed(1)+'%</strong> dos visitantes clicam no link. Manter a bio atualizada com imóveis disponíveis.':'Clique no link da bio em <strong>'+ctr.toFixed(1)+'%</strong>. Reescrever a bio com CTA claro e link direto para o WhatsApp.'):
+    'Dados de visitas ao perfil indisponíveis no momento.';
+  prox('proxSaudeTxt',proxTxt);
+  var vitrineItems=[];
+  if(d.profileViews>0){
+    vitrineItems.push(chk(d.profileViews>=2000?'ok':'warn','Visitas ao perfil este mes: '+fmt(d.profileViews),'Pessoas que abriram o perfil para saber mais'));
+    vitrineItems.push(chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio esta convertendo'));
+  } else {
+    vitrineItems.push(chk('info','Visitas ao perfil: indisponível na API','Requer permissão adicional aprovada pela Meta'));
+  }
+  if(d.linkClicks>0){
+    vitrineItems.push(chk(d.linkClicks>=50?'ok':'warn','Cliques no link: '+fmt(d.linkClicks)+' este mes','Pessoas que foram para o WhatsApp ou site'));
+  }
+  vitrineItems.push(chk('info','Menções e marcações: indisponível','A API não fornece dados de menções'));
+  document.getElementById('vitrineEl').innerHTML=vitrineItems.join('');
+  // Destaques — não disponível na API
+  document.getElementById('highlightsEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de acesso aos destaques não estão disponíveis na API do Instagram. Verifique diretamente no Instagram Insights do aplicativo.</div>';
+  // Consistência de publicação — baseada nos posts reais
   var dias=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
-  var semanas=[[1,1,1,0,1,1,0],[1,1,0,1,1,0,1],[1,0,1,1,1,1,0],[1,1,1,0,1,0,1]];
+  var postDates=(d.posts||[]).filter(function(p){return p.timestamp;}).map(function(p){return new Date(p.timestamp);});
+  var semanas=[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+  var hoje=new Date();
+  postDates.forEach(function(dt){
+    var diffDias=Math.floor((hoje-dt)/(1000*60*60*24));
+    if(diffDias<28){
+      var semIdx=Math.floor(diffDias/7);
+      var diaIdx=(dt.getDay()+6)%7; // 0=seg
+      if(semIdx<4) semanas[semIdx][diaIdx]=1;
+    }
+  });
+  var totalPublicacoes=semanas.reduce(function(a,s){return a+s.reduce(function(b,v){return b+v;},0);},0);
   var diasH='<tr>'+dias.map(function(d){return '<td style="text-align:center;font-size:10px;color:var(--ink3)">'+d+'</td>';}).join('')+'</tr>';
   var semH=semanas.map(function(s){
     return '<tr>'+s.map(function(v){
@@ -1176,17 +1196,20 @@ function rSaude(){
       return '<td style="text-align:center"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:'+col+'">'+(v?'●':'○')+'</div></td>';
     }).join('')+'</tr>';
   }).join('');
-  document.getElementById('consistenciaEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Ultimas 4 semanas — publicou ou nao publicou</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px">'+diasH+semH+'</table></div><div style="margin-top:12px;padding:10px 12px;background:var(--green-l);border-radius:var(--r);font-size:11px;color:var(--green)">Publicacao regular detectada. Consistencia e o principal fator de crescimento organico.</div>';
+  var consistMsg=totalPublicacoes>=12?'Publicacao regular detectada. Consistencia e o principal fator de crescimento organico.':totalPublicacoes>=6?'Publicacao moderada. Aumentar frequencia para pelo menos 1 post por dia ajuda no alcance organico.':'Poucos posts detectados nas ultimas 4 semanas. Consistencia e essencial para crescer no Instagram.';
+  var consistColor=totalPublicacoes>=12?'var(--green)':totalPublicacoes>=6?'var(--amber)':'var(--red)';
+  var consistBg=totalPublicacoes>=12?'var(--green-l)':totalPublicacoes>=6?'var(--amber-l)':'var(--red-l)';
+  document.getElementById('consistenciaEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Ultimas 4 semanas — baseado nos posts reais da conta</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px">'+diasH+semH+'</table></div><div style="margin-top:12px;padding:10px 12px;background:'+consistBg+';border-radius:var(--r);font-size:11px;color:'+consistColor+'">'+consistMsg+'</div>';
 }
 
 function rDirect(){
   var respOk=P.resp<=20;
   prox('proxDirectTxt',!respOk?'Tempo de resposta: <strong>'+P.resp+' minutos</strong>. Configure uma mensagem automatica no Instagram para responder instantaneamente fora do horario comercial.':'<strong>Direct funcionando bem.</strong> Garantir que comentarios com perguntas tambem sejam respondidos em ate 30 minutos.');
   document.getElementById('kpiDirect').innerHTML=[
-    kpi('DMs recebidos/semana','~'+fmt(P.resp<=10?30:P.resp<=30?20:12),'volume estimado',''),
-    kpi('Taxa de resposta','89%','bom','k-green'),
-    kpi('Tempo de resposta',P.resp+'min',respOk?'aceitavel':'melhorar',respOk?'k-dark':''),
-    kpi('DMs de compra','~12/sem','leads no Direct','k-gold')
+    kpi('DMs recebidos/semana','—','não disponível na API',''),
+    kpi('Taxa de resposta','—','não disponível na API',''),
+    kpi('Tempo de resposta',P.resp+'min',respOk?'configurado no setup':' melhorar',respOk?'k-dark':''),
+    kpi('DMs de compra','—','não disponível na API','')
   ].join('');
   var faixas=[{l:'Ate 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — critico',ref:999}];
   document.getElementById('velocDirectEl').innerHTML=faixas.map(function(f,i){
@@ -1198,13 +1221,8 @@ function rDirect(){
     var blabel=f.ref<=5?'Ideal':f.ref<=30?'Bom':'Melhorar';
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:'+(ativo?bg:'var(--sub)')+';border:'+(ativo?'1.5px solid '+c:'.5px solid var(--line)')+'"><div style="width:10px;height:10px;border-radius:50%;background:'+(ativo?c:'var(--line)')+'"></div><div style="flex:1;font-size:12px;font-weight:'+(ativo?600:400)+';color:'+(ativo?c:'var(--ink3)')+'"> '+f.l+'</div>'+(ativo?'<span class="badge '+bstatus+'">'+blabel+'</span>':'')+'</div>';
   }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrao avalia varios imoveis ao mesmo tempo. A resposta mais rapida tem vantagem real.</div>';
-  document.getElementById('origemDmEl').innerHTML=[
-    {l:'DM apos ver Reel ou video',p:45,c:'#B07D3A',d:'Interesse alto — viu o imovel'},
-    {l:'DM apos comentar no post',p:22,c:'#1A3A6E',d:'Interesse medio — ja interagiu'},
-    {l:'DM direto pelo perfil',p:18,c:'#1A5C3A',d:'Interesse alto — foi buscar contato'},
-    {l:'DM apos Story com sticker',p:10,c:'#7A5010',d:'Resposta ao CTA'},
-    {l:'DM via trafego pago',p:5,c:'#8C8C85',d:'Lead do gestor de trafego'}
-  ].map(function(o){return barRow(o.l,o.d,o.p,o.c);}).join('');
+  // Origem dos DMs — não disponível na API
+  document.getElementById('origemDmEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de origem dos DMs não estão disponíveis na API do Instagram. Verifique diretamente no Instagram Insights do aplicativo.</div>';
   // Comentários com intenção de compra — reais ou simulados
   var comentariosEl = document.getElementById('comentIntencaoEl');
   var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
@@ -1239,55 +1257,102 @@ function rDirect(){
 
 function rEngajamento(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
-  var engOk=d.engRate>=b.eng.min;
+  var engOk=d.engRate!==null&&d.engRate>=b.eng.min;
   prox('proxEngTxt',d.saves<b.saves.min?'Os saves estao em <strong>'+fmt(d.saves)+'</strong>. Publicar conteudo de lifestyle do bairro e carrosseis com dicas de compra.':'<strong>Engajamento saudavel.</strong> Manter o ritmo de Reels e focar em compartilhamentos.');
   document.getElementById('kpiEng').innerHTML=[
-    kpi('Taxa de engajamento',d.engRate.toFixed(1)+'%',engOk?'acima do minimo':'abaixo do esperado',engOk?'k-dark':''),
-    kpi('Saves',fmt(d.saves),'intencao de compra','k-green'),
-    kpi('Compartilhamentos',fmt(d.shares),'indicacao organica',''),
-    kpi('Comentarios',fmt(d.comments),'~12 com pergunta de compra',''),
-    kpi('Mencoes',fmt(d.mentions)+'/sem','prova social',''),
-    kpi('Alcance 30d',fmt(d.reach),'pessoas unicas','k-blue')
+    kpi('Taxa de engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do minimo':'calculado nos posts',engOk?'k-dark':''),
+    kpi('Saves',d.saves>0?fmt(d.saves):'—',d.saves>0?'intencao de compra':'indisponivel na API','k-green'),
+    kpi('Compartilhamentos',d.shares>0?fmt(d.shares):'—',d.shares>0?'indicacao organica':'indisponivel na API',''),
+    kpi('Comentarios',fmt(d.comments),'nos ultimos posts',''),
+    kpi('Curtidas',fmt(d.likes),'nos ultimos posts',''),
+    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas unicas':'indisponivel na API','k-blue')
   ].join('');
-  var ec=[d.likes,d.comments,d.saves,d.shares,d.mentions];
-  var ecl=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
-  var ell=['Curtidas','Comentarios','Saves','Compart.','Mencoes'];
+  var ec=[d.likes,d.comments,d.saves>0?d.saves:0,d.shares>0?d.shares:0];
+  var ecl=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F'];
+  var ell=['Curtidas','Comentarios','Saves','Compart.'];
   document.getElementById('engLegEl').innerHTML=ell.map(function(l,i){return '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:'+ecl[i]+'"></span>'+l+' '+fmt(ec[i])+'</span>';}).join('');
   dc('cEngPizza');charts.cEngPizza=new Chart(document.getElementById('cEngPizza'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
-  dc('cSaves');charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-  dc('cShares');charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-  dc('cReach');charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});
+  // Saves por dia — só mostra se disponível
+  dc('cSaves');
+  if(d.saves7){
+    charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  } else {
+    document.getElementById('cSaves').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de saves por dia não disponíveis na API</div>';
+  }
+  dc('cShares');
+  if(d.shares7){
+    charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+  } else {
+    document.getElementById('cShares').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de compartilhamentos por dia não disponíveis na API</div>';
+  }
+  dc('cReach');
+  if(d.reach7){
+    charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});
+  } else {
+    document.getElementById('cReach').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de alcance por dia não disponíveis na API</div>';
+  }
 }
 
 function rConteudo(){
   var d=D;
-  var best=d.posts.reduce(function(a,b){return b.saves>a.saves?b:a;},d.posts[0]);
-  prox('proxContTxt','O post com mais saves foi <strong>'+best.caption+'</strong> ('+best.saves+' saves). <strong>Criar mais conteudo neste formato e estilo</strong>.');
+  var posts=d.posts||[];
+  // Melhor post por curtidas (saves muitas vezes zerado na API)
+  var best=posts.length>0?posts.reduce(function(a,b){return(b.likes+b.comments)>(a.likes+a.comments)?b:a;},posts[0]):null;
+  if(best) prox('proxContTxt','O post com mais engajamento foi <strong>'+best.caption+'</strong> ('+best.likes+' curtidas, '+best.comments+' comentários). <strong>Criar mais conteúdo neste formato e estilo</strong>.');
   var tipos={REEL:'Reel',VIDEO:'Video',CAROUSEL_ALBUM:'Carrossel',IMAGE:'Foto'};
   var tc={REEL:['#FAF0E0','#7A5520'],VIDEO:['#FAF0D8','#7A5010'],CAROUSEL_ALBUM:['#E0E8FA','#1A3A6E'],IMAGE:['#E0F0E8','#1A5C3A']};
-  var tbl='<table class="ptbl"><thead><tr><th>Publicacao</th><th>Tipo</th><th>Alcance</th><th>Curtidas</th><th>Saves</th><th>Compart.</th><th>Resultado</th></tr></thead><tbody>';
-  d.posts.forEach(function(p){
+  var tbl='<table class="ptbl"><thead><tr><th>Publicacao</th><th>Tipo</th><th>Curtidas</th><th>Comentários</th><th>Saves</th><th>Resultado</th></tr></thead><tbody>';
+  posts.forEach(function(p){
     var c=tc[p.mediaType]||['#EFECE6','#454540'];
-    var s=p.saves>=80?'Otimo':p.saves>=30?'Bom':'Baixo';
+    var score=p.likes+p.comments*2+(p.saves||0)*3;
+    var s=score>=200?'Otimo':score>=80?'Bom':'Baixo';
     var sc=s==='Otimo'?'b-ok':s==='Bom'?'b-warn':'b-bad';
-    tbl+='<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">'+p.caption+'</td><td><span class="pill" style="background:'+c[0]+';color:'+c[1]+'">'+( tipos[p.mediaType]||p.mediaType)+'</span></td><td>'+fmt(p.reach)+'</td><td>'+fmt(p.likes)+'</td><td style="font-weight:600;color:var(--green)">'+fmt(p.saves)+'</td><td>'+fmt(p.shares)+'</td><td><span class="badge '+sc+'">'+s+'</span></td></tr>';
+    tbl+='<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">'+p.caption+'</td><td><span class="pill" style="background:'+c[0]+';color:'+c[1]+'">'+(tipos[p.mediaType]||p.mediaType)+'</span></td><td>'+fmt(p.likes)+'</td><td>'+fmt(p.comments)+'</td><td style="font-weight:600;color:var(--green)">'+(p.saves>0?fmt(p.saves):'—')+'</td><td><span class="badge '+sc+'">'+s+'</span></td></tr>';
   });
   tbl+='</tbody></table>';
   document.getElementById('postsTableEl').innerHTML=tbl;
-  var mix=[{l:'Tour em video / Reel',a:38,r:35,c:'#B07D3A'},{l:'Lifestyle do bairro',a:20,r:25,c:'#1A5C3A'},{l:'Depoimento de comprador',a:10,r:20,c:'#8C1F1F'},{l:'Educativo',a:18,r:12,c:'#1A3A6E'},{l:'Foto estatica',a:14,r:8,c:'#8C8C85'}];
-  document.getElementById('mixEl').innerHTML=mix.map(function(m){
-    return '<div class="row"><div class="row-lbl">'+m.l+'</div><div style="text-align:right;font-size:11px;color:var(--ink3)">atual '+m.a+'% ideal '+m.r+'%</div><div class="mbar"><div class="mbar-f" style="width:'+m.a+'%;background:'+m.c+'"></div></div></div>';
+
+  // Mix de conteúdo REAL — baseado nos posts da API
+  var contagem={REEL:0,VIDEO:0,CAROUSEL_ALBUM:0,IMAGE:0};
+  posts.forEach(function(p){if(contagem[p.mediaType]!==undefined)contagem[p.mediaType]++;});
+  var total=posts.length||1;
+  var mixReal=[
+    {l:'Reel / Vídeo',a:Math.round((contagem.REEL+contagem.VIDEO)/total*100),r:40,c:'#B07D3A'},
+    {l:'Carrossel',a:Math.round(contagem.CAROUSEL_ALBUM/total*100),r:35,c:'#1A3A6E'},
+    {l:'Foto estática',a:Math.round(contagem.IMAGE/total*100),r:25,c:'#1A5C3A'}
+  ];
+  document.getElementById('mixEl').innerHTML=mixReal.map(function(m){
+    return '<div class="row"><div class="row-lbl">'+m.l+'</div><div style="text-align:right;font-size:11px;color:var(--ink3)">atual '+m.a+'% · ideal '+m.r+'%</div><div class="mbar"><div class="mbar-f" style="width:'+m.a+'%;background:'+m.c+'"></div></div></div>';
   }).join('');
-  var days=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
-  var horasHTML=days.map(function(day){
-    var cells=d.horas.map(function(v){
-      var o=Math.min(v/32,1);
-      var bg=v>22?'rgba(176,125,58,'+Math.max(o,0.7)+')':v>12?'rgba(176,125,58,'+Math.max(o*0.5,0.25)+')':v>5?'rgba(176,125,58,.12)':'rgba(176,125,58,.04)';
-      return '<div class="hm-cell" style="background:'+bg+'"></div>';
+
+  // Melhor horário para publicar — baseado nos posts com mais engajamento
+  var postComHora=posts.filter(function(p){return p.timestamp;}).map(function(p){
+    var dt=new Date(p.timestamp);
+    return{hora:dt.getHours(),dia:(dt.getDay()+6)%7,eng:p.likes+p.comments*2};
+  });
+  var horaEng=new Array(24).fill(0);
+  var horaCount=new Array(24).fill(0);
+  postComHora.forEach(function(p){horaEng[p.hora]+=p.eng;horaCount[p.hora]++;});
+  var horaMed=horaEng.map(function(e,i){return horaCount[i]>0?e/horaCount[i]:0;});
+  var melhorHora=horaMed.indexOf(Math.max.apply(null,horaMed));
+  var diaEng=[0,0,0,0,0,0,0];
+  var diaCount=[0,0,0,0,0,0,0];
+  postComHora.forEach(function(p){diaEng[p.dia]+=p.eng;diaCount[p.dia]++;});
+  var diaMed=diaEng.map(function(e,i){return diaCount[i]>0?e/diaCount[i]:0;});
+  var melhorDia=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'][diaMed.indexOf(Math.max.apply(null,diaMed))];
+  var labels=['0h','','','','','','6h','','','','','','12h','','','','','','18h','','','','','23h'];
+  var horariosEl=document.getElementById('horariosEl');
+  if(postComHora.length>0){
+    var maxEng=Math.max.apply(null,horaMed)||1;
+    var bars=horaMed.map(function(v,i){
+      var h=(v/maxEng);
+      var bg=h>0.7?'rgba(176,125,58,0.9)':h>0.3?'rgba(176,125,58,0.5)':h>0?'rgba(176,125,58,0.2)':'rgba(176,125,58,0.05)';
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;background:'+bg+';border-radius:3px 3px 0 0;height:'+(Math.max(h*80,2))+'px;transition:height .3s"></div><div style="font-size:9px;color:var(--ink3)">'+labels[i]+'</div></div>';
     }).join('');
-    return '<div class="hm-row"><span class="hm-lbl">'+day+'</span><div class="hm-cells">'+cells+'</div></div>';
-  }).join('');
-  document.getElementById('horariosEl').innerHTML=horasHTML+'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ink3);margin-top:5px;padding-left:33px"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>';
+    horariosEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:2px;height:100px;padding-bottom:18px">'+bars+'</div><div style="margin-top:10px;font-size:12px;color:var(--ink3)">Melhor horário detectado: <strong style="color:var(--gold)">'+melhorHora+'h</strong> · Melhor dia: <strong style="color:var(--gold)">'+melhorDia+'</strong> — baseado no engajamento real dos seus posts</div>';
+  } else {
+    horariosEl.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--ink3)">Posts insuficientes para calcular melhor horário.</div>';
+  }
 }
 
 function rAudiencia(){
@@ -1295,49 +1360,55 @@ function rAudiencia(){
   var ac=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F','#7A5010'];
   var fit35=d.age.filter(function(a){return a.l==='35-44'||a.l==='45-54'||a.l==='35–44'||a.l==='45–54';}).reduce(function(s,a){return s+a.p;},0);
   var fitOk=fit35>=45;
+  var localPct=d.cities.length>=2?d.cities[0].p+d.cities[1].p:d.cities.length>=1?d.cities[0].p:0;
   document.getElementById('kpiAud').innerHTML=[
     kpi('Seguidores totais',fmt(d.followers),'',''),
     kpi('Faixa 35-54 anos',fit35+'%','',''),
-    kpi('Audiencia local',( d.cities[0].p+d.cities[1].p)+'%','',''),
-    kpi('Engajamento',d.engRate.toFixed(1)+'%','','')
+    kpi('Audiencia local',localPct+'%','',''),
+    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—','','')
   ].join('');
-  document.getElementById('ageEl').innerHTML=d.age.map(function(g,i){return aud(g.l,g.p,ac[i]);}).join('');
-  document.getElementById('ageDiagEl').innerHTML='<span style="color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'':'')+''+fit35+'% da audiencia tem 35-54 anos</strong> — '+(fitOk?'excelente fit com o perfil de comprador.':'abaixo do ideal. O comprador de alto padrao tende a ter 35-55 anos.')+'</span>';
+  document.getElementById('ageEl').innerHTML=d.age.map(function(g,i){return aud(g.l,g.p,ac[i%ac.length]);}).join('');
+  document.getElementById('ageDiagEl').innerHTML='<span style="color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+fit35+'% da audiencia tem 35-54 anos</strong> — '+(fitOk?'excelente fit com o perfil de comprador.':'abaixo do ideal. O comprador de alto padrao tende a ter 35-55 anos.')+'</span>';
   document.getElementById('genEl').innerHTML=d.gender.map(function(g){return aud(g.l,g.p,g.c);}).join('');
   dc('cGen');charts.cGen=new Chart(document.getElementById('cGen'),{type:'doughnut',data:{labels:d.gender.map(function(g){return g.l;}),datasets:[{data:d.gender.map(function(g){return g.p;}),backgroundColor:d.gender.map(function(g){return g.c;}),borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
-  document.getElementById('locEl').innerHTML=d.cities.map(function(g){return aud(g.l,g.p,'#B07D3A');}).join('');
-  document.getElementById('fitEl').innerHTML=[
+  if(d.cities.length>0){
+    document.getElementById('locEl').innerHTML=d.cities.map(function(g){return aud(g.l,g.p,'#B07D3A');}).join('');
+  } else {
+    document.getElementById('locEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de cidade indisponíveis neste período.</div>';
+  }
+  var fitItems=[
     {l:'Faixa etaria 35-54',v:fit35+'%',ok:fitOk},
-    {l:'Audiencia na regiao',v:(d.cities[0].p+d.cities[1].p)+'%',ok:true},
-    {l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4},
-    {l:'Saves (intencao)',v:fmt(d.saves)+'/mes',ok:d.saves>=300}
-  ].map(function(x){
+    d.cities.length>0?{l:'Audiencia nas top 2 cidades',v:localPct+'%',ok:localPct>=30}:null,
+    d.engRate!==null?{l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4}:null,
+    d.saves>0?{l:'Saves (intencao)',v:fmt(d.saves)+'/mes',ok:d.saves>=300}:null
+  ].filter(Boolean);
+  document.getElementById('fitEl').innerHTML=fitItems.map(function(x){
     return '<div class="row"><div class="row-lbl">'+x.l+'</div><div class="row-val" style="color:'+(x.ok?'var(--green)':'var(--amber)')+'">'+x.v+'</div><span class="badge '+(x.ok?'b-ok':'b-warn')+'">'+(x.ok?'OK':'Atencao')+'</span></div>';
   }).join('')+'<div style="margin-top:12px;padding:10px 12px;background:'+(fitOk?'var(--green-l)':'var(--amber-l)')+';border-radius:var(--r);font-size:11px;color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'Boa qualidade de audiencia para o segmento imobiliario.':'Audiencia com fit parcial. Ajustar linha editorial para atrair faixa com maior poder de compra.')+'</strong></div>';
 }
 
 function rGargalos(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
-  var ctr=d.linkClicks/d.profileViews*100;
+  var ctr=d.profileViews>0?d.linkClicks/d.profileViews*100:null;
   var fit35=d.age.filter(function(a){return a.l==='35-44'||a.l==='45-54'||a.l==='35–44'||a.l==='45–54';}).reduce(function(s,a){return s+a.p;},0);
   var diags=[];
   if(P.resp>30)diags.push({icon:'ti-clock-off',c:'var(--red)',bg:'var(--red-l)',t:'Resposta no Direct demora '+P.resp+' minutos',desc:'No imobiliario de medio/alto padrao, o comprador avalia varios imoveis ao mesmo tempo. Cada 10 minutos a mais reduz a chance de conversao em ate 7%.',acao:'Configurar resposta automatica com qualificacao inicial: Esta buscando para morar ou investir? Qual prazo ideal?'});
-  if(d.engRate<b.eng.min)diags.push({icon:'ti-heart-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Engajamento abaixo do esperado: '+d.engRate.toFixed(1)+'%',desc:'O benchmark para o segmento e '+b.eng.min+' a '+b.eng.ref+'%. O conteudo nao esta gerando identificacao com o comprador.',acao:'Substituir 2 posts tecnicos por semana por conteudo de lifestyle. Carrosseis educativos geram saves.'});
-  if(ctr<b.ctr.min)diags.push({icon:'ti-link-off',c:'var(--red)',bg:'var(--red-l)',t:'Bio nao esta convertendo: CTR de '+ctr.toFixed(1)+'%',desc:'O visitante chega ao perfil e sai sem tomar acao. O benchmark e '+b.ctr.min+' a '+b.ctr.ref+'%.',acao:'Reescrever a bio com: o que voce oferece + para quem + CTA direto. Imoveis de alto padrao na sua regiao — Tour virtual disponivel — Clique para ver.'});
-  if(d.saves<b.saves.min)diags.push({icon:'ti-bookmark-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Saves baixos: '+fmt(d.saves)+' no mes',desc:'O save e o indicador mais honesto de intencao de compra. Benchmark: '+b.saves.min+' a '+b.saves.ref+' saves/mes.',acao:'Publicar conteudo que as pessoas querem guardar: tour completo com narracao, comparativo de bairros, guia de documentacao.'});
+  if(d.engRate!==null&&d.engRate<b.eng.min)diags.push({icon:'ti-heart-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Engajamento abaixo do esperado: '+d.engRate.toFixed(1)+'%',desc:'O benchmark para o segmento e '+b.eng.min+' a '+b.eng.ref+'%. O conteudo nao esta gerando identificacao com o comprador.',acao:'Substituir 2 posts tecnicos por semana por conteudo de lifestyle. Carrosseis educativos geram saves.'});
+  if(ctr!==null&&ctr<b.ctr.min)diags.push({icon:'ti-link-off',c:'var(--red)',bg:'var(--red-l)',t:'Bio nao esta convertendo: CTR de '+ctr.toFixed(1)+'%',desc:'O visitante chega ao perfil e sai sem tomar acao. O benchmark e '+b.ctr.min+' a '+b.ctr.ref+'%.',acao:'Reescrever a bio com: o que voce oferece + para quem + CTA direto.'});
+  if(d.saves>0&&d.saves<b.saves.min)diags.push({icon:'ti-bookmark-off',c:'var(--amber)',bg:'var(--amber-l)',t:'Saves baixos: '+fmt(d.saves)+' no mes',desc:'O save e o indicador mais honesto de intencao de compra. Benchmark: '+b.saves.min+' a '+b.saves.ref+' saves/mes.',acao:'Publicar conteudo que as pessoas querem guardar: tour completo com narracao, comparativo de bairros, guia de documentacao.'});
   if(fit35<45)diags.push({icon:'ti-users-minus',c:'var(--amber)',bg:'var(--amber-l)',t:'Audiencia com fit parcial: '+fit35+'% na faixa 35-54 anos',desc:'O comprador de medio/alto padrao geralmente tem entre 35 e 55 anos. Se a audiencia e muito jovem, o conteudo esta atraindo o perfil errado.',acao:'Ajustar a linguagem e os temas para o publico 35+. Falar sobre etapas de vida: familia crescendo, upgrade de imovel, investimento seguro.'});
   if(diags.length===0)diags.push({icon:'ti-circle-check',c:'var(--green)',bg:'var(--green-l)',t:'Nenhum gargalo critico identificado',desc:'As metricas estao dentro do esperado para o segmento. O foco agora e manter a consistencia e escalar o que ja esta funcionando.',acao:'Identificar os 3 posts com maior engajamento e criar variacoes do mesmo formato e tema.'});
   document.getElementById('diagCompleto').innerHTML=diags.map(function(dg){
     return '<div class="diag" style="background:'+dg.bg+';border-left-color:'+dg.c+'"><i class="ti '+dg.icon+'" style="color:'+dg.c+';font-size:20px;flex-shrink:0;margin-top:1px"></i><div><div class="diag-title" style="color:'+dg.c+'">'+dg.t+'</div><div class="diag-desc">'+dg.desc+'</div><div class="diag-acao"><strong>O que fazer:</strong> '+dg.acao+'</div></div></div>';
   }).join('');
   var rows=[
-    {m:'Taxa de engajamento',s:d.engRate.toFixed(1)+'%',b:b.eng.min+' a '+b.eng.ref+'%',ok:d.engRate>=b.eng.min},
-    {m:'CTR do perfil',s:ctr.toFixed(1)+'%',b:b.ctr.min+' a '+b.ctr.ref+'%',ok:ctr>=b.ctr.min},
-    {m:'Saves/mes',s:fmt(d.saves),b:fmt(b.saves.min)+' a '+fmt(b.saves.ref),ok:d.saves>=b.saves.min},
+    d.engRate!==null?{m:'Taxa de engajamento',s:d.engRate.toFixed(1)+'%',b:b.eng.min+' a '+b.eng.ref+'%',ok:d.engRate>=b.eng.min}:null,
+    ctr!==null?{m:'CTR do perfil',s:ctr.toFixed(1)+'%',b:b.ctr.min+' a '+b.ctr.ref+'%',ok:ctr>=b.ctr.min}:null,
+    d.saves>0?{m:'Saves/mes',s:fmt(d.saves),b:fmt(b.saves.min)+' a '+fmt(b.saves.ref),ok:d.saves>=b.saves.min}:null,
     {m:'Seguidores',s:fmt(d.followers),b:fmt(b.seg.min)+' a '+fmt(b.seg.ref),ok:d.followers>=b.seg.min},
     {m:'Tempo resposta DM',s:P.resp+'min',b:'ate 10 min',ok:P.resp<=10},
     {m:'Faixa etaria 35-54',s:fit35+'%',b:'acima de 45%',ok:fit35>=45}
-  ];
+  ].filter(Boolean);
   var tbl='<thead><tr><th>Metrica</th><th>Voce</th><th>Referencia do mercado</th><th>Situacao</th></tr></thead><tbody>';
   rows.forEach(function(r){tbl+='<tr><td style="font-weight:500">'+r.m+'</td><td style="font-weight:600">'+r.s+'</td><td style="color:var(--ink3)">'+r.b+'</td><td><span class="badge '+(r.ok?'b-ok':'b-bad')+'">'+(r.ok?'Dentro do esperado':'Abaixo do esperado')+'</span></td></tr>';});
   tbl+='</tbody>';
@@ -1346,12 +1417,12 @@ function rGargalos(){
 
 function rPlano(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
-  var ctr=d.linkClicks/d.profileViews*100;
+  var ctr=d.profileViews>0?d.linkClicks/d.profileViews*100:null;
   var isAlto=P.seg==='alto';
   var proxAcao='';
   if(P.resp>30)proxAcao='<strong>Configurar resposta automatica no Direct e WhatsApp esta semana</strong>. Com '+P.resp+' minutos de resposta, leads estao sendo perdidos para concorrentes mais rapidos.';
-  else if(ctr<b.ctr.min)proxAcao='<strong>Reescrever a bio ate sexta-feira</strong>. CTR baixo significa que muitas pessoas visitaram o perfil e saíram sem acao.';
-  else if(d.saves<b.saves.min)proxAcao='<strong>Publicar 1 Reel de tour com narracao esta semana</strong>. Saves abaixo do esperado. Tour com narracao e o formato com maior taxa de save no imobiliario.';
+  else if(ctr!==null&&ctr<b.ctr.min)proxAcao='<strong>Reescrever a bio ate sexta-feira</strong>. CTR baixo significa que muitas pessoas visitaram o perfil e saíram sem acao.';
+  else if(d.saves>0&&d.saves<b.saves.min)proxAcao='<strong>Publicar 1 Reel de tour com narracao esta semana</strong>. Saves abaixo do esperado. Tour com narracao e o formato com maior taxa de save no imobiliario.';
   else proxAcao='<strong>Manter a consistencia e aumentar a frequencia de Stories</strong>. O perfil esta saudavel. Publicar Stories diarios com link sticker aumenta o trafego para o WhatsApp.';
   prox('proxPlanoTxt',proxAcao);
   document.getElementById('planoSubEl').textContent='Adaptado para imobiliario de '+(isAlto?'alto':'medio')+' padrao — ticket R$'+P.ticket+'k+';
