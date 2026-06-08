@@ -885,14 +885,13 @@ function setConnectedState(username){
 }
 
 // ── OAUTH ─────────────────────────────────────────────────────────────────
-var OAUTH_CLIENT_ID = '1495381002138022';
+var OAUTH_CLIENT_ID = '1323624159684969';
 var OAUTH_REDIRECT  = 'https://instagram-dashboard-drab.vercel.app';
 var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_insights,instagram_manage_comments,pages_show_list';
 
 function iniciarOAuth(){
   var nome = document.getElementById('s-nome').value.trim();
   if(nome) localStorage.setItem('si_oauth_nome', nome);
-  // Salvar seleções do formulário para recuperar após callback
   localStorage.setItem('si_oauth_pre', JSON.stringify({
     seg: document.getElementById('s-seg').value,
     ticket: document.getElementById('s-ticket').value,
@@ -901,9 +900,10 @@ function iniciarOAuth(){
   }));
   var state = Math.random().toString(36).substring(2);
   localStorage.setItem('si_oauth_state', state);
-  // Instagram OAuth usa api.instagram.com, não facebook.com/dialog/oauth
-  var url = 'https://api.instagram.com/oauth/authorize'
-    + '?client_id=' + OAUTH_CLIENT_ID
+  // URL gerada pelo próprio Meta para este app
+  var url = 'https://www.instagram.com/oauth/authorize'
+    + '?force_reauth=true'
+    + '&client_id=' + OAUTH_CLIENT_ID
     + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
     + '&scope=' + encodeURIComponent(OAUTH_SCOPE)
     + '&state=' + state
@@ -916,7 +916,7 @@ async function trocarCodigoPorToken(code){
   // Porém, chamadas cross-origin com client_secret não funcionam no browser.
   // Usamos o endpoint de token curto do Instagram que aceita POST via form
   var body = new URLSearchParams({
-    client_id:     OAUTH_CLIENT_ID,
+    client_id:     '1323624159684969',
     client_secret: '7066ee1731bc964cbfdab7c373ca09e9',
     grant_type:    'authorization_code',
     redirect_uri:  OAUTH_REDIRECT,
