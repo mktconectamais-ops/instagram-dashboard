@@ -784,11 +784,13 @@ async function carregarAPI(){
     var audData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
     try{
       var aud2=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value&timeframe=last_90_days&breakdown=age,gender');
+      console.log('Audiencia raw:', JSON.stringify(aud2));
       audData=processarAudiencia(aud2.data||[]);
     }catch(e){
       console.log('Audiencia indisponivel:',e.message);
       try{
         var aud3=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value');
+        console.log('Audiencia fallback raw:', JSON.stringify(aud3));
         audData=processarAudiencia(aud3.data||[]);
       }catch(e2){console.log('Audiencia fallback falhou:',e2.message);}
     }
