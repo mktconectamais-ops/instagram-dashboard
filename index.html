@@ -1141,12 +1141,19 @@ function rResumo(){
     kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0&&d.profileViews>0?ctr.toFixed(1)+'% dos visitantes':'indisponivel','k-dark')
   ].join('');
   // Gráfico crescimento — só mostra se tiver dados reais de alcance
+  var growthCard = document.getElementById('cGrowth') ? document.getElementById('cGrowth').closest('.card') : null;
   dc('cGrowth');
   if(d.reach7){
-    charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.reach7,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-    document.getElementById('cGrowth').parentElement.previousElementSibling&&(document.getElementById('cGrowth').parentElement.previousElementSibling.textContent='Alcance por dia — últimos 7 dias');
+    // Recriar canvas após dc()
+    var growthWrap = growthCard ? growthCard.querySelector('div[style*="height:190px"]') : null;
+    if(growthWrap){
+      growthWrap.innerHTML = '<canvas id="cGrowth"></canvas>';
+      charts.cGrowth=new Chart(document.getElementById('cGrowth'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.reach7,backgroundColor:'#B07D3A',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+      var ctSub = growthCard.querySelector('.ct-sub');
+      if(ctSub) ctSub.textContent='Alcance por dia — últimos 7 dias';
+    }
   } else {
-    document.getElementById('cGrowth').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:190px;color:var(--ink3);font-size:13px">Dados de crescimento diário não disponíveis na API</div>';
+    if(growthCard) growthCard.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:190px;color:var(--ink3);font-size:13px;padding:20px;text-align:center">Dados de crescimento diário não disponíveis na API</div>';
   }
   // Origens de seguidores — não disponível na API, remover
   var origensEl=document.getElementById('origensEl');
@@ -1273,24 +1280,24 @@ function rEngajamento(){
   var ell=['Curtidas','Comentarios','Saves','Compart.'];
   document.getElementById('engLegEl').innerHTML=ell.map(function(l,i){return '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:'+ecl[i]+'"></span>'+l+' '+fmt(ec[i])+'</span>';}).join('');
   dc('cEngPizza');charts.cEngPizza=new Chart(document.getElementById('cEngPizza'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
-  // Saves por dia — só mostra se disponível
+  // Saves por dia — salvar wrap antes de dc()
+  var savesWrap=document.getElementById('cSaves')?document.getElementById('cSaves').parentElement:null;
   dc('cSaves');
-  if(d.saves7){
-    charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-  } else {
-    document.getElementById('cSaves').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de saves por dia não disponíveis na API</div>';
+  if(savesWrap){
+    if(d.saves7){savesWrap.innerHTML='<canvas id="cSaves"></canvas>';charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
+    else{savesWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de saves por dia não disponíveis na API</div>';}
   }
+  var sharesWrap=document.getElementById('cShares')?document.getElementById('cShares').parentElement:null;
   dc('cShares');
-  if(d.shares7){
-    charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
-  } else {
-    document.getElementById('cShares').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de compartilhamentos por dia não disponíveis na API</div>';
+  if(sharesWrap){
+    if(d.shares7){sharesWrap.innerHTML='<canvas id="cShares"></canvas>';charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});}
+    else{sharesWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de compartilhamentos por dia não disponíveis na API</div>';}
   }
+  var reachWrap=document.getElementById('cReach')?document.getElementById('cReach').parentElement:null;
   dc('cReach');
-  if(d.reach7){
-    charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});
-  } else {
-    document.getElementById('cReach').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de alcance por dia não disponíveis na API</div>';
+  if(reachWrap){
+    if(d.reach7){reachWrap.innerHTML='<canvas id="cReach"></canvas>';charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});}
+    else{reachWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de alcance por dia não disponíveis na API</div>';}
   }
 }
 
