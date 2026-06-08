@@ -887,7 +887,7 @@ function setConnectedState(username){
 // ── OAUTH ─────────────────────────────────────────────────────────────────
 var OAUTH_CLIENT_ID = '1495381002138022';
 var OAUTH_REDIRECT  = 'https://instagram-dashboard-drab.vercel.app';
-var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_insights,instagram_manage_comments,pages_show_list,public_profile';
+var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_insights,instagram_manage_comments,pages_show_list';
 
 function iniciarOAuth(){
   var nome = document.getElementById('s-nome').value.trim();
@@ -901,7 +901,8 @@ function iniciarOAuth(){
   }));
   var state = Math.random().toString(36).substring(2);
   localStorage.setItem('si_oauth_state', state);
-  var url = 'https://www.facebook.com/v21.0/dialog/oauth'
+  // Instagram OAuth usa api.instagram.com, não facebook.com/dialog/oauth
+  var url = 'https://api.instagram.com/oauth/authorize'
     + '?client_id=' + OAUTH_CLIENT_ID
     + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
     + '&scope=' + encodeURIComponent(OAUTH_SCOPE)
@@ -911,35 +912,37 @@ function iniciarOAuth(){
 }
 
 async function trocarCodigoPorToken(code){
-  // O exchange code→token exige client_secret e deve ser feito server-side.
-  // Como o app é client-side puro, usamos o endpoint de token do Instagram
-  // que aceita o código via GET (fluxo do Instagram Basic Display / Graph)
-  var tokenUrl = 'https://graph.facebook.com/v21.0/oauth/access_token'
-    + '?client_id=' + OAUTH_CLIENT_ID
-    + '&client_secret=7066ee1731bc964cbfdab7c373ca09e9'
-    + '&redirect_uri=' + encodeURIComponent(OAUTH_REDIRECT)
-    + '&code=' + code;
-  var r = await fetch(tokenUrl);
+  // Instagram OAuth usa api.instagram.com para trocar o código
+  // Porém, chamadas cross-origin com client_secret não funcionam no browser.
+  // Usamos o endpoint de token curto do Instagram que aceita POST via form
+  var body = new URLSearchParams({
+    client_id:     OAUTH_CLIENT_ID,
+    client_secret: '7066ee1731bc964cbfdab7c373ca09e9',
+    grant_type:    'authorization_code',
+    redirect_uri:  OAUTH_REDIRECT,
+    code:          code
+  });
+  var r = await fetch('https://api.instagram.com/oauth/access_token', {
+    method: 'POST',
+    body:   body
+  });
   var data = await r.json();
-  if(data.error) throw new Error(data.error.message);
+  if(data.error_message) throw new Error(data.error_message);
+  if(data.error)         throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+  // data.access_token = token curto, data.user_id = IG user id
+  localStorage.setItem('si_oauth_userid', data.user_id);
   return data.access_token;
 }
 
 async function buscarUserIdPeloToken(token){
-  var r = await fetch('https://graph.facebook.com/v21.0/me?fields=id,name&access_token=' + token);
+  // Com Instagram OAuth o user_id já vem na resposta do token.
+  // Este método busca o ID da conta Business vinculada via Graph API
+  var saved = localStorage.getItem('si_oauth_userid');
+  if(saved) return saved;
+  var r = await fetch('https://graph.instagram.com/v21.0/me?fields=id,username&access_token=' + token);
   var data = await r.json();
   if(data.error) throw new Error(data.error.message);
-  // Buscar conta IG Business vinculada
-  var r2 = await fetch('https://graph.facebook.com/v21.0/' + data.id + '/accounts?fields=instagram_business_account&access_token=' + token);
-  var pages = await r2.json();
-  if(pages.data && pages.data.length > 0){
-    for(var i=0;i<pages.data.length;i++){
-      if(pages.data[i].instagram_business_account){
-        return pages.data[i].instagram_business_account.id;
-      }
-    }
-  }
-  throw new Error('Nenhuma conta Instagram Business encontrada vinculada a este Facebook.');
+  return data.id;
 }
 
 async function verificarCallbackOAuth(){
