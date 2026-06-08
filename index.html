@@ -770,16 +770,23 @@ async function carregarAPI(){
     var until=Math.floor(Date.now()/1000);
     var insightsData=[];
     try{
-      var ins=await fetchAPI('/'+P.userId+'/insights?metric=reach,profile_views,website_clicks&period=day&since='+since+'&until='+until);
+      // reach e impressions usam period=day normalmente
+      var ins=await fetchAPI('/'+P.userId+'/insights?metric=reach&period=day&since='+since+'&until='+until);
       insightsData=ins.data||[];
-    }catch(e){console.log('Insights parciais:',e.message);}
+    }catch(e){console.log('Insights reach:',e.message);}
+    try{
+      // profile_views e website_clicks precisam de metric_type=total_value
+      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&metric_type=total_value&since='+since+'&until='+until);
+      insightsData=insightsData.concat(ins2.data||[]);
+    }catch(e){console.log('Insights total_value:',e.message);}
     setLoading(true,'Buscando publicacoes...');
     var media=await fetchAPI('/'+P.userId+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit=15');
     var audData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
     try{
-      var aud2=await fetchAPI('/'+P.userId+'/insights?metric=audience_gender_age,audience_city&period=lifetime');
+      // Audiência requer period=lifetime e metric_type=total_value
+      var aud2=await fetchAPI('/'+P.userId+'/insights?metric=audience_gender_age,audience_city&period=lifetime&metric_type=total_value');
       audData=processarAudiencia(aud2.data||[]);
-    }catch(e){console.log('Audiencia indisponivel');}
+    }catch(e){console.log('Audiencia indisponivel:',e.message);}
     // Buscar comentários reais
     setLoading(true,'Buscando comentários...');
     var comentariosReais=[];
