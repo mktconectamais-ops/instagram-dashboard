@@ -887,7 +887,8 @@ function setConnectedState(username){
 // ── OAUTH ─────────────────────────────────────────────────────────────────
 var OAUTH_CLIENT_ID = '1323624159684969';
 var OAUTH_REDIRECT  = 'https://instagram-dashboard-drab.vercel.app';
-var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_insights,instagram_manage_comments,pages_show_list';
+// Apenas permissões válidas para o fluxo Instagram Business OAuth
+var OAUTH_SCOPE     = 'instagram_business_basic,instagram_business_manage_insights,instagram_manage_comments';
 
 function iniciarOAuth(){
   var nome = document.getElementById('s-nome').value.trim();
