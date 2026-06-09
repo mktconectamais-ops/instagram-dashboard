@@ -785,6 +785,7 @@ async function carregarAPI(){
     }catch(e){console.log('Reach erro:',e.message);}
     try{
       var pvData=await buscarInsightsPeriodo('profile_views,website_clicks','&metric_type=total_value');
+      console.log('profile_views data:', JSON.stringify(pvData.slice(0,2)));
       insightsData=insightsData.concat(pvData);
     }catch(e){console.log('Profile_views erro:',e.message);}
     // follower_count só aceita até 30 dias — usar o menor entre period e 30
@@ -823,6 +824,7 @@ async function carregarAPI(){
       var audCidade=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value&breakdown=city');
       console.log('Cidades raw:', JSON.stringify(audCidade));
       var cidadesProcessadas=processarCidades(audCidade.data||[]);
+      console.log('Cidades processadas:', JSON.stringify(cidadesProcessadas));
       if(cidadesProcessadas.length>0) audData.cities=cidadesProcessadas;
     }catch(e){console.log('Cidades indisponivel:',e.message);}
     // Buscar comentários dos posts do período
