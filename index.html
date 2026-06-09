@@ -753,20 +753,40 @@ async function carregarAPI(){
     setLoading(true,'Buscando dados do perfil...');
     var profile=await fetchAPI('/'+P.userId+'?fields=username,name,followers_count,follows_count,media_count,biography');
     setLoading(true,'Buscando métricas — últimos '+period+' dias...');
-    var since=Math.floor(Date.now()/1000)-86400*period;
-    var until=Math.floor(Date.now()/1000);
+    var now=Math.floor(Date.now()/1000);
     var insightsData=[];
-    try{
-      var ins=await fetchAPI('/'+P.userId+'/insights?metric=reach&period=day&since='+since+'&until='+until);
-      insightsData=ins.data||[];
-    }catch(e){console.log('Insights reach:',e.message);}
-    try{
-      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&metric_type=total_value&since='+since+'&until='+until);
-      console.log('profile_views raw:', JSON.stringify(ins2));
-      insightsData=insightsData.concat(ins2.data||[]);
-    }catch(e){
-      console.log('Insights profile_views erro:',e.message);
+
+    // A API não aceita mais de 30 dias por chamada — dividir em janelas de 30d
+    async function buscarInsightsPeriodo(metric, extraParams){
+      var janelas=[];
+      var diasRestantes=period;
+      var ate=now;
+      while(diasRestantes>0){
+        var janela=Math.min(diasRestantes,30);
+        var de=ate-86400*janela;
+        janelas.push({de:de,ate:ate});
+        ate=de;
+        diasRestantes-=janela;
+      }
+      var resultados=[];
+      for(var j=0;j<janelas.length;j++){
+        try{
+          var ep='/'+P.userId+'/insights?metric='+metric+'&period=day&since='+janelas[j].de+'&until='+janelas[j].ate+(extraParams||'');
+          var r=await fetchAPI(ep);
+          if(r.data) resultados=resultados.concat(r.data);
+        }catch(e){console.log('Insights '+metric+' janela '+j+':',e.message);}
+      }
+      return resultados;
     }
+
+    try{
+      var reachData=await buscarInsightsPeriodo('reach','');
+      insightsData=insightsData.concat(reachData);
+    }catch(e){console.log('Reach erro:',e.message);}
+    try{
+      var pvData=await buscarInsightsPeriodo('profile_views,website_clicks','&metric_type=total_value');
+      insightsData=insightsData.concat(pvData);
+    }catch(e){console.log('Profile_views erro:',e.message);}
     // Buscar posts — mais posts para períodos maiores
     setLoading(true,'Buscando publicações...');
     var mediaLimit = period <= 7 ? 10 : period <= 30 ? 20 : 50;
@@ -918,27 +938,32 @@ function montarDados(profile,insights,posts,aud,comentarios){
   var reach=0,profileViews=0,linkClicks=0;
   var reach7=null,imp7=null,link7=null;
   try{
-    var find=function(name){return insights.find(function(d){return d.name===name;});};
-    var sum=function(d){return d&&d.values?d.values.reduce(function(a,b){return a+(b.value||0);},0):0;};
-    var last7=function(d){return d&&d.values?d.values.slice(-7).map(function(v){return v.value||0;}):null;};
-    var rd=find('reach');
-    if(rd){reach=sum(rd);var r7=last7(rd);if(r7){reach7=r7;imp7=r7.map(function(v){return Math.round(v*2.5);});}}
-    var pvd=find('profile_views');if(pvd)profileViews=sum(pvd);
-    var wcd=find('website_clicks');if(wcd){linkClicks=sum(wcd);var l7=last7(wcd);if(l7)link7=l7;}
+    // Com múltiplas janelas, podem existir múltiplos registros do mesmo metric
+    var findAll=function(name){return insights.filter(function(d){return d.name===name;});};
+    var sumAll=function(arr){return arr.reduce(function(tot,d){return tot+(d.values?d.values.reduce(function(a,b){return a+(b.value||0);},0):0);},0);};
+    var lastN=function(arr,n){
+      var allVals=[];
+      arr.forEach(function(d){if(d.values)allVals=allVals.concat(d.values.map(function(v){return v.value||0;}));});
+      return allVals.length>0?allVals.slice(-n):null;
+    };
+    var rds=findAll('reach');
+    if(rds.length>0){reach=sumAll(rds);var r7=lastN(rds,7);if(r7&&r7.length>0){reach7=r7;imp7=r7.map(function(v){return Math.round(v*2.5);});}}
+    var pvds=findAll('profile_views');if(pvds.length>0)profileViews=sumAll(pvds);
+    var wcds=findAll('website_clicks');if(wcds.length>0){linkClicks=sumAll(wcds);}
   }catch(e){console.log('Erro insights:',e);}
   var mediaItems=posts.map(function(p){
     return{caption:(p.caption||'').substring(0,50)||'(sem legenda)',mediaType:p.media_type||'IMAGE',timestamp:p.timestamp,reach:p.reach||0,likes:p.like_count||0,comments:p.comments_count||0,saves:p.saved||0,shares:p.shares||0};
   });
+  // Curtidas e comentários — total dos posts do período (não acumulado histórico)
   var totalLikes=mediaItems.reduce(function(a,p){return a+p.likes;},0);
   var totalComments=mediaItems.reduce(function(a,p){return a+p.comments;},0);
   var totalSaves=mediaItems.reduce(function(a,p){return a+p.saves;},0);
   var totalShares=mediaItems.reduce(function(a,p){return a+p.shares;},0);
-  // Saves e shares retornam 0 quando a permissão avançada não foi aprovada.
-  // Usar null para indicar "indisponível" em vez de mostrar 0.
   var savesDisp = totalSaves > 0 ? totalSaves : null;
   var sharesDisp = totalShares > 0 ? totalShares : null;
   var followers=profile.followers_count||0;
-  var engRate=followers>0&&(totalLikes+totalComments)>0?parseFloat(((totalLikes+totalComments+(savesDisp||0))/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):null;
+  // Engajamento = (curtidas + comentários) / posts / seguidores * 100
+  var engRate=followers>0&&mediaItems.length>0&&(totalLikes+totalComments)>0?parseFloat(((totalLikes+totalComments)/mediaItems.length/followers*100).toFixed(2)):null;
   return{
     username:profile.username||P.nome,
     followers:followers,following:profile.follows_count||0,mediaCount:parseInt(profile.media_count)||0,
@@ -1169,10 +1194,10 @@ function rResumo(){
   }).join('');
   document.getElementById('kpiResumo').innerHTML=[
     kpi('Seguidores',fmt(d.followers),d.following>0?'seguindo '+fmt(d.following):'','k-gold'),
-    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do mínimo':'calculado nos posts',engOk?'k-green':''),
-    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue'),
-    kpi('Curtidas',fmt(d.likes),'nos últimos posts',''),
-    kpi('Comentários',fmt(d.comments),'nos últimos posts',''),
+    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do mínimo — posts do período':'calculado nos posts',engOk?'k-green':''),
+    kpi('Alcance '+period+'d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue'),
+    kpi('Curtidas',fmt(d.likes),d._postsNoPeriodo>0?'posts do período':'posts recentes',''),
+    kpi('Comentários',fmt(d.comments),d._postsNoPeriodo>0?'posts do período':'posts recentes',''),
     kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0?ctr.toFixed(1)+'% dos visitantes':'indisponível na API','k-dark')
   ].join('');
   // Gráfico crescimento — só mostra se tiver dados reais de alcance
