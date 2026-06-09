@@ -518,7 +518,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="sb-sec">Visão do cliente</div>
   <button class="sb-btn on" data-pg="resumo"><i class="ti ti-layout-dashboard"></i>Resumo geral</button>
   <button class="sb-btn" data-pg="saude"><i class="ti ti-heartbeat"></i>Saúde do perfil</button>
-  <button class="sb-btn" data-pg="direct"><i class="ti ti-message-circle"></i>Direct e Relacionamento</button>
   <div class="sb-sec">Performance</div>
   <button class="sb-btn" data-pg="engajamento"><i class="ti ti-flame"></i>Engajamento real</button>
   <button class="sb-btn" data-pg="conteudo"><i class="ti ti-photo"></i>Conteúdo e Criativos</button>
@@ -573,15 +572,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   </div>
 </div>
 
-<div class="page" id="pg-direct">
-  <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxDirectTxt">—</div></div></div>
-  <div class="kgrid" id="kpiDirect"></div>
-  <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Velocidade de resposta no Direct</div><div class="ct-sub">No imobiliário, quem responde primeiro tem vantagem real</div><div id="velocDirectEl"></div></div>
-  </div>
-  <div class="card"><div class="ct"><i class="ti ti-message-2-heart"></i>Comentários com intenção de compra</div><div class="ct-sub">Perguntas nos comentários são leads — precisam de resposta em até 10 minutos</div><div id="comentIntencaoEl"></div></div>
-</div>
-
 <div class="page" id="pg-engajamento">
   <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxEngTxt">—</div></div></div>
   <div class="kgrid" id="kpiEng"></div>
@@ -589,6 +579,7 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-pie"></i>Engajamento por tipo</div><div class="ct-sub">Curtidas e comentários — interações reais com o conteúdo</div><div id="engLegEl" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--ink3)"></div><div style="position:relative;height:180px"><canvas id="cEngPizza"></canvas></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-eye"></i>Alcance e impressões</div><div class="ct-sub">Quantas pessoas únicas viram o conteúdo</div><div style="position:relative;height:180px"><canvas id="cReach"></canvas></div></div>
   </div>
+  <div class="card"><div class="ct"><i class="ti ti-message-2-heart"></i>Comentários com intenção de compra</div><div class="ct-sub">Perguntas nos comentários são leads — identificados automaticamente por palavras-chave</div><div id="comentIntencaoEl"></div></div>
 </div>
 
 <div class="page" id="pg-conteudo">
@@ -761,31 +752,33 @@ async function carregarAPI(){
   try{
     setLoading(true,'Buscando dados do perfil...');
     var profile=await fetchAPI('/'+P.userId+'?fields=username,name,followers_count,follows_count,media_count,biography');
-    setLoading(true,'Buscando metricas...');
-    var since=Math.floor(Date.now()/1000)-86400*28;
+    setLoading(true,'Buscando métricas — últimos '+period+' dias...');
+    var since=Math.floor(Date.now()/1000)-86400*period;
     var until=Math.floor(Date.now()/1000);
     var insightsData=[];
     try{
-      // reach e impressions usam period=day normalmente
       var ins=await fetchAPI('/'+P.userId+'/insights?metric=reach&period=day&since='+since+'&until='+until);
       insightsData=ins.data||[];
     }catch(e){console.log('Insights reach:',e.message);}
     try{
-      // profile_views e website_clicks — período total sem metric_type
-      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&since='+since+'&until='+until);
+      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&metric_type=total_value&since='+since+'&until='+until);
       console.log('profile_views raw:', JSON.stringify(ins2));
       insightsData=insightsData.concat(ins2.data||[]);
     }catch(e){
       console.log('Insights profile_views erro:',e.message);
-      // Tentar sem period
-      try{
-        var ins3=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=month');
-        console.log('profile_views month:', JSON.stringify(ins3));
-        insightsData=insightsData.concat(ins3.data||[]);
-      }catch(e2){console.log('profile_views month falhou:',e2.message);}
     }
-    setLoading(true,'Buscando publicacoes...');
-    var media=await fetchAPI('/'+P.userId+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit=15');
+    // Buscar posts — mais posts para períodos maiores
+    setLoading(true,'Buscando publicações...');
+    var mediaLimit = period <= 7 ? 10 : period <= 30 ? 20 : 50;
+    var media=await fetchAPI('/'+P.userId+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit='+mediaLimit);
+    // Filtrar posts dentro do período selecionado
+    var cutoffMs = Date.now() - (period * 86400 * 1000);
+    var todosOsPosts = media.data||[];
+    var postsNoPeriodo = todosOsPosts.filter(function(p){
+      return p.timestamp && new Date(p.timestamp).getTime() >= cutoffMs;
+    });
+    // Se não houver posts no período, avisar mas usar os mais recentes para análise
+    var postsParaAnalise = postsNoPeriodo.length > 0 ? postsNoPeriodo : todosOsPosts.slice(0,5);
     var audData={gender:DEMO.gender,age:DEMO.age,cities:[]};
     try{
       var aud2=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value&timeframe=last_90_days&breakdown=age,gender');
@@ -804,15 +797,14 @@ async function carregarAPI(){
       var cidadesProcessadas=processarCidades(audCidade.data||[]);
       if(cidadesProcessadas.length>0) audData.cities=cidadesProcessadas;
     }catch(e){console.log('Cidades indisponivel:',e.message);}
-    // Buscar comentários reais
+    // Buscar comentários dos posts do período
     setLoading(true,'Buscando comentários...');
     var comentariosReais=[];
     try{
-      // Buscar comentários dos últimos posts
-      var mediaIds=(media.data||[]).slice(0,5).map(function(p){return p.id;});
+      var mediaIds=postsParaAnalise.slice(0,10).map(function(p){return p.id;});
       for(var mi=0;mi<mediaIds.length;mi++){
         try{
-          var comResp=await fetchAPI('/'+mediaIds[mi]+'/comments?fields=id,text,timestamp,like_count,username&limit=20');
+          var comResp=await fetchAPI('/'+mediaIds[mi]+'/comments?fields=id,text,timestamp,like_count,username&limit=50');
           if(comResp.data){
             comResp.data.forEach(function(c){c._media_id=mediaIds[mi];});
             comentariosReais=comentariosReais.concat(comResp.data);
@@ -820,7 +812,9 @@ async function carregarAPI(){
         }catch(e){console.log('Erro comentarios post '+mediaIds[mi]+':',e.message);}
       }
     }catch(e){console.log('Erro geral comentarios:',e.message);}
-    D=montarDados(profile,insightsData,media.data||[],audData,comentariosReais);
+    D=montarDados(profile,insightsData,postsParaAnalise,audData,comentariosReais);
+    D._periodoLabel = period+'d';
+    D._postsNoPeriodo = postsNoPeriodo.length;
     setConnectedState(profile.username||P.nome);
     setLoading(false);
     render();
@@ -1146,7 +1140,7 @@ window.addEventListener('DOMContentLoaded', async function(){
   document.getElementById('setup').classList.remove('off');
 });
 
-function render(){rResumo();rSaude();rDirect();rEngajamento();rConteudo();rAudiencia();rGargalos();rPlano();rBranding();}
+function render(){rResumo();rSaude();rEngajamento();rConteudo();rAudiencia();rGargalos();rPlano();rBranding();}
 
 function rResumo(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
@@ -1158,12 +1152,16 @@ function rResumo(){
   else if(!savesOk&&d.saves>0)ptxt='Os saves estao em <strong>'+fmt(d.saves)+'</strong> no mes. Publicar mais conteudo de lifestyle do bairro e tours com narracao.';
   else ptxt='Perfil <strong>saudavel</strong>. Manter regularidade de publicacao e garantir resposta a todos os comentarios com pergunta em ate 30 minutos.';
   prox('proxResumoTxt',ptxt);
+  // Atualizar subtítulo com período e quantidade de posts analisados
+  var postsMsg = D._postsNoPeriodo !== undefined ? 
+    (D._postsNoPeriodo > 0 ? D._postsNoPeriodo+' post(s) publicado(s) neste período' : 'Nenhum post neste período — exibindo posts mais recentes') : '';
+  document.getElementById('pgSub').textContent = 'Análise dos últimos '+period+' dias' + (postsMsg?' · '+postsMsg:'');
   var engPorPost=d.posts.length>0?Math.round((d.likes+d.comments)/d.posts.length):0;
   var contOk=engPorPost>=20;
   var sems=[
     {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate!==null?d.engRate.toFixed(1)+'% de taxa':'Calculando...'},
-    {area:'Direct',icon:'ti-message-circle',s:respOk?'s-ok':'s-warn',label:respOk?'Respondendo bem':'Pode melhorar',desc:'~'+P.resp+' min de resposta'},
     {area:'Crescimento',icon:'ti-trending-up',s:'s-info',label:'Ver perfil',desc:fmt(d.followers)+' seguidores'},
+    {area:'Alcance',icon:'ti-eye',s:d.reach>0?'s-ok':'s-warn',label:d.reach>0?fmt(d.reach)+' pessoas':'Indisponível',desc:d.reach>0?'últimos '+period+'d':'API não retornou'},
     {area:'Conteudo',icon:'ti-photo',s:contOk?'s-ok':'s-warn',label:contOk?'Gerando interesse':'Pouco impacto',desc:fmt(engPorPost)+' interações/post'}
   ];
   document.getElementById('semaforoEl').innerHTML=sems.map(function(s){
@@ -1533,10 +1531,12 @@ document.querySelectorAll('.sb-btn').forEach(function(btn){
 });
 
 document.querySelectorAll('.pbtn').forEach(function(b){
-  b.addEventListener('click',function(){
+  b.addEventListener('click',async function(){
     document.querySelectorAll('.pbtn').forEach(function(x){x.classList.remove('on');});
     this.classList.add('on');
     period=parseInt(this.getAttribute('data-p'));
+    if(P.token&&P.userId){await carregarAPI();}
+    else{D=DEMO;render();}
   });
 });
 
