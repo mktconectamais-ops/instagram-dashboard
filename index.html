@@ -586,11 +586,7 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxEngTxt">—</div></div></div>
   <div class="kgrid" id="kpiEng"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-pie"></i>Engajamento por tipo</div><div class="ct-sub">Saves e compartilhamentos valem mais que curtidas no imobiliário</div><div id="engLegEl" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--ink3)"></div><div style="position:relative;height:180px"><canvas id="cEngPizza"></canvas></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-bookmark"></i>Saves — sinal de intenção real</div><div class="ct-sub">Saves indicam que alguém quer mostrar o imóvel para outra pessoa</div><div style="position:relative;height:200px"><canvas id="cSaves"></canvas></div></div>
-  </div>
-  <div class="g2" style="margin-top:0">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-share"></i>Compartilhamentos</div><div class="ct-sub">Cada compartilhamento alcança pessoas fora da base sem custo</div><div style="position:relative;height:180px"><canvas id="cShares"></canvas></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-pie"></i>Engajamento por tipo</div><div class="ct-sub">Curtidas e comentários — interações reais com o conteúdo</div><div id="engLegEl" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--ink3)"></div><div style="position:relative;height:180px"><canvas id="cEngPizza"></canvas></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-eye"></i>Alcance e impressões</div><div class="ct-sub">Quantas pessoas únicas viram o conteúdo</div><div style="position:relative;height:180px"><canvas id="cReach"></canvas></div></div>
   </div>
 </div>
@@ -775,25 +771,39 @@ async function carregarAPI(){
       insightsData=ins.data||[];
     }catch(e){console.log('Insights reach:',e.message);}
     try{
-      // profile_views e website_clicks precisam de metric_type=total_value
-      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&metric_type=total_value&since='+since+'&until='+until);
+      // profile_views e website_clicks — período total sem metric_type
+      var ins2=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=day&since='+since+'&until='+until);
+      console.log('profile_views raw:', JSON.stringify(ins2));
       insightsData=insightsData.concat(ins2.data||[]);
-    }catch(e){console.log('Insights total_value:',e.message);}
+    }catch(e){
+      console.log('Insights profile_views erro:',e.message);
+      // Tentar sem period
+      try{
+        var ins3=await fetchAPI('/'+P.userId+'/insights?metric=profile_views,website_clicks&period=month');
+        console.log('profile_views month:', JSON.stringify(ins3));
+        insightsData=insightsData.concat(ins3.data||[]);
+      }catch(e2){console.log('profile_views month falhou:',e2.message);}
+    }
     setLoading(true,'Buscando publicacoes...');
     var media=await fetchAPI('/'+P.userId+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count,reach,saved,shares&limit=15');
-    var audData={gender:DEMO.gender,age:DEMO.age,cities:DEMO.cities};
+    var audData={gender:DEMO.gender,age:DEMO.age,cities:[]};
     try{
       var aud2=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value&timeframe=last_90_days&breakdown=age,gender');
-      console.log('Audiencia raw:', JSON.stringify(aud2));
       audData=processarAudiencia(aud2.data||[]);
     }catch(e){
       console.log('Audiencia indisponivel:',e.message);
       try{
         var aud3=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value');
-        console.log('Audiencia fallback raw:', JSON.stringify(aud3));
         audData=processarAudiencia(aud3.data||[]);
       }catch(e2){console.log('Audiencia fallback falhou:',e2.message);}
     }
+    // Buscar cidades separadamente
+    try{
+      var audCidade=await fetchAPI('/'+P.userId+'/insights?metric=follower_demographics&period=lifetime&metric_type=total_value&breakdown=city');
+      console.log('Cidades raw:', JSON.stringify(audCidade));
+      var cidadesProcessadas=processarCidades(audCidade.data||[]);
+      if(cidadesProcessadas.length>0) audData.cities=cidadesProcessadas;
+    }catch(e){console.log('Cidades indisponivel:',e.message);}
     // Buscar comentários reais
     setLoading(true,'Buscando comentários...');
     var comentariosReais=[];
@@ -886,6 +896,27 @@ function processarAudiencia(data){
     }
   }catch(e){console.log('Erro audiencia:',e);}
   return{gender:gender,age:age,cities:cities};
+}
+
+function processarCidades(data){
+  try{
+    var fd=data.find(function(d){return d.name==='follower_demographics';});
+    if(!fd||!fd.total_value||!fd.total_value.breakdowns) return [];
+    var results=fd.total_value.breakdowns[0]&&fd.total_value.breakdowns[0].results?fd.total_value.breakdowns[0].results:[];
+    var cityMap={};
+    var total=0;
+    results.forEach(function(r){
+      var city=r.dimension_values&&r.dimension_values[0]?r.dimension_values[0]:'Outros';
+      var v=r.value||0;
+      total+=v;
+      if(!cityMap[city]) cityMap[city]=0;
+      cityMap[city]+=v;
+    });
+    if(total===0) return [];
+    return Object.keys(cityMap).sort(function(a,b){return cityMap[b]-cityMap[a];}).slice(0,5).map(function(k){
+      return{l:k,p:Math.round(cityMap[k]/total*100)};
+    });
+  }catch(e){return [];}
 }
 
 function montarDados(profile,insights,posts,aud,comentarios){
@@ -1127,22 +1158,24 @@ function rResumo(){
   else if(!savesOk&&d.saves>0)ptxt='Os saves estao em <strong>'+fmt(d.saves)+'</strong> no mes. Publicar mais conteudo de lifestyle do bairro e tours com narracao.';
   else ptxt='Perfil <strong>saudavel</strong>. Manter regularidade de publicacao e garantir resposta a todos os comentarios com pergunta em ate 30 minutos.';
   prox('proxResumoTxt',ptxt);
+  var engPorPost=d.posts.length>0?Math.round((d.likes+d.comments)/d.posts.length):0;
+  var contOk=engPorPost>=20;
   var sems=[
     {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate!==null?d.engRate.toFixed(1)+'% de taxa':'Calculando...'},
     {area:'Direct',icon:'ti-message-circle',s:respOk?'s-ok':'s-warn',label:respOk?'Respondendo bem':'Pode melhorar',desc:'~'+P.resp+' min de resposta'},
     {area:'Crescimento',icon:'ti-trending-up',s:'s-info',label:'Ver perfil',desc:fmt(d.followers)+' seguidores'},
-    {area:'Conteudo',icon:'ti-bookmark',s:savesOk?'s-ok':'s-warn',label:savesOk?'Gerando interesse':'Pouco impacto',desc:fmt(d.saves)+' saves este mes'}
+    {area:'Conteudo',icon:'ti-photo',s:contOk?'s-ok':'s-warn',label:contOk?'Gerando interesse':'Pouco impacto',desc:fmt(engPorPost)+' interações/post'}
   ];
   document.getElementById('semaforoEl').innerHTML=sems.map(function(s){
     return '<div class="sem '+s.s+'"><div class="sem-circle"><i class="ti '+s.icon+'"></i></div><div><div class="sem-label">'+s.area+'</div><div class="sem-status">'+s.label+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">'+s.desc+'</div></div></div>';
   }).join('');
   document.getElementById('kpiResumo').innerHTML=[
     kpi('Seguidores',fmt(d.followers),d.following>0?'seguindo '+fmt(d.following):'','k-gold'),
-    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do minimo':'calculado nos posts',engOk?'k-green':''),
-    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas unicas':'indisponivel','k-blue'),
-    kpi('Saves',d.saves>0?fmt(d.saves):'—',d.saves>0?'intencao de compra':'indisponivel na API','k-dark'),
-    kpi('Compartilhamentos',d.shares>0?fmt(d.shares):'—',d.shares>0?'indicacao organica':'indisponivel na API',''),
-    kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0&&d.profileViews>0?ctr.toFixed(1)+'% dos visitantes':'indisponivel','k-dark')
+    kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do mínimo':'calculado nos posts',engOk?'k-green':''),
+    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue'),
+    kpi('Curtidas',fmt(d.likes),'nos últimos posts',''),
+    kpi('Comentários',fmt(d.comments),'nos últimos posts',''),
+    kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0?ctr.toFixed(1)+'% dos visitantes':'indisponível na API','k-dark')
   ].join('');
   // Gráfico crescimento — só mostra se tiver dados reais de alcance
   var growthCard = document.getElementById('cGrowth') ? document.getElementById('cGrowth').closest('.card') : null;
@@ -1173,15 +1206,15 @@ function rSaude(){
   prox('proxSaudeTxt',proxTxt);
   var vitrineItems=[];
   if(d.profileViews>0){
-    vitrineItems.push(chk(d.profileViews>=2000?'ok':'warn','Visitas ao perfil este mes: '+fmt(d.profileViews),'Pessoas que abriram o perfil para saber mais'));
-    vitrineItems.push(chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio esta convertendo'));
+    vitrineItems.push(chk(d.profileViews>=2000?'ok':'warn','Visitas ao perfil este mês: '+fmt(d.profileViews),'Pessoas que abriram o perfil para saber mais'));
+    vitrineItems.push(chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio está convertendo'));
+    if(d.linkClicks>0) vitrineItems.push(chk(d.linkClicks>=50?'ok':'warn','Cliques no link: '+fmt(d.linkClicks)+' este mês','Pessoas que foram ao WhatsApp ou site'));
   } else {
-    vitrineItems.push(chk('info','Visitas ao perfil: indisponível na API','Requer permissão adicional aprovada pela Meta'));
+    vitrineItems.push(chk('warn','Visitas ao perfil: aguardando dados','A API retorna este dado após aprovação completa das permissões'));
+    vitrineItems.push(chk('warn','Cliques no link da bio: aguardando dados','Disponível junto com visitas ao perfil'));
   }
-  if(d.linkClicks>0){
-    vitrineItems.push(chk(d.linkClicks>=50?'ok':'warn','Cliques no link: '+fmt(d.linkClicks)+' este mes','Pessoas que foram para o WhatsApp ou site'));
-  }
-  vitrineItems.push(chk('info','Menções e marcações: indisponível','A API não fornece dados de menções'));
+  // Adicionar dado que sempre temos — engajamento e posts
+  vitrineItems.push(chk(d.mediaCount>=10?'ok':'warn','Total de publicações: '+d.mediaCount,'Perfis com mais de 12 posts têm credibilidade maior no imobiliário'));
   document.getElementById('vitrineEl').innerHTML=vitrineItems.join('');
   // Destaques — não disponível na API
   // Destaques removido do HTML — não disponível na API
@@ -1217,10 +1250,7 @@ function rDirect(){
   var respOk=P.resp<=20;
   prox('proxDirectTxt',!respOk?'Tempo de resposta: <strong>'+P.resp+' minutos</strong>. Configure uma mensagem automatica no Instagram para responder instantaneamente fora do horario comercial.':'<strong>Direct funcionando bem.</strong> Garantir que comentarios com perguntas tambem sejam respondidos em ate 30 minutos.');
   document.getElementById('kpiDirect').innerHTML=[
-    kpi('DMs recebidos/semana','—','não disponível na API',''),
-    kpi('Taxa de resposta','—','não disponível na API',''),
-    kpi('Tempo de resposta',P.resp+'min',respOk?'configurado no setup':' melhorar',respOk?'k-dark':''),
-    kpi('DMs de compra','—','não disponível na API','')
+    kpi('Tempo de resposta',P.resp+'min',respOk?'configurado no setup — bom':'melhorar',respOk?'k-dark':'')
   ].join('');
   var faixas=[{l:'Ate 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — critico',ref:999}];
   document.getElementById('velocDirectEl').innerHTML=faixas.map(function(f,i){
@@ -1269,37 +1299,26 @@ function rDirect(){
 function rEngajamento(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
   var engOk=d.engRate!==null&&d.engRate>=b.eng.min;
-  prox('proxEngTxt',d.saves<b.saves.min?'Os saves estao em <strong>'+fmt(d.saves)+'</strong>. Publicar conteudo de lifestyle do bairro e carrosseis com dicas de compra.':'<strong>Engajamento saudavel.</strong> Manter o ritmo de Reels e focar em compartilhamentos.');
+  // Próximo passo baseado em curtidas+comentários quando saves indisponível
+  var totalEng=(d.likes||0)+(d.comments||0);
+  var engPorPost=d.posts.length>0?Math.round(totalEng/d.posts.length):0;
+  prox('proxEngTxt',engOk?'<strong>Engajamento saudável em '+d.engRate.toFixed(1)+'%.</strong> Manter o ritmo. Responder todos os comentários com pergunta em até 30 minutos.':'Engajamento em <strong>'+(d.engRate!==null?d.engRate.toFixed(1)+'%':'cálculo indisponível')+'</strong>. Publicar carrosseis educativos e tours de imóveis para aumentar curtidas e comentários.');
   document.getElementById('kpiEng').innerHTML=[
-    kpi('Taxa de engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do minimo':'calculado nos posts',engOk?'k-dark':''),
-    kpi('Saves',d.saves>0?fmt(d.saves):'—',d.saves>0?'intencao de compra':'indisponivel na API','k-green'),
-    kpi('Compartilhamentos',d.shares>0?fmt(d.shares):'—',d.shares>0?'indicacao organica':'indisponivel na API',''),
-    kpi('Comentarios',fmt(d.comments),'nos ultimos posts',''),
-    kpi('Curtidas',fmt(d.likes),'nos ultimos posts',''),
-    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas unicas':'indisponivel na API','k-blue')
+    kpi('Taxa de engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do mínimo':'calculado nos posts',engOk?'k-dark':''),
+    kpi('Curtidas',fmt(d.likes),'nos últimos posts',''),
+    kpi('Comentários',fmt(d.comments),'nos últimos posts',''),
+    kpi('Alcance 30d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue')
   ].join('');
-  var ec=[d.likes,d.comments,d.saves>0?d.saves:0,d.shares>0?d.shares:0];
-  var ecl=['#B07D3A','#1A3A6E','#1A5C3A','#8C1F1F'];
-  var ell=['Curtidas','Comentarios','Saves','Compart.'];
-  document.getElementById('engLegEl').innerHTML=ell.map(function(l,i){return '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:'+ecl[i]+'"></span>'+l+' '+fmt(ec[i])+'</span>';}).join('');
+  // Pizza só com curtidas e comentários
+  var ec=[d.likes,d.comments];
+  var ecl=['#B07D3A','#1A3A6E'];
+  var ell=['Curtidas '+fmt(d.likes),'Comentários '+fmt(d.comments)];
+  document.getElementById('engLegEl').innerHTML=ell.map(function(l,i){return '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:'+ecl[i]+'"></span>'+l+'</span>';}).join('');
   dc('cEngPizza');charts.cEngPizza=new Chart(document.getElementById('cEngPizza'),{type:'doughnut',data:{labels:ell,datasets:[{data:ec,backgroundColor:ecl,borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
-  // Saves por dia — salvar wrap antes de dc()
-  var savesWrap=document.getElementById('cSaves')?document.getElementById('cSaves').parentElement:null;
-  dc('cSaves');
-  if(savesWrap){
-    if(d.saves7){savesWrap.innerHTML='<canvas id="cSaves"></canvas>';charts.cSaves=new Chart(document.getElementById('cSaves'),{type:'line',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.saves7,borderColor:'#1A5C3A',backgroundColor:'rgba(26,92,58,.1)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
-    else{savesWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de saves por dia não disponíveis na API</div>';}
-  }
-  var sharesWrap=document.getElementById('cShares')?document.getElementById('cShares').parentElement:null;
-  dc('cShares');
-  if(sharesWrap){
-    if(d.shares7){sharesWrap.innerHTML='<canvas id="cShares"></canvas>';charts.cShares=new Chart(document.getElementById('cShares'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{data:d.shares7,backgroundColor:'#8C1F1F',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});}
-    else{sharesWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de compartilhamentos por dia não disponíveis na API</div>';}
-  }
   var reachWrap=document.getElementById('cReach')?document.getElementById('cReach').parentElement:null;
   dc('cReach');
   if(reachWrap){
-    if(d.reach7){reachWrap.innerHTML='<canvas id="cReach"></canvas>';charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressoes',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});}
+    if(d.reach7){reachWrap.innerHTML='<canvas id="cReach"></canvas>';charts.cReach=new Chart(document.getElementById('cReach'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sab','Dom'],datasets:[{label:'Alcance',data:d.reach7,backgroundColor:'rgba(26,58,110,.33)',borderColor:'#1A3A6E',borderWidth:1.5,borderRadius:4},{label:'Impressões',data:d.imp7,backgroundColor:'rgba(176,125,58,.2)',borderColor:'#B07D3A',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:11}}}},scales:{y:{ticks:{callback:function(v){return fmt(v);}}},x:{grid:{display:false}}}}});}
     else{reachWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink3);font-size:13px;text-align:center;padding:20px">Dados de alcance por dia não disponíveis na API</div>';}
   }
 }
@@ -1382,20 +1401,20 @@ function rAudiencia(){
   document.getElementById('ageDiagEl').innerHTML='<span style="color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+fit35+'% da audiencia tem 35-54 anos</strong> — '+(fitOk?'excelente fit com o perfil de comprador.':'abaixo do ideal. O comprador de alto padrao tende a ter 35-55 anos.')+'</span>';
   document.getElementById('genEl').innerHTML=d.gender.map(function(g){return aud(g.l,g.p,g.c);}).join('');
   dc('cGen');charts.cGen=new Chart(document.getElementById('cGen'),{type:'doughnut',data:{labels:d.gender.map(function(g){return g.l;}),datasets:[{data:d.gender.map(function(g){return g.p;}),backgroundColor:d.gender.map(function(g){return g.c;}),borderWidth:2,borderColor:'#FFFFFF'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
-  if(d.cities.length>0){
+  if(d.cities&&d.cities.length>0){
     document.getElementById('locEl').innerHTML=d.cities.map(function(g){return aud(g.l,g.p,'#B07D3A');}).join('');
   } else {
-    document.getElementById('locEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de cidade indisponíveis neste período.</div>';
+    document.getElementById('locEl').innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--ink3);line-height:1.7">Dados de localização dos seguidores não disponíveis no momento.<br>A API retorna este dado quando há seguidores suficientes na conta.</div>';
   }
+  var localPct=d.cities&&d.cities.length>=2?d.cities[0].p+d.cities[1].p:d.cities&&d.cities.length===1?d.cities[0].p:0;
   var fitItems=[
-    {l:'Faixa etaria 35-54',v:fit35+'%',ok:fitOk},
-    d.cities.length>0?{l:'Audiencia nas top 2 cidades',v:localPct+'%',ok:localPct>=30}:null,
-    d.engRate!==null?{l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4}:null,
-    d.saves>0?{l:'Saves (intencao)',v:fmt(d.saves)+'/mes',ok:d.saves>=300}:null
+    {l:'Faixa etária 35-54',v:fit35+'%',ok:fitOk},
+    localPct>0?{l:'Audiência nas top 2 cidades',v:localPct+'%',ok:localPct>=30}:null,
+    d.engRate!==null?{l:'Engajamento ativo',v:d.engRate.toFixed(1)+'%',ok:d.engRate>=4}:null
   ].filter(Boolean);
   document.getElementById('fitEl').innerHTML=fitItems.map(function(x){
-    return '<div class="row"><div class="row-lbl">'+x.l+'</div><div class="row-val" style="color:'+(x.ok?'var(--green)':'var(--amber)')+'">'+x.v+'</div><span class="badge '+(x.ok?'b-ok':'b-warn')+'">'+(x.ok?'OK':'Atencao')+'</span></div>';
-  }).join('')+'<div style="margin-top:12px;padding:10px 12px;background:'+(fitOk?'var(--green-l)':'var(--amber-l)')+';border-radius:var(--r);font-size:11px;color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'Boa qualidade de audiencia para o segmento imobiliario.':'Audiencia com fit parcial. Ajustar linha editorial para atrair faixa com maior poder de compra.')+'</strong></div>';
+    return '<div class="row"><div class="row-lbl">'+x.l+'</div><div class="row-val" style="color:'+(x.ok?'var(--green)':'var(--amber)')+'">'+x.v+'</div><span class="badge '+(x.ok?'b-ok':'b-warn')+'">'+(x.ok?'OK':'Atenção')+'</span></div>';
+  }).join('')+'<div style="margin-top:12px;padding:10px 12px;background:'+(fitOk?'var(--green-l)':'var(--amber-l)')+';border-radius:var(--r);font-size:11px;color:'+(fitOk?'var(--green)':'var(--amber)')+'"><strong>'+(fitOk?'Boa qualidade de audiência para o segmento imobiliário.':'Audiência com fit parcial. Ajustar linha editorial para atrair faixa com maior poder de compra.')+'</strong></div>';
 }
 
 function rGargalos(){
