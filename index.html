@@ -787,6 +787,10 @@ async function carregarAPI(){
       var pvData=await buscarInsightsPeriodo('profile_views,website_clicks','&metric_type=total_value');
       insightsData=insightsData.concat(pvData);
     }catch(e){console.log('Profile_views erro:',e.message);}
+    try{
+      var fcData=await buscarInsightsPeriodo('follower_count','');
+      insightsData=insightsData.concat(fcData);
+    }catch(e){console.log('Follower_count erro:',e.message);}
     // Buscar posts — mais posts para períodos maiores
     setLoading(true,'Buscando publicações...');
     var mediaLimit = period <= 7 ? 10 : period <= 30 ? 20 : 50;
@@ -935,7 +939,7 @@ function processarCidades(data){
 
 function montarDados(profile,insights,posts,aud,comentarios){
   comentarios=comentarios||[];
-  var reach=0,profileViews=0,linkClicks=0;
+  var reach=0,profileViews=0,linkClicks=0,followerChange=null;
   var reach7=null,imp7=null,link7=null;
   try{
     // Com múltiplas janelas, podem existir múltiplos registros do mesmo metric
@@ -950,6 +954,16 @@ function montarDados(profile,insights,posts,aud,comentarios){
     if(rds.length>0){reach=sumAll(rds);var r7=lastN(rds,7);if(r7&&r7.length>0){reach7=r7;imp7=r7.map(function(v){return Math.round(v*2.5);});}}
     var pvds=findAll('profile_views');if(pvds.length>0)profileViews=sumAll(pvds);
     var wcds=findAll('website_clicks');if(wcds.length>0){linkClicks=sumAll(wcds);}
+    // Variação de seguidores no período
+    var fcds=findAll('follower_count');
+    if(fcds.length>0){
+      var allFcVals=[];
+      fcds.forEach(function(d){if(d.values)allFcVals=allFcVals.concat(d.values);});
+      if(allFcVals.length>0){
+        var fcTotal=allFcVals.reduce(function(a,b){return a+(b.value||0);},0);
+        followerChange=fcTotal; // pode ser negativo
+      }
+    }
   }catch(e){console.log('Erro insights:',e);}
   var mediaItems=posts.map(function(p){
     return{caption:(p.caption||'').substring(0,50)||'(sem legenda)',mediaType:p.media_type||'IMAGE',timestamp:p.timestamp,reach:p.reach||0,likes:p.like_count||0,comments:p.comments_count||0,saves:p.saved||0,shares:p.shares||0};
@@ -967,6 +981,7 @@ function montarDados(profile,insights,posts,aud,comentarios){
   return{
     username:profile.username||P.nome,
     followers:followers,following:profile.follows_count||0,mediaCount:parseInt(profile.media_count)||0,
+    followerChange:followerChange,
     engRate:engRate,reach:reach||0,impressions:Math.round((reach||0)*2.5),
     profileViews:profileViews||0,linkClicks:linkClicks||0,
     likes:totalLikes,comments:totalComments,saves:savesDisp,shares:sharesDisp,
@@ -1183,17 +1198,28 @@ function rResumo(){
   document.getElementById('pgSub').textContent = 'Análise dos últimos '+period+' dias' + (postsMsg?' · '+postsMsg:'');
   var engPorPost=d.posts.length>0?Math.round((d.likes+d.comments)/d.posts.length):0;
   var contOk=engPorPost>=20;
+  var crescOk = d.followerChange === null || d.followerChange >= 0;
+  var crescLabel = d.followerChange !== null ?
+    (d.followerChange >= 0 ? '+'+d.followerChange+' seguidores' : d.followerChange+' seguidores') :
+    fmt(d.followers)+' seguidores';
+  var crescStatus = d.followerChange !== null ?
+    (d.followerChange > 0 ? 'Crescendo' : d.followerChange === 0 ? 'Estável' : 'Perdendo') :
+    'Ver perfil';
   var sems=[
     {area:'Engajamento',icon:'ti-heart',s:engOk?'s-ok':'s-warn',label:engOk?'Saudavel':'Atencao',desc:d.engRate!==null?d.engRate.toFixed(1)+'% de taxa':'Calculando...'},
-    {area:'Crescimento',icon:'ti-trending-up',s:'s-info',label:'Ver perfil',desc:fmt(d.followers)+' seguidores'},
+    {area:'Crescimento',icon:'ti-trending-up',s:crescOk?'s-info':'s-warn',label:crescStatus,desc:crescLabel},
     {area:'Alcance',icon:'ti-eye',s:d.reach>0?'s-ok':'s-warn',label:d.reach>0?fmt(d.reach)+' pessoas':'Indisponível',desc:d.reach>0?'últimos '+period+'d':'API não retornou'},
     {area:'Conteudo',icon:'ti-photo',s:contOk?'s-ok':'s-warn',label:contOk?'Gerando interesse':'Pouco impacto',desc:fmt(engPorPost)+' interações/post'}
   ];
   document.getElementById('semaforoEl').innerHTML=sems.map(function(s){
     return '<div class="sem '+s.s+'"><div class="sem-circle"><i class="ti '+s.icon+'"></i></div><div><div class="sem-label">'+s.area+'</div><div class="sem-status">'+s.label+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">'+s.desc+'</div></div></div>';
   }).join('');
+  var followerLabel = d.followerChange !== null ?
+    (d.followerChange >= 0 ? '+'+d.followerChange+' no período' : d.followerChange+' no período') :
+    (d.following>0?'seguindo '+fmt(d.following):'');
+  var followerOk = d.followerChange === null || d.followerChange >= 0;
   document.getElementById('kpiResumo').innerHTML=[
-    kpi('Seguidores',fmt(d.followers),d.following>0?'seguindo '+fmt(d.following):'','k-gold'),
+    kpi('Seguidores',fmt(d.followers),followerLabel,d.followerChange<0?'':'k-gold'),
     kpi('Engajamento',d.engRate!==null?d.engRate.toFixed(1)+'%':'—',engOk?'acima do mínimo — posts do período':'calculado nos posts',engOk?'k-green':''),
     kpi('Alcance '+period+'d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue'),
     kpi('Curtidas',fmt(d.likes),d._postsNoPeriodo>0?'posts do período':'posts recentes',''),
