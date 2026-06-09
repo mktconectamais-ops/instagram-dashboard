@@ -787,9 +787,13 @@ async function carregarAPI(){
       var pvData=await buscarInsightsPeriodo('profile_views,website_clicks','&metric_type=total_value');
       insightsData=insightsData.concat(pvData);
     }catch(e){console.log('Profile_views erro:',e.message);}
+    // follower_count só aceita até 30 dias — usar o menor entre period e 30
     try{
-      var fcData=await buscarInsightsPeriodo('follower_count','');
-      insightsData=insightsData.concat(fcData);
+      var fcPeriod=Math.min(period,30);
+      var fcSince=Math.floor(Date.now()/1000)-86400*fcPeriod;
+      var fcUntil=Math.floor(Date.now()/1000)-86400; // excluir hoje
+      var fcResp=await fetchAPI('/'+P.userId+'/insights?metric=follower_count&period=day&since='+fcSince+'&until='+fcUntil);
+      if(fcResp.data) insightsData=insightsData.concat(fcResp.data);
     }catch(e){console.log('Follower_count erro:',e.message);}
     // Buscar posts — mais posts para períodos maiores
     setLoading(true,'Buscando publicações...');
