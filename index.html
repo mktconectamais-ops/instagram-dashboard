@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
 // ── IA ────────────────────────────────────────────────────────────────────
 let iaKey = '', nivelIA = 'simples', chatAberto = false;
 
@@ -46,18 +47,18 @@ function perguntaRapida(txt){
 function montarContexto(){
   if(!D) return 'Dados não disponíveis ainda.';
   const b = BENCH[P.seg]||BENCH.medio;
-  const ctr = (D.linkClicks/D.profileViews*100).toFixed(1);
-  const fit35 = D.age ? D.age.filter(a=>a.l==='35-44'||a.l==='45-54').reduce((s,a)=>s+a.p,0) : 0;
+  const ctr = D.profileViews>0?(D.linkClicks/D.profileViews*100).toFixed(1):"n/d";
+  const fit35 = D.age ? D.age.filter(a=>a.l==="35-44"||a.l==="45-54").reduce((s,a)=>s+a.p,0) : 0;
   return 'DADOS REAIS DO PERFIL @'+D.username+':'+
     ' Segmento: '+P.seg+' padrao, Ticket medio: R$'+P.ticket+'k+,'+
-    ' Seguidores: '+D.followers+', Engajamento: '+D.engRate+'%,'+
-    ' Alcance 30d: '+D.reach+', Saves: '+D.saves+', Compartilhamentos: '+D.shares+','+
+    " Seguidores: "+D.followers+", Engajamento: "+(D.engRate!==null?D.engRate+"%":"indisponivel")+","+
+    " Alcance 30d: "+(D.reach||"indisponivel")+", Saves: "+(D.saves>0?D.saves:"indisponivel")+", Compartilhamentos: "+(D.shares>0?D.shares:"indisponivel")+","+
     ' Visitas ao perfil: '+D.profileViews+', Cliques no link: '+D.linkClicks+', CTR: '+ctr+'%,'+
     ' Tempo de resposta DM: '+P.resp+' minutos,'+
     ' Audiencia 35-54 anos: '+fit35+'%,'+
     ' Benchmark engajamento para o segmento: '+b.eng.min+'-'+b.eng.ref+'%,'+
     ' Benchmark CTR: '+b.ctr.min+'-'+b.ctr.ref+'%.'+
-    ' Posts recentes: '+D.posts.slice(0,3).map(p=>p.caption+'(saves:'+p.saves+')').join(', ')+'.';
+    " Posts recentes: "+D.posts.slice(0,3).map(p=>p.caption+"(curtidas:"+p.likes+",comentarios:"+p.comments+")").join(", ")+".";
 }
 
 function montarSystemPrompt(){
@@ -261,6 +262,8 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 .s-warn .sem-status{color:var(--amber)}
 .s-bad .sem-circle{background:var(--red-l);color:var(--red)}
 .s-bad .sem-status{color:var(--red)}
+.s-info .sem-circle{background:var(--blue-l);color:var(--blue)}
+.s-info .sem-status{color:var(--blue)}
 .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:20px}
 .kpi{background:var(--card);border-radius:var(--rl);padding:18px 20px;border:.5px solid var(--line);position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--line)}
@@ -558,8 +561,7 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="semaforo" id="semaforoEl"></div>
   <div class="kgrid" id="kpiResumo"></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-trending-up"></i>Crescimento de seguidores</div><div class="ct-sub">Novos seguidores por dia nos últimos 7 dias</div><div style="position:relative;height:190px"><canvas id="cGrowth"></canvas></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-compass"></i>De onde vieram os novos seguidores</div><div class="ct-sub">Cada origem tem um comportamento diferente</div><div id="origensEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-trending-up"></i>Alcance por dia</div><div class="ct-sub">Pessoas únicas que viram o conteúdo — últimos 7 dias</div><div style="position:relative;height:190px"><canvas id="cGrowth"></canvas></div></div>
   </div>
 </div>
 
@@ -567,7 +569,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="proximo"><div class="prox-icon"><i class="ti ti-arrow-right"></i></div><div><div class="prox-eyebrow">Próximo passo</div><div class="prox-text" id="proxSaudeTxt">—</div></div></div>
   <div class="card"><div class="ct"><i class="ti ti-user-circle"></i>O perfil como vitrine</div><div class="ct-sub">O que acontece quando alguém visita o perfil pela primeira vez</div><div id="vitrineEl"></div></div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-bookmark"></i>Destaques</div><div class="ct-sub">Qual destaque as pessoas mais acessam</div><div id="highlightsEl"></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-calendar-stats"></i>Consistência de publicação</div><div class="ct-sub">Regularidade constrói autoridade no mercado imobiliário</div><div id="consistenciaEl"></div></div>
   </div>
 </div>
@@ -577,7 +578,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="kgrid" id="kpiDirect"></div>
   <div class="g2">
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Velocidade de resposta no Direct</div><div class="ct-sub">No imobiliário, quem responde primeiro tem vantagem real</div><div id="velocDirectEl"></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-messages"></i>De onde vieram as mensagens</div><div class="ct-sub">Cada origem indica um nível de interesse diferente</div><div id="origemDmEl"></div></div>
   </div>
   <div class="card"><div class="ct"><i class="ti ti-message-2-heart"></i>Comentários com intenção de compra</div><div class="ct-sub">Perguntas nos comentários são leads — precisam de resposta em até 10 minutos</div><div id="comentIntencaoEl"></div></div>
 </div>
@@ -600,7 +600,7 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="card"><div class="ct"><i class="ti ti-photo"></i>Posts — desempenho individual</div><div class="ct-sub">O que cada publicação gerou de interesse real</div><div style="overflow-x:auto" id="postsTableEl"></div></div>
   <div class="g2">
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-chart-donut"></i>Mix de conteúdo</div><div class="ct-sub">O que você tem publicado vs. o recomendado</div><div id="mixEl"></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Melhor horário para publicar</div><div class="ct-sub">Quando sua audiência está mais ativa</div><div id="horariosEl"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-clock"></i>Melhor horário para publicar</div><div class="ct-sub">Baseado no engajamento real dos seus posts anteriores</div><div id="horariosEl"></div></div>
   </div>
 </div>
 
@@ -908,17 +908,21 @@ function montarDados(profile,insights,posts,aud,comentarios){
   var totalComments=mediaItems.reduce(function(a,p){return a+p.comments;},0);
   var totalSaves=mediaItems.reduce(function(a,p){return a+p.saves;},0);
   var totalShares=mediaItems.reduce(function(a,p){return a+p.shares;},0);
+  // Saves e shares retornam 0 quando a permissão avançada não foi aprovada.
+  // Usar null para indicar "indisponível" em vez de mostrar 0.
+  var savesDisp = totalSaves > 0 ? totalSaves : null;
+  var sharesDisp = totalShares > 0 ? totalShares : null;
   var followers=profile.followers_count||0;
-  var engRate=followers>0&&(totalLikes+totalComments)>0?parseFloat(((totalLikes+totalComments+totalSaves)/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):null;
+  var engRate=followers>0&&(totalLikes+totalComments)>0?parseFloat(((totalLikes+totalComments+(savesDisp||0))/Math.max(mediaItems.length,1)/followers*100).toFixed(2)):null;
   return{
     username:profile.username||P.nome,
     followers:followers,following:profile.follows_count||0,mediaCount:parseInt(profile.media_count)||0,
     engRate:engRate,reach:reach||0,impressions:Math.round((reach||0)*2.5),
     profileViews:profileViews||0,linkClicks:linkClicks||0,
-    likes:totalLikes,comments:totalComments,saves:totalSaves,shares:totalShares,
+    likes:totalLikes,comments:totalComments,saves:savesDisp,shares:sharesDisp,
     // Dados não disponíveis na API — null indica "sem dados"
     mentions:null,newFollowers:null,
-    growth:null,reach7:reach7,imp7:imp7,saves7:null,shares7:null,link7:link7,horas:DEMO.horas,
+    growth:null,reach7:reach7,imp7:imp7,saves7:null,shares7:null,link7:link7,
     posts:mediaItems.length>0?mediaItems:DEMO.posts,
     gender:aud.gender,age:aud.age,cities:aud.cities,
     comentariosReais:comentarios
@@ -1156,8 +1160,7 @@ function rResumo(){
     if(growthCard) growthCard.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:190px;color:var(--ink3);font-size:13px;padding:20px;text-align:center">Dados de crescimento diário não disponíveis na API</div>';
   }
   // Origens de seguidores — não disponível na API, remover
-  var origensEl=document.getElementById('origensEl');
-  if(origensEl) origensEl.closest('.card').style.display='none';
+  // Origens de seguidores removido do HTML — não disponível na API
 }
 
 function rSaude(){
@@ -1181,7 +1184,7 @@ function rSaude(){
   vitrineItems.push(chk('info','Menções e marcações: indisponível','A API não fornece dados de menções'));
   document.getElementById('vitrineEl').innerHTML=vitrineItems.join('');
   // Destaques — não disponível na API
-  document.getElementById('highlightsEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de acesso aos destaques não estão disponíveis na API do Instagram. Verifique diretamente no Instagram Insights do aplicativo.</div>';
+  // Destaques removido do HTML — não disponível na API
   // Consistência de publicação — baseada nos posts reais
   var dias=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
   var postDates=(d.posts||[]).filter(function(p){return p.timestamp;}).map(function(p){return new Date(p.timestamp);});
@@ -1230,7 +1233,7 @@ function rDirect(){
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:'+(ativo?bg:'var(--sub)')+';border:'+(ativo?'1.5px solid '+c:'.5px solid var(--line)')+'"><div style="width:10px;height:10px;border-radius:50%;background:'+(ativo?c:'var(--line)')+'"></div><div style="flex:1;font-size:12px;font-weight:'+(ativo?600:400)+';color:'+(ativo?c:'var(--ink3)')+'"> '+f.l+'</div>'+(ativo?'<span class="badge '+bstatus+'">'+blabel+'</span>':'')+'</div>';
   }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrao avalia varios imoveis ao mesmo tempo. A resposta mais rapida tem vantagem real.</div>';
   // Origem dos DMs — não disponível na API
-  document.getElementById('origemDmEl').innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">Dados de origem dos DMs não estão disponíveis na API do Instagram. Verifique diretamente no Instagram Insights do aplicativo.</div>';
+  // Origem dos DMs removido do HTML — não disponível na API
   // Comentários com intenção de compra — reais ou simulados
   var comentariosEl = document.getElementById('comentIntencaoEl');
   var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
@@ -1530,166 +1533,6 @@ window.addEventListener('load',async function(){
     else{D=DEMO;render();}
   }
 });
-
-// ── IA ────────────────────────────────────────────────────────────────────
-let iaKey = '', nivelIA = 'simples', chatAberto = false;
-
-function salvarChaveIA(){
-  const k = document.getElementById('iaKeyInput').value.trim();
-  if(!k){alert('Cole sua chave de API antes de salvar');return;}
-  iaKey = k;
-  localStorage.setItem('ia_key', k);
-  document.getElementById('iaKeyWarn').classList.add('off');
-  document.getElementById('iaPanelDiagBtn').classList.remove('off');
-  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat flutuante no canto da tela.';
-  alert('Chave salva! A IA está pronta para usar.');
-}
-
-function setNivel(n){
-  nivelIA = n;
-  document.querySelectorAll('.ia-nivel-btn').forEach(b=>{
-    b.classList.toggle('on', b.textContent.toLowerCase().includes(n==='simples'?'simpl':'pro'));
-  });
-}
-
-function toggleChat(){
-  chatAberto = !chatAberto;
-  document.getElementById('iaPanel').classList.toggle('off', !chatAberto);
-  if(!iaKey){
-    document.getElementById('iaKeyWarn').classList.remove('off');
-    document.getElementById('iaPanelDiagBtn').classList.add('off');
-  }
-}
-
-function perguntaRapida(txt){
-  document.getElementById('iaPanelInput').value = txt;
-  enviarPanelMsg();
-}
-
-function montarContexto(){
-  if(!D) return 'Dados não disponíveis ainda.';
-  const b = BENCH[P.seg]||BENCH.medio;
-  const ctr = (D.linkClicks/D.profileViews*100).toFixed(1);
-  const fit35 = D.age ? D.age.filter(a=>a.l==='35-44'||a.l==='45-54').reduce((s,a)=>s+a.p,0) : 0;
-  return 'DADOS REAIS DO PERFIL @'+D.username+':'+
-    ' Segmento: '+P.seg+' padrao, Ticket medio: R$'+P.ticket+'k+,'+
-    ' Seguidores: '+D.followers+', Engajamento: '+D.engRate+'%,'+
-    ' Alcance 30d: '+D.reach+', Saves: '+D.saves+', Compartilhamentos: '+D.shares+','+
-    ' Visitas ao perfil: '+D.profileViews+', Cliques no link: '+D.linkClicks+', CTR: '+ctr+'%,'+
-    ' Tempo de resposta DM: '+P.resp+' minutos,'+
-    ' Audiencia 35-54 anos: '+fit35+'%,'+
-    ' Benchmark engajamento para o segmento: '+b.eng.min+'-'+b.eng.ref+'%,'+
-    ' Benchmark CTR: '+b.ctr.min+'-'+b.ctr.ref+'%.'+
-    ' Posts recentes: '+D.posts.slice(0,3).map(p=>p.caption+'(saves:'+p.saves+')').join(', ')+'.';
-}
-
-function montarSystemPrompt(){
-  const isSimples = nivelIA === 'simples';
-  if(isSimples){
-    return 'Voce e uma consultora especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
-      'Fale de forma simples, direta e humana, como uma consultora explicando para o dono do negocio. '+
-      'Use portugues do Brasil sem erros. Evite jargoes tecnicos. Seja pratica e objetiva. '+
-      'Sempre termine com UMA acao concreta e simples para o cliente fazer. '+
-      'Maximo 3 paragrafos curtos. Use emojis com moderacao (1-2 por resposta).';
-  } else {
-    return 'Voce e uma estrategista especialista em Instagram para o mercado imobiliario brasileiro de medio e alto padrao. '+
-      'Use linguagem tecnica e precisa, com dados e benchmarks do setor. '+
-      'Analise causa raiz, impacto nos KPIs e solucao com metricas esperadas. '+
-      'Seja direto e profissional. Use portugues do Brasil sem erros. '+
-      'Estruture em: Diagnostico, Causa, Solucao, Resultado esperado.';
-  }
-}
-
-async function chamarIA(mensagens){
-  if(!iaKey) return 'Configure sua chave de API primeiro na secao Analise com IA.';
-  try{
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:1000,
-        system: montarSystemPrompt(),
-        messages: mensagens
-      })
-    });
-    const data = await resp.json();
-    if(data.error) return 'Erro: '+data.error.message;
-    return data.content[0].text;
-  }catch(e){
-    return 'Erro ao conectar com a IA. Verifique sua chave de API.';
-  }
-}
-
-async function gerarDiagIA(noPanel){
-  if(!iaKey){alert('Configure sua chave de API na secao Analise com IA primeiro.');return;}
-  const ctx = montarContexto();
-  const prompt = 'Com base nos dados abaixo, gere um diagnostico completo do perfil imobiliario. Identifique os 3 principais gargalos, explique a causa de cada um e sugira a acao prioritaria. '+ctx;
-
-  if(noPanel){
-    adicionarMsgPanel('Gerando diagnostico completo do perfil...','loading');
-  } else {
-    document.getElementById('iaDiagResultado').innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink3);font-size:13px"><i class="ti ti-loader-2" style="font-size:24px;display:block;margin-bottom:8px;animation:spin 1s linear infinite"></i>Analisando dados do perfil...</div>';
-  }
-
-  const resp = await chamarIA([{role:'user',content:prompt}]);
-  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
-
-  if(noPanel){
-    document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
-    adicionarMsgPanel(html,'bot');
-  } else {
-    document.getElementById('iaDiagResultado').innerHTML = '<div style="font-size:12px;line-height:1.75;color:var(--ink);padding:4px 0">'+html+'</div>';
-  }
-}
-
-function adicionarMsgPanel(txt, tipo){
-  const msgs = document.getElementById('iaPanelMsgs');
-  const div = document.createElement('div');
-  div.className = 'ia-msg '+tipo;
-  div.innerHTML = txt;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-async function enviarPanelMsg(){
-  const input = document.getElementById('iaPanelInput');
-  const txt = input.value.trim();
-  if(!txt) return;
-  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
-  input.value = '';
-  adicionarMsgPanel(txt,'user');
-  adicionarMsgPanel('Pensando...','loading');
-  const ctx = montarContexto();
-  const resp = await chamarIA([{role:'user',content:'Contexto do perfil: '+ctx+'. Pergunta: '+txt}]);
-  document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
-  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
-  adicionarMsgPanel(html,'bot');
-}
-
-async function enviarMsgIA(){
-  const input = document.getElementById('iaChatInput');
-  const txt = input.value.trim();
-  if(!txt) return;
-  if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
-  input.value = '';
-  const msgs = document.getElementById('iaChatMsgs');
-  const userDiv = document.createElement('div');
-  userDiv.className='ia-msg user';userDiv.textContent=txt;msgs.appendChild(userDiv);
-  const loadDiv = document.createElement('div');
-  loadDiv.className='ia-msg loading';loadDiv.textContent='Pensando...';msgs.appendChild(loadDiv);
-  msgs.scrollTop=msgs.scrollHeight;
-  const ctx = montarContexto();
-  const resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+txt}]);
-  loadDiv.remove();
-  const botDiv=document.createElement('div');
-  botDiv.className='ia-msg bot';
-  botDiv.innerHTML=(function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
-  msgs.appendChild(botDiv);
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-// IA inicializada
 
 </script>
 
