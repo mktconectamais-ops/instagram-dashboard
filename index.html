@@ -1230,7 +1230,7 @@ function rResumo(){
     kpi('Alcance '+period+'d',d.reach>0?fmt(d.reach):'—',d.reach>0?'pessoas únicas':'indisponível na API','k-blue'),
     kpi('Curtidas',fmt(d.likes),d._postsNoPeriodo>0?'posts do período':'posts recentes',''),
     kpi('Comentários',fmt(d.comments),d._postsNoPeriodo>0?'posts do período':'posts recentes',''),
-    kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0?ctr.toFixed(1)+'% dos visitantes':'indisponível na API','k-dark')
+    kpi('Cliques no link',d.linkClicks>0?fmt(d.linkClicks):'—',d.linkClicks>0?ctr.toFixed(1)+'% dos visitantes':'disponível após aprovação do app','k-dark')
   ].join('');
   // Gráfico crescimento — só mostra se tiver dados reais de alcance
   var growthCard = document.getElementById('cGrowth') ? document.getElementById('cGrowth').closest('.card') : null;
@@ -1257,7 +1257,7 @@ function rSaude(){
   var ctrOk=ctr>=8;
   var proxTxt=d.profileViews>0?
     (ctrOk?'Bio convertendo bem — <strong>'+ctr.toFixed(1)+'%</strong> dos visitantes clicam no link. Manter a bio atualizada com imóveis disponíveis.':'Clique no link da bio em <strong>'+ctr.toFixed(1)+'%</strong>. Reescrever a bio com CTA claro e link direto para o WhatsApp.'):
-    'Dados de visitas ao perfil indisponíveis no momento.';
+    'Visitas ao perfil e cliques no link estarão disponíveis <strong>após a publicação do app</strong> na Meta. Aguardando aprovação.';
   prox('proxSaudeTxt',proxTxt);
   var vitrineItems=[];
   if(d.profileViews>0){
@@ -1265,8 +1265,8 @@ function rSaude(){
     vitrineItems.push(chk(ctrOk?'ok':'warn','Clique no link da bio: '+ctr.toFixed(1)+'%','Acima de 8% indica que a bio está convertendo'));
     if(d.linkClicks>0) vitrineItems.push(chk(d.linkClicks>=50?'ok':'warn','Cliques no link: '+fmt(d.linkClicks)+' este mês','Pessoas que foram ao WhatsApp ou site'));
   } else {
-    vitrineItems.push(chk('warn','Visitas ao perfil: aguardando dados','A API retorna este dado após aprovação completa das permissões'));
-    vitrineItems.push(chk('warn','Cliques no link da bio: aguardando dados','Disponível junto com visitas ao perfil'));
+    vitrineItems.push(chk('warn','Visitas ao perfil: disponível após aprovação','A Meta libera este dado quando o app for publicado e aprovado'));
+    vitrineItems.push(chk('warn','Cliques no link da bio: disponível após aprovação','Liberado junto com visitas ao perfil após publicação do app'));
   }
   // Adicionar dado que sempre temos — engajamento e posts
   vitrineItems.push(chk(d.mediaCount>=10?'ok':'warn','Total de publicações: '+d.mediaCount,'Perfis com mais de 12 posts têm credibilidade maior no imobiliário'));
@@ -1534,6 +1534,7 @@ function rPlano(){
 }
 
 function rBranding(){
+  try{
   var isAlto=P.seg==='alto';
   document.getElementById('proxBrandTxt').innerHTML='<strong>Auditar os ultimos 12 posts do feed</strong>: todos seguem o guia de identidade visual? Grid coeso gera confianca em visitantes novos — essencial no imobiliario de alto padrao.';
   document.getElementById('brandingEl').innerHTML=[
@@ -1560,12 +1561,12 @@ function rBranding(){
     chk('warn','Legenda com gancho nos primeiros 3s','Maioria comeca com descricao do imovel'),
     chk('ok','Linguagem de conversa nos Stories','Tom proximo e natural')
   ].join('');
+  }catch(e){console.log('Erro rBranding:',e);}
 }
 
 var PGS={
   resumo:['Resumo geral','Como esta o perfil — visao rapida para o cliente e o time'],
   saude:['Saude do perfil','O perfil esta funcionando bem como vitrine?'],
-  direct:['Direct e Relacionamento','Como esta o atendimento e o relacionamento no Direct'],
   engajamento:['Engajamento real','Saves, compartilhamentos, comentarios — o que gera interesse de verdade'],
   conteudo:['Conteudo e Criativos','O que esta performando e o que pode melhorar'],
   audiencia:['Audiencia','Quem sao os seguidores e qual o fit com o perfil de comprador'],
