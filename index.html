@@ -17,9 +17,13 @@ function salvarChaveIA(){
   if(!k){alert('Cole sua chave de API antes de salvar');return;}
   iaKey = k;
   localStorage.setItem('ia_key', k);
+  // Atualizar aviso na página IA
+  var warnPage = document.getElementById('iaKeyWarnPage');
+  if(warnPage) warnPage.innerHTML='<i class="ti ti-circle-check" style="flex-shrink:0;margin-top:1px;color:var(--green)"></i><span style="color:var(--green)"><strong>Chave configurada!</strong> A IA está pronta para usar.</span>';
+  // Atualizar aviso no chat flutuante
   document.getElementById('iaKeyWarn').classList.add('off');
   document.getElementById('iaPanelDiagBtn').classList.remove('off');
-  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat flutuante no canto da tela.';
+  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat abaixo.';
   alert('Chave salva! A IA está pronta para usar.');
 }
 
@@ -146,21 +150,38 @@ async function enviarPanelMsg(){
 }
 
 async function enviarMsgIA(){
-  const input = document.getElementById('iaChatInput');
+  const input = document.getElementById('iaPanelInput');
   const txt = input.value.trim();
   if(!txt) return;
   if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
   input.value = '';
-  const msgs = document.getElementById('iaChatMsgs');
-  const userDiv = document.createElement('div');
-  userDiv.className='ia-msg user';userDiv.textContent=txt;msgs.appendChild(userDiv);
-  const loadDiv = document.createElement('div');
+  adicionarMsgPanel(txt,'user');
+  adicionarMsgPanel('Pensando...','loading');
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto do perfil: '+ctx+'. Pergunta: '+txt}]);
+  document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  adicionarMsgPanel(html,'bot');
+}
+
+// Chat da página IA (separado do chat flutuante)
+async function enviarMsgIA_page(txt){
+  var input = document.getElementById('iaChatInput');
+  var msg = txt || (input ? input.value.trim() : '');
+  if(!msg) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro na seção Análise com IA.');return;}
+  if(input) input.value = '';
+  var msgs = document.getElementById('iaChatMsgs');
+  if(!msgs) return;
+  var userDiv = document.createElement('div');
+  userDiv.className='ia-msg user';userDiv.textContent=msg;msgs.appendChild(userDiv);
+  var loadDiv = document.createElement('div');
   loadDiv.className='ia-msg loading';loadDiv.textContent='Pensando...';msgs.appendChild(loadDiv);
   msgs.scrollTop=msgs.scrollHeight;
-  const ctx = montarContexto();
-  const resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+txt}]);
+  var ctx = montarContexto();
+  var resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+msg}]);
   loadDiv.remove();
-  const botDiv=document.createElement('div');
+  var botDiv=document.createElement('div');
   botDiv.className='ia-msg bot';
   botDiv.innerHTML=(function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
   msgs.appendChild(botDiv);
@@ -168,7 +189,6 @@ async function enviarMsgIA(){
 }
 
 // IA inicializada
-
 </script>
 <style>
 :root{
@@ -625,6 +645,60 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="g2">
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-palette"></i>Identidade visual</div><div id="identVisualEl"></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-speakerphone"></i>Linguagem e comunicação</div><div id="linguagemEl"></div></div>
+  </div>
+
+<div class="page" id="pg-ia">
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-sparkles"></i></div><div><div class="prox-eyebrow">Inteligência Artificial</div><div class="prox-text" id="proxIATxt">Configure sua chave de API Anthropic para ativar o diagnóstico e o chat com IA especialista em Instagram imobiliário.</div></div></div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-key"></i>Configurar chave de API</div>
+      <div class="ct-sub">Cada cliente usa sua própria chave Anthropic. A chave fica salva no seu navegador e nunca é enviada a servidores externos.</div>
+      <div id="iaKeyWarnPage" style="background:var(--amber-l);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.6;display:flex;gap:8px;align-items:flex-start"><i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i><span>Chave não configurada. Cole sua chave <strong>sk-ant-...</strong> abaixo.</span></div>
+      <div class="f-label" style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Chave de API Anthropic</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="password" id="iaKeyInput" placeholder="sk-ant-api03-..." style="flex:1;background:var(--sub);border:.5px solid var(--line);border-radius:var(--r);padding:10px 14px;font-size:13px;font-family:var(--body);outline:none;color:var(--ink)" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--line)'">
+        <button onclick="salvarChaveIA()" style="background:var(--gold);color:var(--ink);border:none;border-radius:var(--r);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);white-space:nowrap">Salvar</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);line-height:1.7">Obtenha sua chave em <strong style="color:var(--gold)">console.anthropic.com</strong> → API Keys → Create Key. Custo estimado: R$0,05 a R$0,20 por análise completa.</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-robot"></i>Como funciona a IA</div>
+      <div class="ct-sub">O que a consultora IA faz com os dados do perfil</div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Diagnóstico automático</div><div style="font-size:11px;color:var(--ink3)">Analisa todos os dados e identifica os 3 principais gargalos com causa e solução</div></div><span class="badge b-ok">Disponível</span></div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Chat especialista</div><div style="font-size:11px;color:var(--ink3)">Responde perguntas sobre engajamento, conteúdo, audiência — com os dados reais do perfil</div></div><span class="badge b-ok">Disponível</span></div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Plano de ação por IA</div><div style="font-size:11px;color:var(--ink3)">Geração de plano de conteúdo personalizado baseado nos dados da conta</div></div><span class="badge b-warn">Em breve</span></div>
+      <div class="row" style="border-bottom:none"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Modo Simples ou Profissional</div><div style="font-size:11px;color:var(--ink3)">Simples para o cliente, Profissional para o gestor de tráfego</div></div><span class="badge b-ok">Disponível</span></div>
+    </div>
+  </div>
+  <div class="card" id="iaDiagCard">
+    <div class="ct"><i class="ti ti-stethoscope"></i>Diagnóstico por IA</div>
+    <div class="ct-sub">Análise completa do perfil gerada pela IA com base nos dados reais da conta</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <button id="iaDiagBtnPage" onclick="gerarDiagIA(false)" style="background:var(--ink);color:var(--gold);border:none;border-radius:var(--r);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:8px"><i class="ti ti-sparkles"></i>Gerar diagnóstico</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="ia-nivel-btn on" onclick="setNivel('simples')">Simples</button>
+        <button class="ia-nivel-btn" onclick="setNivel('pro')">Profissional</button>
+      </div>
+    </div>
+    <div id="iaDiagResultado" style="background:var(--sub);border-radius:var(--r);padding:16px 18px;font-size:12px;color:var(--ink3);line-height:1.7">Configure a chave de API e clique em "Gerar diagnóstico" para analisar o perfil.</div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct"><i class="ti ti-message-circle"></i>Chat com a consultora IA</div>
+    <div class="ct-sub">Perguntas específicas sobre o perfil — respondidas com os dados reais da conta</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      <span class="ia-chip" onclick="enviarMsgIA_page('Por que meu engajamento está baixo?')">Engajamento baixo</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('O que devo postar esta semana?')">O que postar?</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Como atrair mais compradores de alto padrão?')">Atrair compradores</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Minha bio está convertendo bem?')">Analisar bio</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Qual o diagnóstico da minha audiência?')">Diagnóstico da audiência</span>
+    </div>
+    <div id="iaChatMsgs" style="background:var(--sub);border-radius:var(--r);padding:14px;min-height:120px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+      <div class="ia-msg bot">Olá! Sou sua consultora especialista em Instagram imobiliário. Configure a chave de API e posso analisar os dados reais do seu perfil.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input class="ia-input" id="iaChatInput" placeholder="Pergunte algo sobre o perfil..." onkeypress="if(event.key==='Enter')enviarMsgIA_page()" style="flex:1">
+      <button class="ia-send" onclick="enviarMsgIA_page()"><i class="ti ti-send"></i></button>
+    </div>
   </div>
 </div>
 
@@ -1163,6 +1237,21 @@ async function recarregar(){if(P.token&&P.userId){await carregarAPI();}else{rend
 
 // ── INICIALIZAÇÃO ──────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async function(){
+  // Restaurar chave IA se salva
+  var savedKey = localStorage.getItem('ia_key');
+  if(savedKey){
+    iaKey = savedKey;
+    var inp = document.getElementById('iaKeyInput');
+    if(inp) inp.value = savedKey;
+    var warnPage = document.getElementById('iaKeyWarnPage');
+    if(warnPage) warnPage.innerHTML='<i class="ti ti-circle-check" style="flex-shrink:0;margin-top:1px;color:var(--green)"></i><span style="color:var(--green)"><strong>Chave configurada!</strong> A IA está pronta para usar.</span>';
+    var kw = document.getElementById('iaKeyWarn');
+    if(kw) kw.classList.add('off');
+    var pd = document.getElementById('iaPanelDiagBtn');
+    if(pd) pd.classList.remove('off');
+    var pt = document.getElementById('proxIATxt');
+    if(pt) pt.innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat abaixo.';
+  }
   // Verificar se há callback OAuth na URL
   var params = new URLSearchParams(window.location.search);
   var temCode = params.get('code');
@@ -1301,55 +1390,6 @@ function rSaude(){
   document.getElementById('consistenciaEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Ultimas 4 semanas — baseado nos posts reais da conta</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px">'+diasH+semH+'</table></div><div style="margin-top:12px;padding:10px 12px;background:'+consistBg+';border-radius:var(--r);font-size:11px;color:'+consistColor+'">'+consistMsg+'</div>';
 }
 
-function rDirect(){
-  var respOk=P.resp<=20;
-  prox('proxDirectTxt',!respOk?'Tempo de resposta: <strong>'+P.resp+' minutos</strong>. Configure uma mensagem automatica no Instagram para responder instantaneamente fora do horario comercial.':'<strong>Direct funcionando bem.</strong> Garantir que comentarios com perguntas tambem sejam respondidos em ate 30 minutos.');
-  document.getElementById('kpiDirect').innerHTML=[
-    kpi('Tempo de resposta',P.resp+'min',respOk?'configurado no setup — bom':'melhorar',respOk?'k-dark':'')
-  ].join('');
-  var faixas=[{l:'Ate 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — critico',ref:999}];
-  document.getElementById('velocDirectEl').innerHTML=faixas.map(function(f,i){
-    var prev=i>0?faixas[i-1].ref:0;
-    var ativo=P.resp>prev&&P.resp<=f.ref;
-    var c=f.ref<=5?'var(--green)':f.ref<=30?'var(--amber)':'var(--red)';
-    var bg=f.ref<=5?'var(--green-l)':f.ref<=30?'var(--amber-l)':'var(--red-l)';
-    var bstatus=f.ref<=5?'b-ok':f.ref<=30?'b-warn':'b-bad';
-    var blabel=f.ref<=5?'Ideal':f.ref<=30?'Bom':'Melhorar';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:'+(ativo?bg:'var(--sub)')+';border:'+(ativo?'1.5px solid '+c:'.5px solid var(--line)')+'"><div style="width:10px;height:10px;border-radius:50%;background:'+(ativo?c:'var(--line)')+'"></div><div style="flex:1;font-size:12px;font-weight:'+(ativo?600:400)+';color:'+(ativo?c:'var(--ink3)')+'"> '+f.l+'</div>'+(ativo?'<span class="badge '+bstatus+'">'+blabel+'</span>':'')+'</div>';
-  }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrao avalia varios imoveis ao mesmo tempo. A resposta mais rapida tem vantagem real.</div>';
-  // Origem dos DMs — não disponível na API
-  // Origem dos DMs removido do HTML — não disponível na API
-  // Comentários com intenção de compra — reais ou simulados
-  var comentariosEl = document.getElementById('comentIntencaoEl');
-  var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
-  if(coms && coms.length > 0){
-    // Palavras-chave de intenção de compra
-    var palavrasIntencao = ['disponível','disponivel','valor','preço','preco','quanto','bairro','localiz','quero conhecer','visitar','agendar','m²','metros','quartos','vagas','condomínio','condominio','parcela','financ','entrada'];
-    var comsIntencao = coms.filter(function(c){
-      var txt = (c.text||'').toLowerCase();
-      return palavrasIntencao.some(function(p){return txt.indexOf(p)>=0;});
-    });
-    if(comsIntencao.length > 0){
-      comentariosEl.innerHTML = comsIntencao.slice(0,6).map(function(c){
-        var dt = c.timestamp ? new Date(c.timestamp).toLocaleDateString('pt-BR') : '';
-        return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">"'+((c.text||'').substring(0,80)+(c.text&&c.text.length>80?'...':''))+'"</div><div style="font-size:11px;color:var(--ink3)">@'+(c.username||'usuário')+' · '+dt+'</div></div><span class="badge b-warn">Lead</span></div>';
-      }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3)">Mostrando '+comsIntencao.length+' comentário(s) com intenção de compra identificados automaticamente.</div>';
-    } else {
-      comentariosEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">'+coms.length+' comentário(s) analisados. Nenhum com palavras-chave de intenção de compra detectadas neste período.</div>';
-    }
-  } else {
-    // Simulado
-    comentariosEl.innerHTML=[
-      {t:'Tem disponível?',f:8,a:'Responder e chamar no DM'},
-      {t:'Qual o valor?',f:6,a:'Não dar o preço no comentário — chamar no DM'},
-      {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
-      {t:'Quero conhecer',f:3,a:'Lead quente — responder em até 10 min'},
-      {t:'Marcação de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
-    ].map(function(c){
-      return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Ação: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
-    }).join('');
-  }
-}
 
 function rEngajamento(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
@@ -1437,6 +1477,37 @@ function rConteudo(){
     horariosEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:2px;height:100px;padding-bottom:18px">'+bars+'</div><div style="margin-top:10px;font-size:12px;color:var(--ink3)">Melhor horário detectado: <strong style="color:var(--gold)">'+melhorHora+'h</strong> · Melhor dia: <strong style="color:var(--gold)">'+melhorDia+'</strong> — baseado no engajamento real dos seus posts</div>';
   } else {
     horariosEl.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--ink3)">Posts insuficientes para calcular melhor horário.</div>';
+  }
+
+  // Comentários com intenção de compra
+  var comentariosEl = document.getElementById('comentIntencaoEl');
+  if(comentariosEl){
+    var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
+    if(coms && coms.length > 0){
+      var palavrasIntencao = ['disponível','disponivel','valor','preço','preco','quanto','bairro','localiz','quero conhecer','visitar','agendar','m²','metros','quartos','vagas','condomínio','condominio','parcela','financ','entrada'];
+      var comsIntencao = coms.filter(function(c){
+        var txt = (c.text||'').toLowerCase();
+        return palavrasIntencao.some(function(p){return txt.indexOf(p)>=0;});
+      });
+      if(comsIntencao.length > 0){
+        comentariosEl.innerHTML = comsIntencao.slice(0,6).map(function(c){
+          var dt = c.timestamp ? new Date(c.timestamp).toLocaleDateString('pt-BR') : '';
+          return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">"'+((c.text||'').substring(0,80)+(c.text&&c.text.length>80?'...':''))+'"</div><div style="font-size:11px;color:var(--ink3)">@'+(c.username||'usuário')+' · '+dt+'</div></div><span class="badge b-warn">Lead</span></div>';
+        }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3)">'+comsIntencao.length+' comentário(s) com intenção de compra identificados automaticamente.</div>';
+      } else {
+        comentariosEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">'+coms.length+' comentário(s) analisados. Nenhum com palavras-chave de intenção de compra neste período.</div>';
+      }
+    } else {
+      comentariosEl.innerHTML=[
+        {t:'Tem disponível?',f:8,a:'Responder e chamar no DM'},
+        {t:'Qual o valor?',f:6,a:'Não dar o preço no comentário — chamar no DM'},
+        {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
+        {t:'Quero conhecer',f:3,a:'Lead quente — responder em até 10 min'},
+        {t:'Marcação de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
+      ].map(function(c){
+        return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Ação: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
+      }).join('');
+    }
   }
 }
 
@@ -1572,7 +1643,8 @@ var PGS={
   audiencia:['Audiencia','Quem sao os seguidores e qual o fit com o perfil de comprador'],
   gargalos:['Diagnostico de gargalos','O que esta impedindo mais resultados — causa e solucao'],
   plano:['Plano de acao','O que publicar, quando e como — baseado nos dados reais'],
-  branding:['Branding','A identidade visual e a comunicacao estao fazendo sentido?']
+  branding:['Branding','A identidade visual e a comunicacao estao fazendo sentido?'],
+  ia:['Análise com IA','Diagnóstico e consultoria especialista — baseado nos dados reais do perfil']
 };
 
 document.querySelectorAll('.sb-btn').forEach(function(btn){
