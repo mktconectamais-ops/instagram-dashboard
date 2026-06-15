@@ -17,9 +17,13 @@ function salvarChaveIA(){
   if(!k){alert('Cole sua chave de API antes de salvar');return;}
   iaKey = k;
   localStorage.setItem('ia_key', k);
+  // Atualizar aviso na página IA
+  var warnPage = document.getElementById('iaKeyWarnPage');
+  if(warnPage) warnPage.innerHTML='<i class="ti ti-circle-check" style="flex-shrink:0;margin-top:1px;color:var(--green)"></i><span style="color:var(--green)"><strong>Chave configurada!</strong> A IA está pronta para usar.</span>';
+  // Atualizar aviso no chat flutuante
   document.getElementById('iaKeyWarn').classList.add('off');
   document.getElementById('iaPanelDiagBtn').classList.remove('off');
-  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat flutuante no canto da tela.';
+  document.getElementById('proxIATxt').innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat abaixo.';
   alert('Chave salva! A IA está pronta para usar.');
 }
 
@@ -146,21 +150,38 @@ async function enviarPanelMsg(){
 }
 
 async function enviarMsgIA(){
-  const input = document.getElementById('iaChatInput');
+  const input = document.getElementById('iaPanelInput');
   const txt = input.value.trim();
   if(!txt) return;
   if(!iaKey){alert('Configure sua chave de API primeiro.');return;}
   input.value = '';
-  const msgs = document.getElementById('iaChatMsgs');
-  const userDiv = document.createElement('div');
-  userDiv.className='ia-msg user';userDiv.textContent=txt;msgs.appendChild(userDiv);
-  const loadDiv = document.createElement('div');
+  adicionarMsgPanel(txt,'user');
+  adicionarMsgPanel('Pensando...','loading');
+  const ctx = montarContexto();
+  const resp = await chamarIA([{role:'user',content:'Contexto do perfil: '+ctx+'. Pergunta: '+txt}]);
+  document.querySelectorAll('.ia-msg.loading').forEach(el=>el.remove());
+  const html = (function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
+  adicionarMsgPanel(html,'bot');
+}
+
+// Chat da página IA (separado do chat flutuante)
+async function enviarMsgIA_page(txt){
+  var input = document.getElementById('iaChatInput');
+  var msg = txt || (input ? input.value.trim() : '');
+  if(!msg) return;
+  if(!iaKey){alert('Configure sua chave de API primeiro na seção Análise com IA.');return;}
+  if(input) input.value = '';
+  var msgs = document.getElementById('iaChatMsgs');
+  if(!msgs) return;
+  var userDiv = document.createElement('div');
+  userDiv.className='ia-msg user';userDiv.textContent=msg;msgs.appendChild(userDiv);
+  var loadDiv = document.createElement('div');
   loadDiv.className='ia-msg loading';loadDiv.textContent='Pensando...';msgs.appendChild(loadDiv);
   msgs.scrollTop=msgs.scrollHeight;
-  const ctx = montarContexto();
-  const resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+txt}]);
+  var ctx = montarContexto();
+  var resp = await chamarIA([{role:'user',content:'Contexto: '+ctx+'. '+msg}]);
   loadDiv.remove();
-  const botDiv=document.createElement('div');
+  var botDiv=document.createElement('div');
   botDiv.className='ia-msg bot';
   botDiv.innerHTML=(function(s){return s.split('**').map(function(p,i){return i%2?'<strong>'+p+'</strong>':p}).join('').replace(/\n/g,'<br>');})(resp);
   msgs.appendChild(botDiv);
@@ -168,7 +189,6 @@ async function enviarMsgIA(){
 }
 
 // IA inicializada
-
 </script>
 <style>
 :root{
@@ -185,24 +205,96 @@ async function enviarMsgIA(){
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
-.setup{position:fixed;inset:0;background:#0C0C0B;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+/* ── LANDING SETUP ─────────────────────────────────────────────────────── */
+:root{
+  --navy:#0E1B4D;--navy2:#162260;--navy3:#1E2E7A;
+  --baby:#DDEEFF;--baby2:#C0DCFF;--baby3:#91BDFF;
+  --accent:#4A90E2;--accent2:#2563EB;
+  --white:#FFFFFF;
+}
+.setup{position:fixed;inset:0;background:var(--white);z-index:9999;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
 .setup.off{display:none}
-.setup-wrap{max-width:560px;width:100%;padding:44px;background:#141412;border:1px solid rgba(176,125,58,.2);border-radius:20px}
-.setup-logo{font-size:9px;font-weight:600;color:rgba(176,125,58,.5);text-transform:uppercase;letter-spacing:.2em;margin-bottom:24px}
-.setup-title{font-family:var(--display);font-size:26px;color:#fff;line-height:1.3;margin-bottom:8px}
-.setup-sub{font-size:13px;color:#666660;line-height:1.7;margin-bottom:28px}
-.f-section{font-size:10px;font-weight:600;color:rgba(176,125,58,.6);text-transform:uppercase;letter-spacing:.14em;margin:22px 0 14px;padding-top:22px;border-top:1px solid rgba(176,125,58,.1)}
+
+/* Painel esquerdo — hero */
+.lp-left{background:var(--navy);display:flex;flex-direction:column;padding:40px 48px;position:relative;overflow:hidden}
+.lp-left::before{content:'';position:absolute;top:-120px;right:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(74,144,226,.18) 0%,transparent 70%);pointer-events:none}
+.lp-left::after{content:'';position:absolute;bottom:-100px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(145,189,255,.1) 0%,transparent 70%);pointer-events:none}
+
+.lp-logo{display:flex;align-items:center;gap:10px;margin-bottom:auto}
+.lp-logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.lp-logo-mark i{font-size:16px;color:#fff}
+.lp-logo-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.lp-logo-name span{color:var(--baby3)}
+
+.lp-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0 32px}
+.lp-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,144,226,.15);border:1px solid rgba(74,144,226,.3);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--baby3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;width:fit-content}
+.lp-badge-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 2s infinite}
+.lp-h1{font-family:var(--display);font-size:36px;font-weight:600;color:#fff;line-height:1.2;margin-bottom:16px;letter-spacing:-.02em}
+.lp-h1 span{color:var(--baby3)}
+.lp-sub{font-size:15px;color:rgba(255,255,255,.55);line-height:1.7;max-width:380px;margin-bottom:36px}
+
+/* Métricas decorativas */
+.lp-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:36px}
+.lp-metric{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px}
+.lp-metric-val{font-family:var(--display);font-size:22px;font-weight:600;color:#fff;margin-bottom:2px}
+.lp-metric-val span{font-size:13px;font-weight:400;color:var(--baby3)}
+.lp-metric-lbl{font-size:11px;color:rgba(255,255,255,.4)}
+
+/* Mini mockup de análise */
+.lp-mockup{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;overflow:hidden}
+.lp-mockup-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.lp-mockup-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.lp-mockup-avatar i{font-size:13px;color:#fff}
+.lp-mockup-title{font-size:12px;font-weight:600;color:#fff}
+.lp-mockup-sub{font-size:10px;color:rgba(255,255,255,.4)}
+.lp-mockup-typing{background:rgba(255,255,255,.06);border-radius:8px;padding:10px 12px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.6;position:relative}
+.lp-mockup-typing strong{color:var(--baby3)}
+.lp-mockup-bars{display:flex;gap:4px;align-items:flex-end;height:36px;margin-top:12px}
+.lp-mockup-bar{flex:1;border-radius:3px 3px 0 0;background:rgba(74,144,226,.4)}
+.lp-mockup-bar.hi{background:var(--accent)}
+
+/* Rodapé esquerdo */
+.lp-left-foot{font-size:11px;color:rgba(255,255,255,.25);margin-top:auto;padding-top:24px}
+
+/* Painel direito — formulário */
+.lp-right{background:var(--baby);display:flex;flex-direction:column;overflow-y:auto}
+.lp-right-inner{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 52px;min-height:100%}
+.lp-right-header{margin-bottom:32px}
+.lp-right-eyebrow{font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.lp-right-title{font-family:var(--display);font-size:26px;font-weight:600;color:var(--navy);line-height:1.3;margin-bottom:8px}
+.lp-right-sub{font-size:13px;color:rgba(14,27,77,.55);line-height:1.6}
+
+/* Form fields — paleta azul */
+.f-section{font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.12em;margin:20px 0 12px;padding-top:20px;border-top:1px solid rgba(14,27,77,.1)}
 .f-section:first-of-type{margin-top:0;padding-top:0;border-top:none}
-.f-label{font-size:10px;font-weight:600;color:rgba(176,125,58,.8);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
-.f-input{width:100%;background:#1C1C1A;border:1px solid rgba(176,125,58,.18);border-radius:var(--r);padding:12px 14px;color:#fff;font-family:var(--body);font-size:13px;outline:none;margin-bottom:16px}
-.f-input:focus{border-color:var(--gold)}
+.f-label{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:6px;display:block}
+.f-input{width:100%;background:#fff;border:1.5px solid rgba(14,27,77,.15);border-radius:10px;padding:12px 14px;color:var(--navy);font-family:var(--body);font-size:13px;outline:none;margin-bottom:14px;transition:border-color .15s}
+.f-input:focus{border-color:var(--accent2)}
+.f-input::placeholder{color:rgba(14,27,77,.3)}
 .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.f-select{width:100%;background:#1C1C1A;border:1px solid rgba(176,125,58,.18);border-radius:var(--r);padding:12px 14px;color:#fff;font-family:var(--body);font-size:13px;outline:none;margin-bottom:16px;cursor:pointer}
-.f-select option{background:#1C1C1A}
-.f-btn{width:100%;background:var(--gold);color:#0C0C0B;border:none;border-radius:var(--r);padding:14px;font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:4px}
-.f-btn:hover{background:#C49040}
-.f-note{font-size:11px;color:#454540;line-height:1.7;margin-top:14px}
-.f-api-note{background:rgba(176,125,58,.08);border:1px solid rgba(176,125,58,.15);border-radius:var(--r);padding:12px 14px;font-size:11px;color:rgba(176,125,58,.8);line-height:1.7;margin-bottom:16px}
+.f-select{width:100%;background:#fff;border:1.5px solid rgba(14,27,77,.15);border-radius:10px;padding:12px 14px;color:var(--navy);font-family:var(--body);font-size:13px;outline:none;margin-bottom:14px;cursor:pointer;transition:border-color .15s}
+.f-select:focus{border-color:var(--accent2)}
+.f-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:15px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;letter-spacing:-.01em}
+.f-btn:hover{background:var(--navy3);transform:translateY(-1px);box-shadow:0 4px 20px rgba(14,27,77,.25)}
+.f-note{font-size:11px;color:rgba(14,27,77,.4);line-height:1.7;margin-top:12px;text-align:center}
+.f-api-note{background:rgba(74,144,226,.1);border:1px solid rgba(74,144,226,.2);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--accent2);line-height:1.7;margin-bottom:14px}
+
+/* Botão Instagram no estilo novo */
+.f-btn-ig{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:15px 20px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.01em}
+.f-btn-ig:hover{background:var(--navy3);transform:translateY(-1px);box-shadow:0 4px 20px rgba(14,27,77,.25)}
+
+/* Steps 2 e 3 */
+#setup-step2 .spinner{border-top-color:var(--accent2)}
+.lp-connected{background:rgba(74,144,226,.08);border:1.5px solid rgba(74,144,226,.25);border-radius:12px;padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.lp-connected-ico{width:36px;height:36px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lp-connected-ico i{font-size:17px;color:#fff}
+
+/* Responsive */
+@media(max-width:900px){
+  .setup{grid-template-columns:1fr}
+  .lp-left{display:none}
+  .lp-right-inner{padding:40px 32px}
+}
 .app{display:flex;min-height:100vh}
 .app.off{display:none}
 .sidebar{width:232px;background:#0F0F0E;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
@@ -389,123 +481,189 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
 </div>
 
 <div class="setup" id="setup">
-<div class="setup-wrap">
-  <div class="setup-logo">Dashboard Social · Imobiliário</div>
-  <div class="setup-title">Configure uma vez.<br>O sistema se adapta.</div>
-  <div class="setup-sub">Conecte a conta do Instagram com um clique. O dashboard busca os dados automaticamente.</div>
 
-  <!-- PASSO 1: OAuth -->
-  <div id="setup-step1">
-    <div class="f-section">Dados da conta do Instagram</div>
-    <div class="f-label">Nome do cliente / imobiliária</div>
-    <input class="f-input" id="s-nome" placeholder="Ex: Imóveis Atlântico Premium">
-    <button class="f-btn-ig" onclick="iniciarOAuth()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="24" height="24" rx="6" fill="url(#ig-grad)"/><circle cx="12" cy="12" r="4.5" stroke="white" stroke-width="1.8"/><circle cx="17" cy="7" r="1.2" fill="white"/><defs><linearGradient id="ig-grad" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#F9A825"/><stop offset="0.4" stop-color="#E91E63"/><stop offset="1" stop-color="#7B1FA2"/></linearGradient></defs></svg>
-      Conectar com Instagram
-    </button>
-    <div class="f-note" style="text-align:center;margin-top:10px">Você será redirecionado para o Instagram para autorizar o acesso. Nenhuma senha é compartilhada.</div>
-    <div class="f-section">Perfil do negócio</div>
-    <div class="f-row">
-      <div>
-        <div class="f-label">Segmento</div>
-        <select class="f-select" id="s-seg">
-          <option value="alto">Alto padrão</option>
-          <option value="medio" selected>Médio padrão</option>
-          <option value="lancamento">Lançamentos</option>
-        </select>
+  <!-- PAINEL ESQUERDO: Hero -->
+  <div class="lp-left">
+    <div class="lp-logo">
+      <div class="lp-logo-mark"><i class="ti ti-chart-bar"></i></div>
+      <div class="lp-logo-name">Conecta<span>+</span> Imobi</div>
+    </div>
+
+    <div class="lp-hero">
+      <div class="lp-badge">
+        <span class="lp-badge-dot"></span>
+        Inteligência Artificial · Instagram
       </div>
-      <div>
-        <div class="f-label">Ticket médio</div>
-        <select class="f-select" id="s-ticket">
-          <option value="300">R$ 300k a 500k</option>
-          <option value="600" selected>R$ 500k a 1M</option>
-          <option value="1000">R$ 1M a 3M</option>
-          <option value="3000">Acima de R$ 3M</option>
-        </select>
+      <h1 class="lp-h1">Analise seu perfil.<br><span>Converta seguidores</span><br>em clientes.</h1>
+      <p class="lp-sub">Analista de perfil com IA que atrai seguidores, engaja e converte — 24 horas por dia. Conecte uma vez, receba insights para sempre.</p>
+
+      <div class="lp-metrics">
+        <div class="lp-metric">
+          <div class="lp-metric-val">+<span>seg</span></div>
+          <div class="lp-metric-lbl">Engajamento real</div>
+        </div>
+        <div class="lp-metric">
+          <div class="lp-metric-val">7 <span>dias</span></div>
+          <div class="lp-metric-lbl">Histórico de alcance</div>
+        </div>
+        <div class="lp-metric">
+          <div class="lp-metric-val">IA<span> 24h</span></div>
+          <div class="lp-metric-lbl">Diagnóstico contínuo</div>
+        </div>
+      </div>
+
+      <!-- Mini mockup de análise -->
+      <div class="lp-mockup">
+        <div class="lp-mockup-header">
+          <div class="lp-mockup-avatar"><i class="ti ti-robot"></i></div>
+          <div>
+            <div class="lp-mockup-title">Consultora IA · Online agora</div>
+            <div class="lp-mockup-sub">Especialista em Instagram imobiliário</div>
+          </div>
+        </div>
+        <div class="lp-mockup-typing">
+          Seu <strong>engajamento está em 6,2%</strong> — acima do mercado. Os posts de tour em vídeo têm <strong>3× mais alcance</strong>. Recomendo aumentar a frequência de Reels esta semana.
+        </div>
+        <div class="lp-mockup-bars">
+          <div class="lp-mockup-bar" style="height:40%"></div>
+          <div class="lp-mockup-bar" style="height:55%"></div>
+          <div class="lp-mockup-bar" style="height:35%"></div>
+          <div class="lp-mockup-bar hi" style="height:80%"></div>
+          <div class="lp-mockup-bar hi" style="height:90%"></div>
+          <div class="lp-mockup-bar" style="height:60%"></div>
+          <div class="lp-mockup-bar hi" style="height:100%"></div>
+        </div>
       </div>
     </div>
-    <div class="f-row">
-      <div>
-        <div class="f-label">Resposta no DM</div>
-        <select class="f-select" id="s-resp">
-          <option value="3">Até 5 minutos</option>
-          <option value="15" selected>5 a 30 minutos</option>
-          <option value="90">30 min a 2 horas</option>
-          <option value="180">Acima de 2 horas</option>
-        </select>
+
+    <div class="lp-left-foot">Conecta+ Marketing Imobiliário · Natal, RN</div>
+  </div>
+
+  <!-- PAINEL DIREITO: Formulário -->
+  <div class="lp-right">
+    <div class="lp-right-inner">
+      <div class="lp-right-header">
+        <div class="lp-right-eyebrow">Acesso ao dashboard</div>
+        <div class="lp-right-title">Configure uma vez.<br>O sistema se adapta.</div>
+        <div class="lp-right-sub">Conecte a conta do Instagram com um clique. O dashboard busca os dados reais automaticamente.</div>
       </div>
-      <div>
-        <div class="f-label">Meta seguidores/mês</div>
-        <select class="f-select" id="s-meta">
-          <option value="100">Até 100</option>
-          <option value="300" selected>100 a 500</option>
-          <option value="800">500 a 1500</option>
-          <option value="2000">Mais de 1500</option>
-        </select>
+
+      <!-- PASSO 1: OAuth -->
+      <div id="setup-step1">
+        <div class="f-section">Conta do Instagram</div>
+        <label class="f-label">Nome do cliente / imobiliária</label>
+        <input class="f-input" id="s-nome" placeholder="Ex: Imóveis Atlântico Premium">
+        <button class="f-btn-ig" onclick="iniciarOAuth()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="24" height="24" rx="6" fill="url(#ig-grad2)"/><circle cx="12" cy="12" r="4.5" stroke="white" stroke-width="1.8"/><circle cx="17" cy="7" r="1.2" fill="white"/><defs><linearGradient id="ig-grad2" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#F9A825"/><stop offset="0.4" stop-color="#E91E63"/><stop offset="1" stop-color="#7B1FA2"/></linearGradient></defs></svg>
+          Conectar com Instagram
+        </button>
+        <p class="f-note">Você será redirecionado para o Instagram para autorizar. Nenhuma senha é compartilhada.</p>
+
+        <div class="f-section">Perfil do negócio</div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Segmento</label>
+            <select class="f-select" id="s-seg">
+              <option value="alto">Alto padrão</option>
+              <option value="medio" selected>Médio padrão</option>
+              <option value="lancamento">Lançamentos</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label">Ticket médio</label>
+            <select class="f-select" id="s-ticket">
+              <option value="300">R$ 300k a 500k</option>
+              <option value="600" selected>R$ 500k a 1M</option>
+              <option value="1000">R$ 1M a 3M</option>
+              <option value="3000">Acima de R$ 3M</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Resposta no DM</label>
+            <select class="f-select" id="s-resp">
+              <option value="3">Até 5 minutos</option>
+              <option value="15" selected>5 a 30 minutos</option>
+              <option value="90">30 min a 2 horas</option>
+              <option value="180">Acima de 2 horas</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label">Meta seguidores/mês</label>
+            <select class="f-select" id="s-meta">
+              <option value="100">Até 100</option>
+              <option value="300" selected>100 a 500</option>
+              <option value="800">500 a 1500</option>
+              <option value="2000">Mais de 1500</option>
+            </select>
+          </div>
+        </div>
       </div>
+
+      <!-- PASSO 2: aguardando callback OAuth -->
+      <div id="setup-step2" style="display:none;text-align:center;padding:40px 0">
+        <div class="spinner" style="margin:0 auto 20px;border-top-color:var(--accent2)"></div>
+        <div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px">Conectando com o Instagram...</div>
+        <div style="font-size:13px;color:rgba(14,27,77,.5)">Aguarde enquanto verificamos a autorização.</div>
+      </div>
+
+      <!-- PASSO 3: conectado, só confirmar -->
+      <div id="setup-step3" style="display:none">
+        <div class="lp-connected">
+          <div class="lp-connected-ico"><i class="ti ti-circle-check"></i></div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:3px">Instagram conectado!</div>
+            <div style="font-size:12px;color:rgba(14,27,77,.5)" id="step3-info">Conta autorizada com sucesso.</div>
+          </div>
+        </div>
+
+        <div class="f-section">Perfil do negócio</div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Segmento</label>
+            <select class="f-select" id="s-seg2">
+              <option value="alto">Alto padrão</option>
+              <option value="medio" selected>Médio padrão</option>
+              <option value="lancamento">Lançamentos</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label">Ticket médio</label>
+            <select class="f-select" id="s-ticket2">
+              <option value="300">R$ 300k a 500k</option>
+              <option value="600" selected>R$ 500k a 1M</option>
+              <option value="1000">R$ 1M a 3M</option>
+              <option value="3000">Acima de R$ 3M</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Resposta no DM</label>
+            <select class="f-select" id="s-resp2">
+              <option value="3">Até 5 minutos</option>
+              <option value="15" selected>5 a 30 minutos</option>
+              <option value="90">30 min a 2 horas</option>
+              <option value="180">Acima de 2 horas</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label">Meta seguidores/mês</label>
+            <select class="f-select" id="s-meta2">
+              <option value="100">Até 100</option>
+              <option value="300" selected>100 a 500</option>
+              <option value="800">500 a 1500</option>
+              <option value="2000">Mais de 1500</option>
+            </select>
+          </div>
+        </div>
+        <button class="f-btn" onclick="iniciarComOAuth()">Abrir dashboard →</button>
+      </div>
+
     </div>
   </div>
 
-  <!-- PASSO 2: aguardando callback OAuth -->
-  <div id="setup-step2" style="display:none;text-align:center;padding:20px 0">
-    <div class="spinner" style="margin:0 auto 20px"></div>
-    <div style="font-size:14px;color:#fff;margin-bottom:8px">Conectando com o Instagram...</div>
-    <div style="font-size:12px;color:#666660">Aguarde enquanto verificamos a autorização.</div>
-  </div>
-
-  <!-- PASSO 3: conectado, só confirmar -->
-  <div id="setup-step3" style="display:none">
-    <div style="background:rgba(26,92,58,.15);border:1px solid rgba(26,92,58,.3);border-radius:var(--r);padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
-      <div style="width:36px;height:36px;border-radius:50%;background:rgba(26,92,58,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">✓</div>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:#4ADE80;margin-bottom:3px">Instagram conectado!</div>
-        <div style="font-size:12px;color:#666660" id="step3-info">Conta autorizada com sucesso.</div>
-      </div>
-    </div>
-    <div class="f-section">Perfil do negócio</div>
-    <div class="f-row">
-      <div>
-        <div class="f-label">Segmento</div>
-        <select class="f-select" id="s-seg2">
-          <option value="alto">Alto padrão</option>
-          <option value="medio" selected>Médio padrão</option>
-          <option value="lancamento">Lançamentos</option>
-        </select>
-      </div>
-      <div>
-        <div class="f-label">Ticket médio</div>
-        <select class="f-select" id="s-ticket2">
-          <option value="300">R$ 300k a 500k</option>
-          <option value="600" selected>R$ 500k a 1M</option>
-          <option value="1000">R$ 1M a 3M</option>
-          <option value="3000">Acima de R$ 3M</option>
-        </select>
-      </div>
-    </div>
-    <div class="f-row">
-      <div>
-        <div class="f-label">Resposta no DM</div>
-        <select class="f-select" id="s-resp2">
-          <option value="3">Até 5 minutos</option>
-          <option value="15" selected>5 a 30 minutos</option>
-          <option value="90">30 min a 2 horas</option>
-          <option value="180">Acima de 2 horas</option>
-        </select>
-      </div>
-      <div>
-        <div class="f-label">Meta seguidores/mês</div>
-        <select class="f-select" id="s-meta2">
-          <option value="100">Até 100</option>
-          <option value="300" selected>100 a 500</option>
-          <option value="800">500 a 1500</option>
-          <option value="2000">Mais de 1500</option>
-        </select>
-      </div>
-    </div>
-    <button class="f-btn" onclick="iniciarComOAuth()">Abrir dashboard</button>
-  </div>
-
-</div>
 </div>
 
 <div class="app off" id="app">
@@ -625,6 +783,60 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:10
   <div class="g2">
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-palette"></i>Identidade visual</div><div id="identVisualEl"></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct"><i class="ti ti-speakerphone"></i>Linguagem e comunicação</div><div id="linguagemEl"></div></div>
+  </div>
+
+<div class="page" id="pg-ia">
+  <div class="proximo"><div class="prox-icon"><i class="ti ti-sparkles"></i></div><div><div class="prox-eyebrow">Inteligência Artificial</div><div class="prox-text" id="proxIATxt">Configure sua chave de API Anthropic para ativar o diagnóstico e o chat com IA especialista em Instagram imobiliário.</div></div></div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-key"></i>Configurar chave de API</div>
+      <div class="ct-sub">Cada cliente usa sua própria chave Anthropic. A chave fica salva no seu navegador e nunca é enviada a servidores externos.</div>
+      <div id="iaKeyWarnPage" style="background:var(--amber-l);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.6;display:flex;gap:8px;align-items:flex-start"><i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i><span>Chave não configurada. Cole sua chave <strong>sk-ant-...</strong> abaixo.</span></div>
+      <div class="f-label" style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Chave de API Anthropic</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="password" id="iaKeyInput" placeholder="sk-ant-api03-..." style="flex:1;background:var(--sub);border:.5px solid var(--line);border-radius:var(--r);padding:10px 14px;font-size:13px;font-family:var(--body);outline:none;color:var(--ink)" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--line)'">
+        <button onclick="salvarChaveIA()" style="background:var(--gold);color:var(--ink);border:none;border-radius:var(--r);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);white-space:nowrap">Salvar</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);line-height:1.7">Obtenha sua chave em <strong style="color:var(--gold)">console.anthropic.com</strong> → API Keys → Create Key. Custo estimado: R$0,05 a R$0,20 por análise completa.</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct"><i class="ti ti-robot"></i>Como funciona a IA</div>
+      <div class="ct-sub">O que a consultora IA faz com os dados do perfil</div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Diagnóstico automático</div><div style="font-size:11px;color:var(--ink3)">Analisa todos os dados e identifica os 3 principais gargalos com causa e solução</div></div><span class="badge b-ok">Disponível</span></div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Chat especialista</div><div style="font-size:11px;color:var(--ink3)">Responde perguntas sobre engajamento, conteúdo, audiência — com os dados reais do perfil</div></div><span class="badge b-ok">Disponível</span></div>
+      <div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Plano de ação por IA</div><div style="font-size:11px;color:var(--ink3)">Geração de plano de conteúdo personalizado baseado nos dados da conta</div></div><span class="badge b-warn">Em breve</span></div>
+      <div class="row" style="border-bottom:none"><div class="row-lbl"><div style="font-size:12px;font-weight:500">Modo Simples ou Profissional</div><div style="font-size:11px;color:var(--ink3)">Simples para o cliente, Profissional para o gestor de tráfego</div></div><span class="badge b-ok">Disponível</span></div>
+    </div>
+  </div>
+  <div class="card" id="iaDiagCard">
+    <div class="ct"><i class="ti ti-stethoscope"></i>Diagnóstico por IA</div>
+    <div class="ct-sub">Análise completa do perfil gerada pela IA com base nos dados reais da conta</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <button id="iaDiagBtnPage" onclick="gerarDiagIA(false)" style="background:var(--ink);color:var(--gold);border:none;border-radius:var(--r);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:8px"><i class="ti ti-sparkles"></i>Gerar diagnóstico</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="ia-nivel-btn on" onclick="setNivel('simples')">Simples</button>
+        <button class="ia-nivel-btn" onclick="setNivel('pro')">Profissional</button>
+      </div>
+    </div>
+    <div id="iaDiagResultado" style="background:var(--sub);border-radius:var(--r);padding:16px 18px;font-size:12px;color:var(--ink3);line-height:1.7">Configure a chave de API e clique em "Gerar diagnóstico" para analisar o perfil.</div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct"><i class="ti ti-message-circle"></i>Chat com a consultora IA</div>
+    <div class="ct-sub">Perguntas específicas sobre o perfil — respondidas com os dados reais da conta</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      <span class="ia-chip" onclick="enviarMsgIA_page('Por que meu engajamento está baixo?')">Engajamento baixo</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('O que devo postar esta semana?')">O que postar?</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Como atrair mais compradores de alto padrão?')">Atrair compradores</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Minha bio está convertendo bem?')">Analisar bio</span>
+      <span class="ia-chip" onclick="enviarMsgIA_page('Qual o diagnóstico da minha audiência?')">Diagnóstico da audiência</span>
+    </div>
+    <div id="iaChatMsgs" style="background:var(--sub);border-radius:var(--r);padding:14px;min-height:120px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+      <div class="ia-msg bot">Olá! Sou sua consultora especialista em Instagram imobiliário. Configure a chave de API e posso analisar os dados reais do seu perfil.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input class="ia-input" id="iaChatInput" placeholder="Pergunte algo sobre o perfil..." onkeypress="if(event.key==='Enter')enviarMsgIA_page()" style="flex:1">
+      <button class="ia-send" onclick="enviarMsgIA_page()"><i class="ti ti-send"></i></button>
+    </div>
   </div>
 </div>
 
@@ -958,8 +1170,20 @@ function montarDados(profile,insights,posts,aud,comentarios){
     };
     var rds=findAll('reach');
     if(rds.length>0){reach=sumAll(rds);var r7=lastN(rds,7);if(r7&&r7.length>0){reach7=r7;imp7=r7.map(function(v){return Math.round(v*2.5);});}}
-    var pvds=findAll('profile_views');if(pvds.length>0)profileViews=sumAll(pvds);
-    var wcds=findAll('website_clicks');if(wcds.length>0){linkClicks=sumAll(wcds);}
+    var pvds=findAll('profile_views');
+    if(pvds.length>0){
+      pvds.forEach(function(d){
+        if(d.total_value&&d.total_value.value) profileViews+=d.total_value.value;
+        else profileViews+=sumAll([d]);
+      });
+    }
+    var wcds=findAll('website_clicks');
+    if(wcds.length>0){
+      wcds.forEach(function(d){
+        if(d.total_value&&d.total_value.value) linkClicks+=d.total_value.value;
+        else linkClicks+=sumAll([d]);
+      });
+    }
     // Variação de seguidores no período
     var fcds=findAll('follower_count');
     if(fcds.length>0){
@@ -973,19 +1197,7 @@ function montarDados(profile,insights,posts,aud,comentarios){
   }catch(e){console.log('Erro insights:',e);}
   var mediaItems=posts.map(function(p){
     var thumb = p.thumbnail_url || (p.media_type==='IMAGE'||p.media_type==='CAROUSEL_ALBUM' ? p.media_url : null);
-    return{
-      caption:(p.caption||'').substring(0,120)||'(sem legenda)',
-      captionFull:p.caption||'',
-      mediaType:p.media_type||'IMAGE',
-      timestamp:p.timestamp,
-      reach:p.reach||0,
-      likes:p.like_count||0,
-      comments:p.comments_count||0,
-      saves:p.saved||0,
-      shares:p.shares||0,
-      thumb:thumb||null,
-      permalink:p.permalink||null
-    };
+    return{caption:(p.caption||'').substring(0,120)||'(sem legenda)',captionFull:p.caption||'',mediaType:p.media_type||'IMAGE',timestamp:p.timestamp,reach:p.reach||0,likes:p.like_count||0,comments:p.comments_count||0,saves:p.saved||0,shares:p.shares||0,thumb:thumb||null,permalink:p.permalink||null};
   });
   // Curtidas e comentários — total dos posts do período (não acumulado histórico)
   var totalLikes=mediaItems.reduce(function(a,p){return a+p.likes;},0);
@@ -1176,6 +1388,21 @@ async function recarregar(){if(P.token&&P.userId){await carregarAPI();}else{rend
 
 // ── INICIALIZAÇÃO ──────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async function(){
+  // Restaurar chave IA se salva
+  var savedKey = localStorage.getItem('ia_key');
+  if(savedKey){
+    iaKey = savedKey;
+    var inp = document.getElementById('iaKeyInput');
+    if(inp) inp.value = savedKey;
+    var warnPage = document.getElementById('iaKeyWarnPage');
+    if(warnPage) warnPage.innerHTML='<i class="ti ti-circle-check" style="flex-shrink:0;margin-top:1px;color:var(--green)"></i><span style="color:var(--green)"><strong>Chave configurada!</strong> A IA está pronta para usar.</span>';
+    var kw = document.getElementById('iaKeyWarn');
+    if(kw) kw.classList.add('off');
+    var pd = document.getElementById('iaPanelDiagBtn');
+    if(pd) pd.classList.remove('off');
+    var pt = document.getElementById('proxIATxt');
+    if(pt) pt.innerHTML = '<strong>IA configurada!</strong> Clique em "Gerar diagnóstico" para analisar o perfil ou use o chat abaixo.';
+  }
   // Verificar se há callback OAuth na URL
   var params = new URLSearchParams(window.location.search);
   var temCode = params.get('code');
@@ -1314,55 +1541,6 @@ function rSaude(){
   document.getElementById('consistenciaEl').innerHTML='<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">Ultimas 4 semanas — baseado nos posts reais da conta</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px">'+diasH+semH+'</table></div><div style="margin-top:12px;padding:10px 12px;background:'+consistBg+';border-radius:var(--r);font-size:11px;color:'+consistColor+'">'+consistMsg+'</div>';
 }
 
-function rDirect(){
-  var respOk=P.resp<=20;
-  prox('proxDirectTxt',!respOk?'Tempo de resposta: <strong>'+P.resp+' minutos</strong>. Configure uma mensagem automatica no Instagram para responder instantaneamente fora do horario comercial.':'<strong>Direct funcionando bem.</strong> Garantir que comentarios com perguntas tambem sejam respondidos em ate 30 minutos.');
-  document.getElementById('kpiDirect').innerHTML=[
-    kpi('Tempo de resposta',P.resp+'min',respOk?'configurado no setup — bom':'melhorar',respOk?'k-dark':'')
-  ].join('');
-  var faixas=[{l:'Ate 5 min — ideal',ref:5},{l:'5 a 30 min — bom',ref:30},{l:'30 min a 2h — melhorar',ref:120},{l:'Acima de 2h — critico',ref:999}];
-  document.getElementById('velocDirectEl').innerHTML=faixas.map(function(f,i){
-    var prev=i>0?faixas[i-1].ref:0;
-    var ativo=P.resp>prev&&P.resp<=f.ref;
-    var c=f.ref<=5?'var(--green)':f.ref<=30?'var(--amber)':'var(--red)';
-    var bg=f.ref<=5?'var(--green-l)':f.ref<=30?'var(--amber-l)':'var(--red-l)';
-    var bstatus=f.ref<=5?'b-ok':f.ref<=30?'b-warn':'b-bad';
-    var blabel=f.ref<=5?'Ideal':f.ref<=30?'Bom':'Melhorar';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);margin-bottom:5px;background:'+(ativo?bg:'var(--sub)')+';border:'+(ativo?'1.5px solid '+c:'.5px solid var(--line)')+'"><div style="width:10px;height:10px;border-radius:50%;background:'+(ativo?c:'var(--line)')+'"></div><div style="flex:1;font-size:12px;font-weight:'+(ativo?600:400)+';color:'+(ativo?c:'var(--ink3)')+'"> '+f.l+'</div>'+(ativo?'<span class="badge '+bstatus+'">'+blabel+'</span>':'')+'</div>';
-  }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.6">O comprador de alto padrao avalia varios imoveis ao mesmo tempo. A resposta mais rapida tem vantagem real.</div>';
-  // Origem dos DMs — não disponível na API
-  // Origem dos DMs removido do HTML — não disponível na API
-  // Comentários com intenção de compra — reais ou simulados
-  var comentariosEl = document.getElementById('comentIntencaoEl');
-  var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
-  if(coms && coms.length > 0){
-    // Palavras-chave de intenção de compra
-    var palavrasIntencao = ['disponível','disponivel','valor','preço','preco','quanto','bairro','localiz','quero conhecer','visitar','agendar','m²','metros','quartos','vagas','condomínio','condominio','parcela','financ','entrada'];
-    var comsIntencao = coms.filter(function(c){
-      var txt = (c.text||'').toLowerCase();
-      return palavrasIntencao.some(function(p){return txt.indexOf(p)>=0;});
-    });
-    if(comsIntencao.length > 0){
-      comentariosEl.innerHTML = comsIntencao.slice(0,6).map(function(c){
-        var dt = c.timestamp ? new Date(c.timestamp).toLocaleDateString('pt-BR') : '';
-        return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">"'+((c.text||'').substring(0,80)+(c.text&&c.text.length>80?'...':''))+'"</div><div style="font-size:11px;color:var(--ink3)">@'+(c.username||'usuário')+' · '+dt+'</div></div><span class="badge b-warn">Lead</span></div>';
-      }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3)">Mostrando '+comsIntencao.length+' comentário(s) com intenção de compra identificados automaticamente.</div>';
-    } else {
-      comentariosEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">'+coms.length+' comentário(s) analisados. Nenhum com palavras-chave de intenção de compra detectadas neste período.</div>';
-    }
-  } else {
-    // Simulado
-    comentariosEl.innerHTML=[
-      {t:'Tem disponível?',f:8,a:'Responder e chamar no DM'},
-      {t:'Qual o valor?',f:6,a:'Não dar o preço no comentário — chamar no DM'},
-      {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
-      {t:'Quero conhecer',f:3,a:'Lead quente — responder em até 10 min'},
-      {t:'Marcação de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
-    ].map(function(c){
-      return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Ação: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
-    }).join('');
-  }
-}
 
 function rEngajamento(){
   var d=D,b=BENCH[P.seg]||BENCH.medio;
@@ -1399,8 +1577,6 @@ function rConteudo(){
   if(best) prox('proxContTxt','O post com mais engajamento foi <strong>'+best.caption+'</strong> ('+best.likes+' curtidas, '+best.comments+' comentários). <strong>Criar mais conteúdo neste formato e estilo</strong>.');
   var tipos={REEL:'Reel',VIDEO:'Video',CAROUSEL_ALBUM:'Carrossel',IMAGE:'Foto'};
   var tc={REEL:'#7A5520',VIDEO:'#7A5010',CAROUSEL_ALBUM:'#1A3A6E',IMAGE:'#1A5C3A'};
-
-  // Grid visual de posts com thumbnails
   var grid='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:8px">';
   posts.forEach(function(p){
     var score=p.likes+p.comments*2;
@@ -1413,8 +1589,7 @@ function rConteudo(){
     var thumbHtml=p.thumb?
       '<img src="'+p.thumb+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML=\'<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#EFECE6;color:#8C8C85;font-size:28px&quot;><i class=&quot;ti ti-photo&quot;></i></div>\'" loading="lazy">':
       '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#EFECE6;color:#8C8C85;font-size:28px"><i class="ti ti-photo"></i></div>';
-    // Ícone de tipo sobre a thumbnail
-    var tipoIcon=p.mediaType==='REEL'||p.mediaType==='VIDEO'?'ti-player-play':'';
+    var tipoIcon=(p.mediaType==='REEL'||p.mediaType==='VIDEO')?'ti-player-play':'';
     var carrosselIcon=p.mediaType==='CAROUSEL_ALBUM'?'ti-layers-intersect':'';
     grid+='<a '+href+' style="display:block;text-decoration:none;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--line);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.08)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
       +'<div style="position:relative;width:100%;padding-top:100%;background:#EFECE6">'
@@ -1481,6 +1656,37 @@ function rConteudo(){
     horariosEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:2px;height:100px;padding-bottom:18px">'+bars+'</div><div style="margin-top:10px;font-size:12px;color:var(--ink3)">Melhor horário detectado: <strong style="color:var(--gold)">'+melhorHora+'h</strong> · Melhor dia: <strong style="color:var(--gold)">'+melhorDia+'</strong> — baseado no engajamento real dos seus posts</div>';
   } else {
     horariosEl.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--ink3)">Posts insuficientes para calcular melhor horário.</div>';
+  }
+
+  // Comentários com intenção de compra
+  var comentariosEl = document.getElementById('comentIntencaoEl');
+  if(comentariosEl){
+    var coms = D.comentariosReais && D.comentariosReais.length > 0 ? D.comentariosReais : null;
+    if(coms && coms.length > 0){
+      var palavrasIntencao = ['disponível','disponivel','valor','preço','preco','quanto','bairro','localiz','quero conhecer','visitar','agendar','m²','metros','quartos','vagas','condomínio','condominio','parcela','financ','entrada'];
+      var comsIntencao = coms.filter(function(c){
+        var txt = (c.text||'').toLowerCase();
+        return palavrasIntencao.some(function(p){return txt.indexOf(p)>=0;});
+      });
+      if(comsIntencao.length > 0){
+        comentariosEl.innerHTML = comsIntencao.slice(0,6).map(function(c){
+          var dt = c.timestamp ? new Date(c.timestamp).toLocaleDateString('pt-BR') : '';
+          return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">"'+((c.text||'').substring(0,80)+(c.text&&c.text.length>80?'...':''))+'"</div><div style="font-size:11px;color:var(--ink3)">@'+(c.username||'usuário')+' · '+dt+'</div></div><span class="badge b-warn">Lead</span></div>';
+        }).join('')+'<div style="margin-top:10px;font-size:11px;color:var(--ink3)">'+comsIntencao.length+' comentário(s) com intenção de compra identificados automaticamente.</div>';
+      } else {
+        comentariosEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--ink3)">'+coms.length+' comentário(s) analisados. Nenhum com palavras-chave de intenção de compra neste período.</div>';
+      }
+    } else {
+      comentariosEl.innerHTML=[
+        {t:'Tem disponível?',f:8,a:'Responder e chamar no DM'},
+        {t:'Qual o valor?',f:6,a:'Não dar o preço no comentário — chamar no DM'},
+        {t:'Fica em qual bairro?',f:4,a:'Responder e convidar para ver mais'},
+        {t:'Quero conhecer',f:3,a:'Lead quente — responder em até 10 min'},
+        {t:'Marcação de amigo',f:12,a:'Agradecer e incluir os dois na conversa'}
+      ].map(function(c){
+        return '<div class="row"><div class="row-lbl"><div style="font-size:12px;font-weight:500">'+c.t+'</div><div style="font-size:11px;color:var(--ink3)">Ação: '+c.a+'</div></div><div class="row-val">'+c.f+'x/sem</div><span class="badge b-warn">Lead</span></div>';
+      }).join('');
+    }
   }
 }
 
@@ -1616,7 +1822,8 @@ var PGS={
   audiencia:['Audiencia','Quem sao os seguidores e qual o fit com o perfil de comprador'],
   gargalos:['Diagnostico de gargalos','O que esta impedindo mais resultados — causa e solucao'],
   plano:['Plano de acao','O que publicar, quando e como — baseado nos dados reais'],
-  branding:['Branding','A identidade visual e a comunicacao estao fazendo sentido?']
+  branding:['Branding','A identidade visual e a comunicacao estao fazendo sentido?'],
+  ia:['Análise com IA','Diagnóstico e consultoria especialista — baseado nos dados reais do perfil']
 };
 
 document.querySelectorAll('.sb-btn').forEach(function(btn){
